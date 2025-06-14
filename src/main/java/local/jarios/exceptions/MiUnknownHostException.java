@@ -10,6 +10,12 @@ import java.net.UnknownHostException;
  */
 public class MiUnknownHostException extends Exception {
 
+    /**
+     * Constructor que envuelve una {@link UnknownHostException} en una
+     * excepción personalizada {@code MiUnknownHostException}.
+     *
+     * @param ex Excepción original de tipo {@link UnknownHostException} que se desea encapsular.
+     */
     public MiUnknownHostException(UnknownHostException ex) {
 
         super(ex);

@@ -20,9 +20,21 @@ import java.sql.Timestamp;
 @MappedSuperclass
 public abstract class Auditable {
 
+    /**
+     * Marca temporal de la creación del registro.
+     * <p>
+     * Se almacena en la columna "created_at". No puede ser nulo ni modificarse tras su asignación inicial.
+     * </p>
+     */
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
+    /**
+     * Marca temporal de la última actualización del registro.
+     * <p>
+     * Se almacena en la columna "updated_at". Puede ser nulo y se actualiza al modificar el registro.
+     * </p>
+     */
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 

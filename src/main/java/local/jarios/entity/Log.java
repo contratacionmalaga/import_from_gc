@@ -24,6 +24,13 @@ import java.util.UUID;
 @Table(name = "log")
 public class Log extends Auditable {
 
+    /**
+     * Identificador único del registro.
+     * <p>
+     * Se mapea a la columna "id" de la tabla en la base de datos.
+     * No es actualizable ni nulo.
+     * </p>
+     */
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;

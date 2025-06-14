@@ -17,6 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class MiMailHelper {
 
+    /**
+     * Constructor privado para evitar la instanciación de la clase utilitaria {@code MiMailHelper}.
+     */
     private MiMailHelper() {
         // No instanciable
     }

@@ -28,9 +28,21 @@ import java.time.Instant;
 @MappedSuperclass
 public abstract class AuditablePlus {
 
+    /**
+     * Fecha y hora de creación del registro.
+     * <p>
+     * Se almacena en la columna "created_at". No puede ser nulo ni modificarse una vez establecido.
+     * </p>
+     */
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /**
+     * Fecha y hora de la última actualización del registro.
+     * <p>
+     * Se almacena en la columna "updated_at". No puede ser nulo y puede actualizarse con cada modificación.
+     * </p>
+     */
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 

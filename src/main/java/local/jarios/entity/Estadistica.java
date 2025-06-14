@@ -31,10 +31,25 @@ import java.util.UUID;
 @Table(name = "estadistica")
 public class Estadistica extends Auditable {
 
+    /**
+     * Identificador único del registro.
+     * <p>
+     * Se mapea a la columna "id" de la tabla en la base de datos.
+     * No es actualizable ni nulo.
+     * </p>
+     */
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    /**
+     * Relación uno a uno con la entidad {@link Log}.
+     * <p>
+     * Se utiliza carga perezosa (lazy loading). La columna "log_id" es
+     * clave foránea referenciando la columna "id" en la tabla log.
+     * Se aplica borrado en cascada.
+     * </p>
+     */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "log_id",
@@ -45,35 +60,88 @@ public class Estadistica extends Auditable {
     )
     private Log logEntity;
 
+    /**
+     * Nombre del equipo asociado a esta estadística.
+     * <p>
+     * Se almacena en la columna "equipo". No puede ser nulo y tiene un
+     * tamaño máximo definido por {@link TamanoCampos#TAMANO_250}.
+     * </p>
+     */
     @Column(name = "equipo", nullable = false, length = TamanoCampos.TAMANO_250)
     private String equipo;
 
+    /**
+     * Número total de ficheros leídos durante el proceso.
+     */
     @Column(name = "nTotalFicherosLeidos")
     private int nTotalFicherosLeidos;
 
+    /**
+     * Número total de ficheros procesados correctamente.
+     */
     @Column(name = "nTotalFicherosProcesados")
     private int nTotalFicherosProcesados;
 
-    @Column(name = "nRegistrosGc") // corregido typo
+    /**
+     * Número total de registros GC procesados.
+     */
+    @Column(name = "nRegistrosGc")
     private int nRegistrosGc;
 
+    /**
+     * Fecha y hora del inicio del proceso de parseo.
+     * <p>
+     * No puede ser nulo.
+     * </p>
+     */
     @Column(name = "fechaHoraInicialParseo", nullable = false)
     private Timestamp fechaHoraInicialParseo;
 
+    /**
+     * Fecha y hora de finalización del proceso de parseo.
+     * <p>
+     * No puede ser nulo.
+     * </p>
+     */
     @Column(name = "fechaHoraFinalParseo", nullable = false)
     private Timestamp fechaHoraFinalParseo;
 
+    /**
+     * Fecha y hora del inicio del proceso de persistencia en base de datos.
+     * <p>
+     * No puede ser nulo.
+     * </p>
+     */
     @Column(name = "fechaHoraInicialBaseDatos", nullable = false)
     private Timestamp fechaHoraInicialBaseDatos;
 
+    /**
+     * Fecha y hora de finalización del proceso de persistencia en base de datos.
+     * <p>
+     * No puede ser nulo.
+     * </p>
+     */
     @Column(name = "fechaHoraFinalBaseDatos", nullable = false)
     private Timestamp fechaHoraFinalBaseDatos;
 
+    /**
+     * Duración total del proceso de parseo, en formato legible.
+     * <p>
+     * No puede ser nulo y tiene longitud máxima definida.
+     * </p>
+     */
     @Column(name = "duracionParseo", nullable = false, length = TamanoCampos.TAMANO_250)
     private String duracionParseo;
 
+    /**
+     * Duración total del proceso de persistencia en base de datos, en formato legible.
+     * <p>
+     * No puede ser nulo y tiene longitud máxima definida.
+     * </p>
+     */
     @Column(name = "duracionBaseDatos", nullable = false, length = TamanoCampos.TAMANO_250)
     private String duracionBaseDatos;
+
 
     /**
      * Constructor que inicializa la entidad Estadistica con un Log asociado,

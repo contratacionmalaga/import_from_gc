@@ -39,10 +39,25 @@ import java.util.UUID;
 )
 public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> {
 
+    /**
+     * Identificador único del registro.
+     * <p>
+     * Se mapea a la columna "id" de la tabla en la base de datos.
+     * No es actualizable ni nulo.
+     * </p>
+     */
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    /**
+     * Relación muchos a uno con la entidad {@link Log}.
+     * <p>
+     * Se utiliza carga perezosa (lazy loading). La columna "log_id" es clave
+     * foránea referenciando la columna "id" en la tabla log.
+     * Se aplica borrado en cascada.
+     * </p>
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "log_id",
@@ -52,23 +67,67 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
                     foreignKeyDefinition = "FOREIGN KEY (log_id) REFERENCES log(id) ON DELETE CASCADE"))
     private Log logEntity;
 
+    /**
+     * Nombre corto del fichero GC.
+     * <p>
+     * Se almacena en la columna "shortName". No puede ser nulo y su
+     * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
+     * </p>
+     */
     @Column(name = "shortName", nullable = false, length = TamanoCampos.TAMANO_250)
     private String shortName;
 
+    /**
+     * Nombre largo o descriptivo del fichero GC.
+     * <p>
+     * Se almacena en la columna "longName". No puede ser nulo y su
+     * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
+     * </p>
+     */
     @Column(name = "longName", nullable = false, length = TamanoCampos.TAMANO_250)
     private String longName;
 
+    /**
+     * Versión del fichero GC.
+     * <p>
+     * Se almacena en la columna "version". No puede ser nulo y su
+     * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
+     * </p>
+     */
     @Column(name = "version", nullable = false, length = TamanoCampos.TAMANO_250)
     private String version;
 
+    /**
+     * URI canónica del fichero GC.
+     * <p>
+     * Se almacena en la columna "canonicalUri". No puede ser nulo y su
+     * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
+     * </p>
+     */
     @Column(name = "canonicalUri", nullable = false, length = TamanoCampos.TAMANO_250)
     private String canonicalUri;
 
+    /**
+     * URI canónica de la versión del fichero GC.
+     * <p>
+     * Se almacena en la columna "canonicalVersionUri". No puede ser nulo y su
+     * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
+     * </p>
+     */
     @Column(name = "canonicalVersionUri", nullable = false, length = TamanoCampos.TAMANO_250)
     private String canonicalVersionUri;
 
+    /**
+     * URI de localización del fichero GC.
+     * <p>
+     * Se almacena en la columna "locationUri". No puede ser nulo y su
+     * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
+     * </p>
+     */
     @Column(name = "locationUri", nullable = false, length = TamanoCampos.TAMANO_250)
     private String locationUri;
+
+
 
     /**
      * Constructor que genera un UUID basado en tiempo y registra la creación del objeto.
