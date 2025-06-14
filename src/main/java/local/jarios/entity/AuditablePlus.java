@@ -1,8 +1,10 @@
 package local.jarios.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +25,6 @@ import java.time.Instant;
 @Slf4j
 @Getter
 @Setter
-@NoArgsConstructor
 @MappedSuperclass
 public abstract class AuditablePlus {
 
