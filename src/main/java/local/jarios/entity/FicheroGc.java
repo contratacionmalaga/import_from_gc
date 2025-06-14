@@ -14,9 +14,18 @@ import java.util.UUID;
 /**
  * Representa la importación de ficheros Excel desde Internet,
  * con sus metadatos y URIs asociados.
- * Author: Juan Antonio
- * Date: 04/06/2024
+ * <p>
+ * Esta clase implementa la interfaz {@link Actualizable} para permitir
+ * actualizaciones basadas en otra instancia de {@code FicheroGc}.
+ * </p>
+ * <p>
+ * Contiene trazabilidad mediante logs para la creación y actualización de instancias.
+ * </p>
+ * <p>
+ * Author: Juan Antonio<br>
+ * Date: 04/06/2024<br>
  * Team: Juan Antonio
+ * </p>
  */
 @Slf4j
 @Setter
@@ -62,7 +71,7 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
     private String locationUri;
 
     /**
-     * Constructor que genera un UUID basado en tiempo y registra creación.
+     * Constructor que genera un UUID basado en tiempo y registra la creación del objeto.
      */
     public FicheroGc() {
         this.id = Generators.timeBasedEpochGenerator().generate();
@@ -70,18 +79,35 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
     }
 
     /**
-     * Compara si otro objeto es igual a esta instancia (ignorando mayúsculas).
+     * Compara si otro objeto es igual a esta instancia.
+     * <p>
+     * La comparación se realiza ignorando mayúsculas en campos clave.
+     * </p>
+     *
+     * @param obj Objeto a comparar.
+     * @return {@code true} si ambos objetos son iguales según los campos relevantes.
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            log.debug("Comparando objeto con sí mismo: retorna true");
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            log.debug("Objeto a comparar es null o de clase diferente: retorna false");
+            return false;
+        }
         FicheroGc that = (FicheroGc) obj;
-        return comparar(that);
+        boolean result = comparar(that);
+        log.debug("Resultado comparación con objeto ID {}: {}", that.id, result);
+        return result;
     }
 
     /**
-     * Compara campos relevantes para determinar igualdad (ignora mayúsculas).
+     * Compara campos relevantes para determinar igualdad.
+     *
+     * @param ficheroGcEntity Objeto {@code FicheroGc} con el que se compara.
+     * @return {@code true} si todos los campos comparados son iguales (ignorando mayúsculas).
      */
     private boolean comparar(FicheroGc ficheroGcEntity) {
         return
@@ -94,11 +120,13 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
     }
 
     /**
-     * Código hash consistente con equals (ignora mayúsculas).
+     * Genera un código hash consistente con el método {@link #equals(Object)}.
+     *
+     * @return Código hash basado en campos clave en minúsculas.
      */
     @Override
     public int hashCode() {
-        return Objects.hash(
+        int hash = Objects.hash(
                 shortName == null ? 0 : shortName.toLowerCase(),
                 longName == null ? 0 : longName.toLowerCase(),
                 version == null ? 0 : version.toLowerCase(),
@@ -106,23 +134,31 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
                 canonicalVersionUri == null ? 0 : canonicalVersionUri.toLowerCase(),
                 locationUri == null ? 0 : locationUri.toLowerCase()
         );
+        log.debug("Hash code generado para FicheroGc con ID {}: {}", id, hash);
+        return hash;
     }
 
     /**
-     * Representación textual separada por ';' de los campos clave.
+     * Representación textual del objeto con campos clave separados por punto y coma.
+     *
+     * @return Cadena con representación de campos clave.
      */
     @Override
     public String toString() {
-        return shortName + "; " +
+        String representation = shortName + "; " +
                 longName + "; " +
                 version + "; " +
                 canonicalUri + "; " +
                 canonicalVersionUri + "; " +
                 locationUri;
+        log.debug("toString generado: {}", representation);
+        return representation;
     }
 
     /**
-     * Devuelve la clave única para mapear la entidad (campo shortName).
+     * Devuelve la clave única que identifica a esta entidad.
+     *
+     * @return Valor del campo único {@code shortName}.
      */
     @Override
     public String getUniqueKey() {
@@ -130,15 +166,19 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
     }
 
     /**
-     * Actualiza esta instancia con los valores de otro FicheroGc y registra el cambio.
+     * Actualiza esta instancia con los valores de otro objeto {@code FicheroGc}.
+     * Se registran los cambios mediante log informativo.
+     *
+     * @param otro Objeto con los datos que actualizarán esta instancia.
      */
     @Override
     public void actualizarCon(FicheroGc otro) {
+        log.info("Actualizando FicheroGc con ID {} con nuevos valores del objeto ID {}", this.id, otro.getId());
         this.longName = otro.getLongName();
         this.version = otro.getVersion();
         this.canonicalUri = otro.getCanonicalUri();
         this.canonicalVersionUri = otro.getCanonicalVersionUri();
         this.locationUri = otro.getLocationUri();
-        log.info("FicheroGc con ID {} actualizado con nuevos valores.", this.id);
+        log.info("Actualización completada para FicheroGc con ID {}", this.id);
     }
 }

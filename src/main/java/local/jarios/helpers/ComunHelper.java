@@ -65,7 +65,7 @@ public final class ComunHelper {
      *
      * @param fechaHoraInicial Marca temporal inicial.
      * @param fechaHoraFinal   Marca temporal final.
-     * @return Duración en formato "<hours>h <minutes>m <seconds>s <milliseconds>ml".
+     * @return Duración en formato "h m s ml".
      */
     public static String calcularTiempoEjecucion(Timestamp fechaHoraInicial, Timestamp fechaHoraFinal) {
         log.debug("Calculando tiempo de ejecución entre {} y {}", fechaHoraInicial, fechaHoraFinal);

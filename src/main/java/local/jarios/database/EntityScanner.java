@@ -14,7 +14,7 @@ import java.util.Collection;
  * Escanea un paquete para encontrar clases anotadas con @Entity y las añade a la configuración de Hibernate.
  * Author: juan
  * Date: 28/12/2024
- * Team:
+ * Team: Juan Antonio
  */
 @Slf4j
 public class EntityScanner {

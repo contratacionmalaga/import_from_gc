@@ -65,6 +65,7 @@ public interface Repository {
      * @param session La sesión Hibernate activa
      * @param transaction La transacción en curso
      * @param parseoFicherosGc Objeto ParseoFicherosGc a persistir
+     * @param propertiesManager Objeto PropertiesManager que me permite el acceso a las key de los ficheros
      */
     void persistir(
             Session session,
