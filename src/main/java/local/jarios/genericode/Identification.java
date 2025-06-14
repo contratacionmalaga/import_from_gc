@@ -57,4 +57,15 @@ public class Identification {
 	 */
 	@XmlElement(name = "LocationUri")
 	private String locationUri;
+
+	/**
+	 * Constructor sin argumentos requerido por JAXB.
+	 * <p>
+	 * Este constructor es necesario para la correcta creación de instancias
+	 * durante la deserialización XML.
+	 * </p>
+	 */
+	public Identification() {
+		// Constructor vacío requerido por JAXB
+	}
 }

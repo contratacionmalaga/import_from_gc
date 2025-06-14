@@ -29,4 +29,14 @@ public class SimpleCodeList {
 	@XmlElement(name = "Row")
 	private List<Row> row;
 
+	/**
+	 * Constructor sin argumentos requerido por JAXB.
+	 * <p>
+	 * Este constructor es necesario para la correcta creación de instancias
+	 * durante la deserialización XML.
+	 * </p>
+	 */
+	public SimpleCodeList() {
+		// Constructor vacío requerido por JAXB
+	}
 }

@@ -34,4 +34,14 @@ public class CodeList {
 	@XmlElement(name = "Identification")
 	private Identification identification;
 
+	/**
+	 * Constructor sin argumentos requerido por JAXB.
+	 * <p>
+	 * Este constructor es necesario para la correcta creación de instancias
+	 * durante la deserialización XML.
+	 * </p>
+	 */
+	public CodeList() {
+		// Constructor vacío requerido por JAXB
+	}
 }

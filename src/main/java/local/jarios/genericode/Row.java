@@ -29,4 +29,14 @@ public class Row {
 	@XmlElement(name = "Value")
 	private List<Value> values;
 
+	/**
+	 * Constructor sin argumentos requerido por JAXB.
+	 * <p>
+	 * Este constructor es necesario para la correcta creación de instancias
+	 * durante la deserialización XML.
+	 * </p>
+	 */
+	public Row() {
+		// Constructor vacío requerido por JAXB
+	}
 }
