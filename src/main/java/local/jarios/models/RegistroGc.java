@@ -4,8 +4,7 @@ import local.jarios.entity.Auditable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Representa un registro de importación de un fichero Excel desde Internet.
@@ -19,9 +18,8 @@ import org.slf4j.LoggerFactory;
 @Setter
 @Getter
 @NoArgsConstructor
+@Slf4j
 public class RegistroGc extends Auditable {
-
-    private static final Logger log = LoggerFactory.getLogger(RegistroGc.class);
 
     /** Código identificador del registro */
     private String code;

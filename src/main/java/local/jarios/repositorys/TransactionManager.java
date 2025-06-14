@@ -71,7 +71,15 @@ public class TransactionManager {
         }
     }
 
-    // Método para realizar rollback
+    /**
+     * Realiza un rollback (deshace) la transacción proporcionada si no es nula.
+     * <p>
+     * Este método garantiza que la transacción se revierta para evitar
+     * que cambios no deseados queden persistidos en caso de error.
+     * </p>
+     *
+     * @param transaction La transacción que se desea revertir. Si es {@code null}, no se realiza ninguna acción.
+     */
     public void rollbackTransaction(Transaction transaction) {
 
         //

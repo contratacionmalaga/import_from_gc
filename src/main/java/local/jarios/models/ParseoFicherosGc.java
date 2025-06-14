@@ -4,8 +4,7 @@ import local.jarios.entity.Auditable;
 import local.jarios.entity.FicheroGc;
 import lombok.Getter;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +24,8 @@ import java.util.Map;
  */
 @Setter
 @Getter
+@Slf4j
 public class ParseoFicherosGc extends Auditable {
-
-    private static final Logger log = LoggerFactory.getLogger(ParseoFicherosGc.class);
 
     /**
      * Lista de objetos {@link FicheroGc} importados.

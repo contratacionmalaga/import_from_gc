@@ -36,8 +36,27 @@ import java.util.List;
 @Slf4j
 public class ServiceImpl implements Service {
 
+    /**
+     * Instancia del repositorio para acceso y gestión de datos.
+     * <p>
+     * Se utiliza para realizar operaciones CRUD sobre las entidades persistentes.
+     * </p>
+     */
     private final Repository repository;
+
+    /**
+     * Gestor de transacciones para controlar el inicio, commit y rollback
+     * de las operaciones dentro de una transacción.
+     */
     private final TransactionManager transactionManager;
+
+    /**
+     * Factoría de sesiones para gestionar conexiones a la base de datos.
+     * <p>
+     * Se utiliza para abrir y manejar sesiones de Hibernate que permiten
+     * realizar operaciones sobre la base de datos.
+     * </p>
+     */
     private final SessionFactory sessionFactory;
 
     /**

@@ -165,7 +165,7 @@ public class RepositoryImpl implements Repository {
      */
     private boolean tablaExiste(Session session, String nombreTablaSinEsquema) {
         String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :nombre";
-        Long count = ((Number) session.createNativeQuery(sql)
+        long count = ((Number) session.createNativeQuery(sql)
                 .setParameter("nombre", nombreTablaSinEsquema)
                 .getSingleResult()).longValue();
         log.debug("Tabla '{}' existe: {}", nombreTablaSinEsquema, count > 0);
