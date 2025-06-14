@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <exec.mainClass>local.jarios.import-from-gc</exec.mainClass>
+        <exec.mainClass>local.jarios.ImportFromGc</exec.mainClass>
         <jackson.version>2.19.1</jackson.version>
     </properties>
 
@@ -276,7 +276,8 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>local.jarios.import-from-gc</mainClass>
+                            <mainClass>local.jarios.ImportFromGc</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>
                     <descriptorRefs>

@@ -20,9 +20,15 @@ import local.jarios.utils.Mensajes;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * Clase principal para la importación de información desde ficheros Excel al sistema.
@@ -55,8 +61,11 @@ public class ImportFromGc {
 
             // Cargo los ficheros properties utilizando el patrón SINGLETON
             PropertiesManager propertiesManager = PropertiesManager.getInstance();
-            log.info(Mensajes.PROPERTY_LOG);
 
+            log.info("Aplicación: {}", propertiesManager.getProperty(Constantes.CONFIG_PROPERTIES, "config.name"));
+            System.out.println("Versión del JAR: " + getVersionFromManifest(ImportFromGc.class));
+
+            System.exit(0);
             // Imprimo el contenido de los ficheros asociados a la configuración Local (solo si debug activo)
             if (log.isDebugEnabled()) {
                 propertiesManager.printAllProperties();
@@ -192,6 +201,49 @@ public class ImportFromGc {
                 log.error("{}{}", Constantes.TABULADOR_2, ste.toString());
             }
             FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
+        }
+    }
+
+    /**
+     * Obtiene la versión (Implementation-Version) desde el MANIFEST.MF
+     * del JAR que contiene la clase especificada.
+     *
+     * @param clazz Clase de referencia para localizar el JAR
+     * @return Versión obtenida del MANIFEST.MF o "Desconocida" si no se encuentra
+     */
+    public static String getVersionFromManifest(Class<?> clazz) {
+        try {
+            String className = clazz.getSimpleName() + ".class";
+            URL classUrl = clazz.getResource(className);
+
+            if (classUrl == null) {
+                return "No se encontró recurso de clase";
+            }
+
+            if (!"jar".equals(classUrl.getProtocol())) {
+                // Probablemente en entorno desarrollo (no en JAR)
+                return "Ejecutando sin JAR (modo desarrollo)";
+            }
+
+            JarURLConnection jarConnection = (JarURLConnection) classUrl.openConnection();
+            JarFile jarFile = jarConnection.getJarFile();
+
+            Manifest manifest = jarFile.getManifest();
+            if (manifest == null) {
+                return "No se encontró MANIFEST.MF en el JAR";
+            }
+
+            Attributes mainAttributes = manifest.getMainAttributes();
+            String version = mainAttributes.getValue("Implementation-Version");
+
+            if (version == null || version.isEmpty()) {
+                return "Versión no especificada en MANIFEST.MF";
+            }
+
+            return version;
+
+        } catch (IOException e) {
+            return "Error leyendo MANIFEST.MF: " + e.getMessage();
         }
     }
 }
