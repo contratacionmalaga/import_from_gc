@@ -4,11 +4,25 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 
-@Setter
+/**
+ * Clase base para entidades que requieren seguimiento de auditoría en cuanto a fechas de creación y actualización.
+ * <p>
+ * Esta clase proporciona los campos {@code createdAt} y {@code updatedAt} que se actualizan automáticamente
+ * durante las operaciones de persistencia para registrar los momentos en que se crean o actualizan las entidades.
+ * </p>
+ * <p>
+ * Author: Juan Antonio<br>
+ * Date: 14/06/2025<br>
+ * Team: Contratacion Electrónica
+ * </p>
+ */
+@Slf4j
 @Getter
+@Setter
 @NoArgsConstructor
 @MappedSuperclass
 public abstract class AuditablePlus {
@@ -19,15 +33,31 @@ public abstract class AuditablePlus {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /**
+     * Método que se ejecuta antes de persistir la entidad para establecer las fechas de creación y actualización.
+     * <p>
+     * Este método se invoca automáticamente durante la operación de persistencia para registrar el momento en
+     * que la entidad es creada.
+     * </p>
+     */
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
+        log.debug("Entidad creada en: {}", now);
     }
 
+    /**
+     * Método que se ejecuta antes de actualizar la entidad para establecer la fecha de actualización.
+     * <p>
+     * Este método se invoca automáticamente durante la operación de actualización para registrar el momento en
+     * que la entidad es modificada.
+     * </p>
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = Instant.now();
+        log.debug("Entidad actualizada en: {}", updatedAt);
     }
 }
