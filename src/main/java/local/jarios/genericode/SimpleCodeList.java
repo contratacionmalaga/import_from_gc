@@ -1,6 +1,5 @@
 package local.jarios.genericode;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,13 +9,24 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
+/**
+ * Representa una lista de códigos simple en una lista de códigos.
+ * Utiliza JAXB para la serialización y deserialización XML.
+ * Lombok se encarga de generar los métodos getter y setter automáticamente.
+ *
+ * @author Juan Antonio
+ * @since 04/06/2024
+ */
 @Getter
 @Setter
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="SimpleCodeList")
+@XmlRootElement(name = "SimpleCodeList")
 public class SimpleCodeList {
-	
-	@XmlElement(name="Row")
-	protected List<Row> row;
+
+	/**
+	 * Valor simple asociado a este elemento.
+	 */
+	@XmlElement(name = "Row")
+	private List<Row> row;
 
 }
