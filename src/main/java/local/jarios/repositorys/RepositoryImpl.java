@@ -32,8 +32,7 @@ import java.util.UUID;
  * </p>
  *
  * @author Juan Antonio
- * @date 04/06/2024
- * @team Contratación Electrónica
+ * @since 04/06/2024
  */
 @Slf4j
 public class RepositoryImpl implements Repository {
