@@ -6,17 +6,19 @@ import local.jarios.interfaces.Actualizable;
 import local.jarios.utils.TamanoCampos;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Description: Importaciones de Ficheros Excel desde Internet
+ * Representa la importación de ficheros Excel desde Internet,
+ * con sus metadatos y URIs asociados.
  * Author: Juan Antonio
  * Date: 04/06/2024
  * Team: Juan Antonio
  */
-
+@Slf4j
 @Setter
 @Getter
 @Entity
@@ -60,36 +62,26 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
     private String locationUri;
 
     /**
-     * Constructor sin argumentos que genera un UUID basado en tiempo.
+     * Constructor que genera un UUID basado en tiempo y registra creación.
      */
     public FicheroGc() {
         this.id = Generators.timeBasedEpochGenerator().generate();
+        log.info("Creado FicheroGc con ID: {}", id);
     }
 
     /**
-     * Método encargado de devolver si un objeto es igual a la instancia de esta clase
-     * @param obj Objeto que voy a comparar con la clase actual
-     * @return Valor devuelto TRUE | FALSE
+     * Compara si otro objeto es igual a esta instancia (ignorando mayúsculas).
      */
     @Override
     public boolean equals(Object obj) {
-        // Caso base devuelvo TRUE
         if (this == obj) return true;
-
-        // En caso de que el objeto sea NULL o que no sea de la misma CLASE devuelvo FALSE
         if (obj == null || getClass() != obj.getClass()) return false;
-
-        // En otro caso realizo un CAST del objeto como un FicheroGc
         FicheroGc that = (FicheroGc) obj;
-
-        // Devuelvo la comparación
         return comparar(that);
     }
 
     /**
-     * Metodo utlizado para comparar un objeto FicheroGc con la instancia actual de la clase
-     * @param ficheroGcEntity Objeto que voy a comparar con la instancia actual de la clase
-     * @return Devuelvo TRUE | FALSE si los objetos son iguales
+     * Compara campos relevantes para determinar igualdad (ignora mayúsculas).
      */
     private boolean comparar(FicheroGc ficheroGcEntity) {
         return
@@ -102,8 +94,7 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
     }
 
     /**
-     * Método hashCode coherente con equalsIgnoreCase utilizado en equals()
-     * @return código hash del objeto
+     * Código hash consistente con equals (ignora mayúsculas).
      */
     @Override
     public int hashCode() {
@@ -118,42 +109,36 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
     }
 
     /**
-     * Método que devuelve una cadena de caracteres con la representación del objeto
-     * @return Cadena de caracteres con la representación del objeto
+     * Representación textual separada por ';' de los campos clave.
      */
     @Override
     public String toString() {
-        return
-                this.shortName + "; " +
-                        this.longName + "; " +
-                        this.version + "; " +
-                        this.canonicalUri + "; " +
-                        this.canonicalVersionUri + "; " +
-                        this.locationUri;
+        return shortName + "; " +
+                longName + "; " +
+                version + "; " +
+                canonicalUri + "; " +
+                canonicalVersionUri + "; " +
+                locationUri;
     }
 
     /**
-     * Método que se tiene que implementar al extender la clase Actualizable. Devuelve el campo único que servirá como
-     * Key para el Map
-     * @return Devuelve el valor del campo único
+     * Devuelve la clave única para mapear la entidad (campo shortName).
      */
     @Override
     public String getUniqueKey() {
-        // Devuelve el valor del campo único (tiene definido un índice de tipo UNIQUE)
         return this.shortName;
     }
 
     /**
-     * Método que actualiza la instancia actual de FicheroGc con otro valor
-     * @param otro El objeto que actualizará la instancia actual de FicheroGc
+     * Actualiza esta instancia con los valores de otro FicheroGc y registra el cambio.
      */
     @Override
     public void actualizarCon(FicheroGc otro) {
-        // Actualiza los campos de este objeto con los valores del objeto otro
         this.longName = otro.getLongName();
         this.version = otro.getVersion();
         this.canonicalUri = otro.getCanonicalUri();
         this.canonicalVersionUri = otro.getCanonicalVersionUri();
         this.locationUri = otro.getLocationUri();
+        log.info("FicheroGc con ID {} actualizado con nuevos valores.", this.id);
     }
 }
