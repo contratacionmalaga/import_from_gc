@@ -17,10 +17,6 @@ import java.io.File;
  *     <li>Procesar ficheros y generar resultados estructurados</li>
  * </ul>
  * Esta clase no debe ser instanciada.
- * </p>
- *
- * @author Juan
- * @since 04/02/2025
  */
 @Slf4j
 public final class FileHelper {

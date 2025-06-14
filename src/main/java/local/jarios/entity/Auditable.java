@@ -42,4 +42,11 @@ public abstract class Auditable {
     protected void onUpdate() {
         updatedAt = new Timestamp(System.currentTimeMillis());
     }
+
+    /**
+     * Constructor sin argumentos.
+     */
+    protected Auditable() {
+        // Constructor vacío
+    }
 }

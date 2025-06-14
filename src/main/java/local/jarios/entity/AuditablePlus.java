@@ -60,4 +60,11 @@ public abstract class AuditablePlus {
         updatedAt = Instant.now();
         log.debug("Entidad actualizada en: {}", updatedAt);
     }
+
+    /**
+     * Constructor sin argumentos.
+     */
+    protected AuditablePlus() {
+        // Constructor vacío
+    }
 }

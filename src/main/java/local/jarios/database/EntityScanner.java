@@ -20,6 +20,13 @@ import java.util.Collection;
 public class EntityScanner {
 
     /**
+     * Constructor sin argumentos.
+     */
+    public EntityScanner() {
+        // Constructor vacío
+    }
+
+    /**
      * Escanea el paquete indicado y añade todas las entidades JPA encontradas a la configuración de Hibernate.
      *
      * @param configuration instancia de configuración de Hibernate

@@ -38,6 +38,13 @@ import java.util.List;
 public class ImportFromGc {
 
     /**
+     * Constructor sin argumentos.
+     */
+    public ImportFromGc() {
+        // Constructor vacío
+    }
+
+    /**
      * Método principal que ejecuta el proceso completo de importación.
      *
      * @param args argumentos de línea de comandos (no usados)
