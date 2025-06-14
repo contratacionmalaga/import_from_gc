@@ -13,6 +13,13 @@ import org.hibernate.Transaction;
 public class TransactionManager {
 
     /**
+     * Constructor sin argumentos.
+     */
+    public TransactionManager() {
+        // Constructor vacío
+    }
+
+    /**
      * Metodo que obtiene una sesión con la base de datos
      *
      * @param sessionFactory Configuración del acceso a la base de datos
