@@ -24,8 +24,12 @@ import local.jarios.entity.Log;
  */
 public final class ManagerGsons {
 
-    // Constructor privado para evitar instanciación
-    private ManagerGsons() {}
+    /**
+     * Constructor privado para evitar la instanciación de esta clase utilitaria.
+     */
+    private ManagerGsons() {
+        // Constucotr vacío
+    }
 
     /**
      * Convierte un objeto a su representación JSON formateada.
