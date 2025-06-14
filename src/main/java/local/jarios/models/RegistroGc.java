@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
  * Contiene un código identificador y un nombre descriptivo.
  *
  * @author Juan Antonio
- * @date 04/06/2024
- * @team Juan Antonio
+ * @since 04/06/2024
+ * @author Juan Antonio
  */
 @Setter
 @Getter

@@ -15,8 +15,8 @@ import java.util.List;
  * Define métodos para guardar entidades y obtener listas desde la base de datos usando Hibernate.
  *
  * @author Juan Antonio
- * @date 04/06/2024
- * @team Contratacion Electrónica
+ * @since 04/06/2024
+ * @author Contratacion Electrónica
  */
 public interface Repository {
 

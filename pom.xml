@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>local.jarios</groupId>
     <artifactId>import-from-gc</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>import-from-gc.git</name>
@@ -13,7 +13,7 @@
         <connection>scm:git:https://github.com/contratacionmalaga/import-from-gc.git</connection>
         <developerConnection>scm:git:git@github.com:contratacionmalaga/import-from-gc.git</developerConnection>
         <url>https://github.com/contratacionmalaga/import-from-gc</url>
-        <tag>HEAD</tag>
+        <tag>v1.0.1</tag>
     </scm>
 
     <distributionManagement>

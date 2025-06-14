@@ -5,7 +5,7 @@ package local.jarios.properties;
  * Esta clase es final y no instanciable, solo provee constantes estáticas.
  *
  * @author Juan Antonio
- * @date 04/06/2024
+ * @since 04/06/2024
  */
 public final class PropertyConstantes {
 

@@ -57,7 +57,6 @@ public final class FileHelper {
 
     /**
      * Verifica si un fichero es válido para su procesamiento.
-     * <p>
      * Un fichero es válido si:
      * <ul>
      *     <li>Existe</li>
