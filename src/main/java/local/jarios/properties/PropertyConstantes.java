@@ -1,25 +1,36 @@
 package local.jarios.properties;
 
+/**
+ * Constantes utilizadas para las claves de configuración en archivos properties.
+ * Esta clase es final y no instanciable, solo provee constantes estáticas.
+ *
+ * @author Juan Antonio
+ * @date 04/06/2024
+ */
 public final class PropertyConstantes {
 
-    public static final String CONFIG_NAME = "config.name";
+    /**
+     * Clave para la ruta base de configuración.
+     */
     public static final String CONFIG_PATH = "config.path";
 
+    /**
+     * Clave para el prefijo de configuración.
+     */
     public static final String CONFIG_PREFIJO = "config.prefijo";
-    public static final String CONFIG_ESQUEMA = "config.esquema";
 
-    /* Nombre de las propiedades del fichero mail.properties */
-    public static final String EMAIL_USER = "mail.user";
-    public static final String EMAIL_PASSWORD = "mail.password";
-    public static final String EMAIL_FROM = "mail.from";
-    public static final String EMAIL_TO = "mail.to";
+    /**
+     * Clave para el nombre de la configuración.
+     */
+    public static final String CONFIG_NAME = "config.name";
 
-    /* */
+    /**
+     * Clave para la URL JDBC de Jakarta Persistence.
+     */
     public static final String LOCAL_URL = "jakarta.persistence.jdbc.url";
 
-    /* Nombre de las propiedades del fichero release.properties */
-    public static final String SCM_TAG = "scm.tag";
-
+    /**
+     * Constructor privado para evitar instanciación.
+     */
     private PropertyConstantes() { }
-
 }

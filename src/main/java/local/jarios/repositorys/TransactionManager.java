@@ -34,7 +34,7 @@ public class TransactionManager {
         return session.beginTransaction();
     }
 
-    ///
+    //
     /**
      * Metodo para cerrar la sesión
      *
@@ -43,7 +43,7 @@ public class TransactionManager {
 
     public void closeSession(Session session) {
 
-        ///
+        //
         if (session != null && session.isOpen()) {
 
             session.close();
@@ -57,17 +57,17 @@ public class TransactionManager {
      */
     public void commitTransaction(Transaction transaction) {
 
-        ///
+        //
         if (transaction != null) {
 
             transaction.commit();
         }
     }
 
-    /// Método para realizar rollback
+    // Método para realizar rollback
     public void rollbackTransaction(Transaction transaction) {
 
-        ///
+        //
         if (transaction != null) {
 
             transaction.rollback();

@@ -5,9 +5,9 @@ import org.hibernate.cfg.Configuration;
 
 import java.util.Properties;
 
-
 /**
  * Description:
+ * Clase encargada de construir y configurar la instancia de Hibernate Configuration.
  * Author: juan
  * Date: 28/12/2024
  * Team:
@@ -15,21 +15,25 @@ import java.util.Properties;
 @Slf4j
 public class HibernateConfigurer {
 
-
     /**
-     * Constructor que recibe Properties
+     * Constructor por defecto.
      */
-    public HibernateConfigurer() { }
+    public HibernateConfigurer() { /*    */ }
 
     /**
-     * Método que devuelve una configuración de Hibernate
-     * @return Configuracion asociada a la conexión definida en el parámetro anterior
+     * Construye una configuración de Hibernate a partir de las propiedades proporcionadas.
+     *
+     * @param hibernateProperties Propiedades para configurar Hibernate (conexión, dialecto, etc.)
+     * @return Configuration configurada con las propiedades
      */
     public Configuration buildConfiguration(Properties hibernateProperties) {
         Configuration configuration = new Configuration();
 
+        // Seteamos las propiedades
         configuration.setProperties(hibernateProperties);
+
+        log.info("Hibernate Configuration creada con {} propiedades.", hibernateProperties.size());
+
         return configuration;
     }
-
 }

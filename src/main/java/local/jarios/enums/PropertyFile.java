@@ -14,19 +14,19 @@ import java.util.List;
 @Getter
 public enum PropertyFile {
 
-    ///
+    //
     PROPERTY_CONFIG("config/config.properties"),
 
-    ///
+    //
     PROPERTY_HIBERNATE("config/hibernate.properties"),
 
-    ///
+    //
     PROPERTY_MAIL("config/mail.properties"),
 
-    ///
+    //
     PROPERTY_RELEASE("release.properties");
 
-    ///
+    //
     private final String ruta;
 
     /**
@@ -35,7 +35,7 @@ public enum PropertyFile {
      */
     PropertyFile(String ruta) {
 
-        ///
+        //
         this.ruta = ruta;
     }
 

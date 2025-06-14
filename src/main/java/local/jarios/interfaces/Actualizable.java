@@ -5,24 +5,51 @@ import local.jarios.entity.Log;
 import java.util.UUID;
 
 /**
- * Description:
- * Author: juan
- * Date: 01/03/2025
- * Team:
+ * Interfaz genérica que define el contrato para entidades actualizables.
+ * <p>
+ * Cualquier clase que implemente esta interfaz podrá ser identificada por una clave única,
+ * tener un identificador tipo UUID, ser actualizada a partir de otra instancia y registrar un log.
+ * </p>
+ *
+ * @param <T> Tipo de entidad que implementa la interfaz.
+ *
+ * @author Juan
+ * @since 01/03/2025
  */
-
-/// Interfaz genérica para asegurar que los objetos tengan los métodos necesarios
 public interface Actualizable<T> {
 
-    /// Método que devuelve el valor único del objeto, usado como clave
+    /**
+     * Obtiene una clave única representativa del objeto (por ejemplo, una combinación de campos clave).
+     * Esta clave será usada como identificador lógico en estructuras de comparación o unificación.
+     *
+     * @return Cadena única representativa del objeto.
+     */
     String getUniqueKey();
 
-    /// Método que devuelvel el identificador del registro
+    /**
+     * Obtiene el identificador persistente del objeto, generalmente una clave primaria tipo UUID.
+     *
+     * @return UUID del objeto.
+     */
     UUID getId();
 
-    /// Método para actualizar el objeto con los valores de otro
+    /**
+     * Actualiza los atributos del objeto actual usando los valores de otro objeto del mismo tipo.
+     * <p>
+     * Este método no debería modificar campos inmutables como el ID o claves únicas.
+     * </p>
+     *
+     * @param otro Objeto desde el cual se copiarán los valores.
+     */
     void actualizarCon(T otro);
 
-    /// Método para aasignar el valor del objeto LogEntity del que hereda
+    /**
+     * Asocia un objeto {@link Log} a la entidad actual.
+     * <p>
+     * Este log puede ser utilizado para trazabilidad de actualizaciones o inserciones.
+     * </p>
+     *
+     * @param logEntity Objeto de log a asociar.
+     */
     void setLogEntity(Log logEntity);
 }

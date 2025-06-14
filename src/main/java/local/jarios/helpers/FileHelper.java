@@ -8,94 +8,122 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 
 /**
- * Description:
- * Author: juan
- * Date: 04/02/2025
- * Team:
+ * Clase de utilidad para el manejo y procesamiento de ficheros.
+ * <p>
+ * Contiene métodos estáticos para:
+ * <ul>
+ *     <li>Listar ficheros de un directorio</li>
+ *     <li>Validar si un fichero es correcto</li>
+ *     <li>Procesar ficheros y generar resultados estructurados</li>
+ * </ul>
+ * Esta clase no debe ser instanciada.
+ * </p>
+ *
+ * @author Juan
+ * @since 04/02/2025
  */
-
 @Slf4j
 public final class FileHelper {
 
     /**
-     * CONSTRUCTOR PRIVADO DE LA CLASE PUESTO QUE ESTA FINAL
+     * Constructor privado para evitar instanciación.
      */
-    private FileHelper() { }
+    private FileHelper() {
+        // Clase de utilidades - no instanciable
+    }
 
     /**
-     * Método que devuelve un Array con los ficheros que se encuentran en una ruta
-     * @param path Ruta desde la que se obtendrán todos los ficheros
-     * @return Array con los Ficheros
+     * Obtiene todos los ficheros contenidos en un directorio.
+     *
+     * @param path Ruta del directorio a inspeccionar.
+     * @return Array de ficheros encontrados. Si el path no es válido, se retorna un array vacío.
      */
-    public static File[] getListaFicherosFromPath (String path) {
+    public static File[] getListaFicherosFromPath(String path) {
+        log.debug("Intentando obtener ficheros desde la ruta: {}", path);
 
         File directorio = new File(path);
 
         if (!directorio.exists() || !directorio.isDirectory()) {
-
-            ///
-            log.warn("El path no existe o no es un directorio válido.");
-            return new File[0];  // Retornar un array vacío si el directorio no es válido
+            log.warn("El path '{}' no existe o no es un directorio válido.", path);
+            return new File[0];
         }
 
-        /// Intentar obtener los archivos del directorio
-        return directorio.listFiles();
+        File[] ficheros = directorio.listFiles();
+        int total = (ficheros != null) ? ficheros.length : 0;
+
+        log.info("Se han encontrado {} fichero(s) en el directorio '{}'.", total, path);
+        return (ficheros != null) ? ficheros : new File[0];
     }
 
     /**
-     * Método que determina si un fichero es correcto
-     * @param file Fichero a analizar
-     * @return boolean Indicando si el fichero es correcto o no
+     * Verifica si un fichero es válido para su procesamiento.
+     * <p>
+     * Un fichero es válido si:
+     * <ul>
+     *     <li>Existe</li>
+     *     <li>Es legible</li>
+     * </ul>
+     *
+     * @param file Objeto {@link File} a verificar.
+     * @return {@code true} si es válido, {@code false} en caso contrario.
      */
     public static boolean esFicheroCorrecto(File file) {
-
-        ///
-        return file.exists() && file.canRead() && file.exists();
+        boolean valido = file != null && file.exists() && file.canRead();
+        log.debug("Validación del fichero '{}': {}", file != null ? file.getName() : "null", valido ? "Correcto" : "Incorrecto");
+        return valido;
     }
 
     /**
-     * Método utilizado para procesar la lista de ficheros y devolver el objeto ParseoFicherosGc para después contrastar
-     *      la información con la existente en la base de datos, unificar ambas fuentes de información y grabar el
-     *      resultado en la base de datos
-     * @param logEntity Objeto LogEntity
-     * @param listFiles Lista de Files
-     * @return List<FicheroGcEntity>
+     * Procesa una lista de ficheros y genera un objeto {@link ParseoFicherosGc} con los resultados.
+     * <p>
+     * Se valida cada fichero antes de procesarlo. Si se puede extraer un objeto válido, se guarda
+     * junto con sus registros asociados.
+     * </p>
+     *
+     * @param logEntity Objeto de log utilizado en el proceso de transformación.
+     * @param listFiles Lista de ficheros a procesar.
+     * @return Objeto {@link ParseoFicherosGc} con la información agregada.
      */
     public static ParseoFicherosGc procesarListaFicherosFromPath(Log logEntity, File[] listFiles) {
+        int totalInput = (listFiles != null) ? listFiles.length : 0;
+        log.info("Iniciando el procesamiento de {} fichero(s).", totalInput);
 
-        /// Creo un objeto del tipo ParseoFicherosGc que a su vez crea los objetos hijos --> NO SON NULOS
         ParseoFicherosGc parseoFicherosGc = new ParseoFicherosGc();
 
-        /// Recorro la lista de ficheros
+        if (listFiles == null || listFiles.length == 0) {
+            log.warn("No se recibieron ficheros para procesar.");
+            return parseoFicherosGc;
+        }
+
         for (File file : listFiles) {
+            if (!esFicheroCorrecto(file)) {
+                log.warn("Fichero '{}' no es válido y será ignorado.", file != null ? file.getName() : "null");
+                continue; // único continue permitido
+            }
 
-            /// Analizo si el File es Correcto
-            if (esFicheroCorrecto(file)) {
+            log.debug("Procesando fichero '{}'.", file.getName());
 
-                /// OBTENGO EL OBJETO CodeList A PARTIR DEL File
-                var codeList = CodeListHelper.getCodeListFromFile(file);
+            var codeList = CodeListHelper.getCodeListFromFile(file);
+            var ficheroGcEntity = CodeListHelper.procesarCodeList(logEntity, codeList);
 
-                /// Obtengo el objeto FicheroGcEntity a partir de un File
-                var ficheroGcEntity = CodeListHelper.procesarCodeList(logEntity, codeList);
+            if (ficheroGcEntity == null) {
+                log.warn("El fichero '{}' fue ignorado porque no se pudo procesar correctamente.", file.getName());
+            } else {
+                parseoFicherosGc.getListFicherosGc().add(ficheroGcEntity);
+                parseoFicherosGc
+                        .getMapRegistrosGcByFicheroGc()
+                        .put(
+                                ficheroGcEntity.getShortName(),
+                                MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(codeList)
+                        );
 
-                ///  Únicamente si el objeto FicheroGcEntity no es NULL lo añado a la lista
-                if (ficheroGcEntity != null) {
-
-                    /// Añado un nuevo registro a la lista de FicherosGcEntity
-                    parseoFicherosGc.getListFicherosGc().add(ficheroGcEntity);
-
-                    /// Añado una nueva entrada <FicheroGcEntity.getShortName, List<RegistroGc>> al Map
-                    parseoFicherosGc
-                            .getMapRegistrosGcByFicheroGc()
-                            .put(
-                                    ficheroGcEntity.getShortName(),
-                                    MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(codeList));
-                }
+                log.info("Fichero '{}' procesado correctamente.", ficheroGcEntity.getShortName());
             }
         }
 
-        /// Devuelvo la lista
-        return parseoFicherosGc;
+        int totalProcesados = parseoFicherosGc.getListFicherosGc().size();
+        log.info("Finalizado el procesamiento. Total de ficheros procesados correctamente: {}", totalProcesados);
 
+        return parseoFicherosGc;
     }
 }

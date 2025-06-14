@@ -12,4 +12,9 @@ public class MiParseException extends RuntimeException {
 
         super(message, cause);
     }
+
+    public MiParseException(String message) {
+
+        super(message);
+    }
 }

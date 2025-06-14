@@ -2,7 +2,7 @@ package local.jarios.helpers;
 
 import local.jarios.exceptions.MiUnknownHostException;
 import local.jarios.managers.ManagerGsons;
-import local.jarios.utils.ConstantesGenerales;
+import local.jarios.utils.Constantes;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
@@ -13,84 +13,92 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 /**
+ * Clase auxiliar con métodos comunes y utilidades generales.
+ * <p>
+ * Proporciona funciones para obtener el nombre del host, imprimir objetos,
+ * calcular tiempos de ejecución y formatear fechas.
+ * </p>
+ *
  * @author Juan Antonio
  */
 @Slf4j
 public final class ComunHelper {
 
     /**
-     * CONSTRUCTOR PRIVADO DE LA CLASE PUESTO QUE ESTA FINAL
+     * Constructor privado para evitar instanciación.
      */
     private ComunHelper() { }
 
     /**
-     * Devuelve el nombre del equipo que está ejecutando el código
-     * @return String con el nombre del Equipo
-     * @throws MiUnknownHostException Excepción en caso de no poder acceder
+     * Obtiene el nombre del equipo donde se está ejecutando la aplicación.
+     *
+     * @return Nombre del host local.
+     * @throws MiUnknownHostException Si no se puede resolver el nombre del host.
      */
-    public static String getHostName () throws MiUnknownHostException {
-
-        ///
+    public static String getHostName() throws MiUnknownHostException {
+        log.debug("Intentando obtener el nombre del host local");
         try {
-            ///
-            return InetAddress.getLocalHost().getHostName();
+            String hostName = InetAddress.getLocalHost().getHostName();
+            log.debug("Nombre del host obtenido: {}", hostName);
+            return hostName;
         } catch (UnknownHostException ex) {
-            ///
-            log.info(ex.getMessage());
-            ///
+            log.error("Error al obtener el nombre del host", ex);
             throw new MiUnknownHostException(ex);
         }
     }
 
     /**
-     * Función encargada de imprimir un objeto
-     * @param object El objeto que voy a imprimir
+     * Imprime en el log el contenido formateado (pretty print) de un objeto JSON.
+     *
+     * @param object Objeto que se desea imprimir.
      */
     public static void imprimir(Object object) {
-
-        /// Imprimiendo el objeto
-        Arrays
-                .stream(
-                        ManagerGsons
-                                .objectToJsonPretty(object)
-                                .split(ConstantesGenerales.CR))
+        log.debug("Imprimiendo objeto de tipo: {}", object != null ? object.getClass().getSimpleName() : "null");
+        Arrays.stream(ManagerGsons.objectToJsonPretty(object).split(Constantes.CR))
                 .forEach(log::info);
+        log.debug("Objeto impreso correctamente");
     }
 
-
     /**
-     * Método que devuelve un String con el formato de duración establecido
-     * @param fechaHoraInicial Timestamp con la fecha inicial
-     * @param fechaHoraFinal Timestamp con la fecha final
-     * @return Cadena de texto con la duración en el formato establecido
+     * Calcula el tiempo transcurrido entre dos marcas temporales y devuelve
+     * un string formateado con horas, minutos, segundos y milisegundos.
+     *
+     * @param fechaHoraInicial Marca temporal inicial.
+     * @param fechaHoraFinal   Marca temporal final.
+     * @return Duración en formato "<hours>h <minutes>m <seconds>s <milliseconds>ml".
      */
     public static String calcularTiempoEjecucion(Timestamp fechaHoraInicial, Timestamp fechaHoraFinal) {
+        log.debug("Calculando tiempo de ejecución entre {} y {}", fechaHoraInicial, fechaHoraFinal);
 
-        /// Defino las variables locales y le asigno los valores que utilizaré
         int milesimas = 1000;
         int minutos = 60;
         int segundos = 60;
         String formatoDuracion = "%sh %sm %ss %sml";
 
-        /// Calculamos la diferencia en milisegundos
         long diffInMillis = fechaHoraFinal.getTime() - fechaHoraInicial.getTime();
 
-        /// Calculamos las horas, minutos, segundos y milisegundos
         long hours = diffInMillis / (milesimas * segundos * minutos);
         long minutes = (diffInMillis % (milesimas * segundos * minutos)) / (milesimas * segundos);
         long seconds = (diffInMillis % (milesimas * segundos)) / milesimas;
         long milliseconds = diffInMillis % milesimas;
 
-        /// Devolvemos el tiempo transcurrido en formato "hh:mm:ss:SSS"
-        return String.format(formatoDuracion, hours, minutes, seconds, milliseconds);
+        String duracionFormateada = String.format(formatoDuracion, hours, minutes, seconds, milliseconds);
+        log.debug("Duración calculada: {}", duracionFormateada);
+        return duracionFormateada;
     }
 
+    /**
+     * Formatea una marca temporal {@link Timestamp} a cadena con formato
+     * "yyyy-MM-dd HH:mm:ss". Si la marca es null, se formatea la fecha y hora actuales.
+     *
+     * @param fechaHora Marca temporal a formatear.
+     * @return Fecha y hora formateadas como cadena.
+     */
     public static String getFechaHoraFormateada(Timestamp fechaHora) {
-
-        /// Usar LocalDateTime.now() si el timestamp es null
         LocalDateTime fecha = (fechaHora != null) ? fechaHora.toLocalDateTime() : LocalDateTime.now();
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return fecha.format(formatter);
+        String fechaFormateada = fecha.format(formatter);
+        log.debug("Fecha formateada: {}", fechaFormateada);
+        return fechaFormateada;
     }
 }

@@ -10,37 +10,28 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
-
-/**
- * Description: Importaciones de Ficheros Excel desde Internet
- * Author: Juan Antonio
- * Date: 04/06/2024
- * Team: Juan Antonio
- */
 
 @Setter
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(
-        name = "estadistica"
-)
+@Table(name = "estadistica")
 public class Estadistica extends Auditable {
 
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @OneToOne(
-            fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "log_id",
             nullable = false,
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "fk_estadistica_log",
-                    foreignKeyDefinition = "FOREIGN KEY (log_id) REFERENCES log(id) ON DELETE CASCADE"))
+                    foreignKeyDefinition = "FOREIGN KEY (log_id) REFERENCES log(id) ON DELETE CASCADE")
+    )
     private Log logEntity;
 
     @Column(name = "equipo", nullable = false, length = TamanoCampos.TAMANO_250)
@@ -52,8 +43,8 @@ public class Estadistica extends Auditable {
     @Column(name = "nTotalFicherosProcesados")
     private int nTotalFicherosProcesados;
 
-    @Column(name = "nRregistrosGc")
-    private int nRregistrosGc;
+    @Column(name = "nRegistrosGc") // corregido typo
+    private int nRegistrosGc;
 
     @Column(name = "fechaHoraInicialParseo", nullable = false)
     private Timestamp fechaHoraInicialParseo;
@@ -74,10 +65,9 @@ public class Estadistica extends Auditable {
     private String duracionBaseDatos;
 
     public Estadistica(Log logEntity) throws MiUnknownHostException {
-
         this.id = Generators.timeBasedEpochGenerator().generate();
         this.logEntity = logEntity;
-        this.fechaHoraInicialParseo = Timestamp.valueOf(LocalDateTime.now());
+        this.fechaHoraInicialParseo = Timestamp.from(Instant.now());
         this.equipo = ComunHelper.getHostName();
     }
 }

@@ -1,10 +1,16 @@
 package local.jarios.utils;
 
 /**
- * Description: LogEntity
- * Author: Juan Antonio
- * Date: 04/06/2024
- * Team: Juan Antonio
+ * Clase final que contiene constantes de mensajes estáticos
+ * usados en la aplicación para logging y trazabilidad.
+ * <p>
+ * Facilita la gestión centralizada de textos comunes para logs,
+ * evitando duplicación y facilitando modificaciones.
+ * </p>
+ *
+ * <p><b>Author:</b> Juan Antonio</p>
+ * <p><b>Date:</b> 04/06/2024</p>
+ * <p><b>Team:</b> Juan Antonio</p>
  */
 public final class Mensajes {
 
@@ -32,15 +38,6 @@ public final class Mensajes {
     public static final String ASIGN_FECHA_HORA_FINAL_BASE_DATOS_TO_ESTADISTICA =
             "Asignada la fecha y hora final de la persistencia en base de datos al objeto Estadísitica. {}";
 
-    public static final String ASIGN_LIST_FEED_TO_LOG =
-            "Asignado de la Lista de Feeds parseados al objeto Log correctamente.";
-
-    public static final String ASIGN_LIST_ORGANOS_CONTRATACION_TO_LOG =
-            "Asignado de la Lista de Órganos de Contratación al Log.";
-
-    public static final String ASIGN_DURACION_PARSEO =
-            "Asignada la duración del parseo en memoria al objeto Estadística correctamente.";
-
     public static final String ASIGN_DURACION_BASE_DATOS =
             "Asignada la duración de la persistencia en base de datos al objeto Estadística correctamente.";
 
@@ -61,9 +58,6 @@ public final class Mensajes {
 
     public static final String LOG_CREACION =
             "Creación del objeto Log correctamente. Id: {}";
-
-    public static final String VERSION_APP =
-            "Versión del aplicativo: {}";
 
     public static final String INICIO =
             "**** Inicio de la ejecución del programa ****";
@@ -98,9 +92,6 @@ public final class Mensajes {
     public static final String FINAL_CORRECTO =
             "La ejecución ha finalizado CORRECTAMENTE.";
 
-    public static final String RESUMEN_EJECUCION =
-            "***** RESUMEN DE LA IMPORTACIÓN *****";
-
     public static final String ENTIDADES =
             "Se han encontrado {} entidades dentro del paquete {}.";
 
@@ -116,6 +107,8 @@ public final class Mensajes {
     public static final String INSERT_RECORDS =
             "{}Insertardos {} registros en la tabla {}";
 
+    /**
+     * Constructor privado para evitar la instanciación.
+     */
     private Mensajes() {}
-
 }

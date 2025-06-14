@@ -9,8 +9,8 @@ import local.jarios.interfaces.Actualizable;
 import local.jarios.models.ParseoFicherosGc;
 import local.jarios.models.RegistroGc;
 import local.jarios.properties.PropertyConstantes;
-import local.jarios.properties.PropertyManager;
-import local.jarios.utils.ConstantesGenerales;
+import local.jarios.properties.config.PropertiesManager;
+import local.jarios.utils.Constantes;
 import local.jarios.utils.FinalDelPrograma;
 import local.jarios.utils.Mensajes;
 import lombok.extern.slf4j.Slf4j;
@@ -46,19 +46,19 @@ public class RepositoryImpl implements Repository {
 
         try {
 
-            /// Persistir el log
+            // Persistir el log
             session.persist(miLog);
             log.info("Persistidas las siguientes entidades: Log, Configuracion, Feeds");
 
         } catch (HibernateException ex) {
 
-            /// Registro la excepción con información adicional
+            // Registro la excepción con información adicional
             log.error("Error en el método: persistirLog(). Error: {}", ex.getMessage());
 
-            /// Deshago los cambios de la transacción en la base de datos
+            // Deshago los cambios de la transacción en la base de datos
             transaction.rollback();
 
-            /// Finaliza la ejecución del programa
+            // Finaliza la ejecución del programa
             FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
 
         }
@@ -76,18 +76,18 @@ public class RepositoryImpl implements Repository {
 
         try {
 
-            /// Persistir la lista de ficherosGc
+            // Persistir la lista de ficherosGc
             grabarLista(session, listFicherosGc);
 
         } catch (HibernateException ex) {
 
-            /// Registro la excepción con información adicional
+            // Registro la excepción con información adicional
             log.error("Error en el método: persistirListFicherosGc(). Error: {}", ex.getMessage());
 
-            /// Deshago los cambios de la transacción en la base de datos
+            // Deshago los cambios de la transacción en la base de datos
             transaction.rollback();
 
-            /// Finaliza la ejecución del programa
+            // Finaliza la ejecución del programa
             FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
 
         }
@@ -103,19 +103,19 @@ public class RepositoryImpl implements Repository {
 
         try {
 
-            /// Persistir estadistica
+            // Persistir estadistica
             session.persist(estadistica);
             log.info("Persistidas la entidad: Estadistica");
 
         } catch (HibernateException ex) {
 
-            /// Registro la excepción con información adicional
+            // Registro la excepción con información adicional
             log.error("Error en el método: persistirEstadistica(). Error: {}", ex.getMessage());
 
-            /// Deshago los cambios de la transacción en la base de datos
+            // Deshago los cambios de la transacción en la base de datos
             transaction.rollback();
 
-            /// Finaliza la ejecución del programa
+            // Finaliza la ejecución del programa
             FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
 
         }
@@ -128,42 +128,47 @@ public class RepositoryImpl implements Repository {
      * @param parseoFicherosGc Objeto que contiene el parseo de los ficheros
      */
     @Override
-    public void persistir(Session session, Transaction transaction, ParseoFicherosGc parseoFicherosGc) {
+    public void persistir(
+            Session session,
+            Transaction transaction,
+            ParseoFicherosGc parseoFicherosGc,
+            PropertiesManager propertiesManager
+    ) {
 
-        PropertyManager propertyManager = PropertyManager.getInstance();
-
-        ///
+        //
         try {
 
-            ///
+            //
             for (Map.Entry<String, List<RegistroGc>> entry :
                     parseoFicherosGc.getMapRegistrosGcByFicheroGc().entrySet()) {
 
-                ///
-                String configPrefijo = propertyManager.getProperty(PropertyConstantes.CONFIG_PREFIJO);
+                //
+                String configPrefijo = propertiesManager.getProperty(
+                        Constantes.CONFIG_PROPERTIES,
+                        PropertyConstantes.CONFIG_PREFIJO);
                 String nombreTablaSinEsquema = configPrefijo + entry.getKey().toLowerCase();
 
-                ///
+                //
                 if (tablaExiste(session, nombreTablaSinEsquema)) {
 
-                    ///
+                    //
                     var dropSql = "DROP TABLE " + nombreTablaSinEsquema;
 
-                    ///
+                    //
                     session.createNativeQuery(dropSql).executeUpdate();
-                    log.info(Mensajes.DROP_TABLE, ConstantesGenerales.TABULADOR_1, nombreTablaSinEsquema);
+                    log.info(Mensajes.DROP_TABLE, Constantes.TABULADOR_1, nombreTablaSinEsquema);
 
                 }
 
-                ///
+                //
                 crearTabla(session, nombreTablaSinEsquema);
-                log.info(Mensajes.CREATE_TABLE, ConstantesGenerales.TABULADOR_1, nombreTablaSinEsquema);
+                log.info(Mensajes.CREATE_TABLE, Constantes.TABULADOR_1, nombreTablaSinEsquema);
 
-                ///
+                //
                 insertarRegistrosEnTabla(session, nombreTablaSinEsquema, entry.getValue());
                 log.info(
                         Mensajes.INSERT_RECORDS,
-                        ConstantesGenerales.TABULADOR_2,
+                        Constantes.TABULADOR_2,
                         entry.getValue().size(),
                         nombreTablaSinEsquema);
 
@@ -171,13 +176,13 @@ public class RepositoryImpl implements Repository {
 
         } catch (HibernateException ex) {
 
-            /// Registro la excepción con información adicional
+            // Registro la excepción con información adicional
             log.error("Error en el método: persistir(). Error: {}", ex.getMessage());
 
-            /// Deshago los cambios de la transacción en la base de datos
+            // Deshago los cambios de la transacción en la base de datos
             transaction.rollback();
 
-            /// Finaliza la ejecución del programa
+            // Finaliza la ejecución del programa
             FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
         }
     }
@@ -185,18 +190,18 @@ public class RepositoryImpl implements Repository {
     private static <T extends Actualizable<T>> void grabarLista(
             Session session, List<T> lista) throws HibernateException {
 
-        ///
+        //
         for (T registro : lista) {
 
-            ///
+            //
             if (registro.getId() != null) {
 
-                ///
+                //
                 session.merge(registro);
 
             } else {
 
-                ///
+                //
                 session.persist(registro);
             }
         }
@@ -210,15 +215,15 @@ public class RepositoryImpl implements Repository {
      */
     private boolean tablaExiste(Session session, String nombreTablaSinEsquema) {
 
-        /// SQL nativo para verificar la existencia de la tabla
+        // SQL nativo para verificar la existencia de la tabla
         String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :nombreTablaSinEsquema";
 
-        ///
+        //
         Long count = (Long) session.createNativeQuery(sql)
                 .setParameter("nombreTablaSinEsquema", nombreTablaSinEsquema)
                 .getSingleResult();
 
-        ///
+        //
         return count > 0;
     }
 
@@ -229,14 +234,14 @@ public class RepositoryImpl implements Repository {
      */
     private void crearTabla(Session session, String nombreTablaConEsquema) {
 
-        /// SQL nativo para crear la tabla
+        // SQL nativo para crear la tabla
         String createTableSql = "CREATE TABLE IF NOT EXISTS " + nombreTablaConEsquema + " (" +
                 "id UUID NOT NULL, " +
                 "code VARCHAR(50) NOT NULL PRIMARY KEY, " +
                 "nombre VARCHAR(500)" +
                 ")";
 
-        /// Crear la tabla si no existe
+        // Crear la tabla si no existe
         session.createNativeQuery(createTableSql).executeUpdate();
     }
 
@@ -251,31 +256,31 @@ public class RepositoryImpl implements Repository {
             String tableName,
             List<RegistroGc> listRegistroGc) {
 
-        /// Usar StringBuilder para construir la consulta de inserción
+        // Usar StringBuilder para construir la consulta de inserción
         StringBuilder insertSql = new StringBuilder("INSERT INTO " + tableName + " (id, code, nombre) VALUES ");
 
-        /// Crear los valores para insertar
+        // Crear los valores para insertar
         for (int i = 0; i < listRegistroGc.size(); i++) {
             RegistroGc registro = listRegistroGc.get(i);
 
-            /// Escapar comillas simples en los valores de texto
+            // Escapar comillas simples en los valores de texto
             UUID id = Generators.timeBasedEpochGenerator().generate();
-            String code = registro.getCode().replace("'", "''");      /// Escapar comillas simples en 'code'
-            String nombre = registro.getNombre().replace("'", "''");  /// Escapar comillas simples en 'nombre'
+            String code = registro.getCode().replace("'", "''");      // Escapar comillas simples en 'code'
+            String nombre = registro.getNombre().replace("'", "''");  // Escapar comillas simples en 'nombre'
 
-            /// Agregar los valores para cada fila
+            // Agregar los valores para cada fila
             insertSql.append("(")
                     .append("'").append(id).append("'").append(", ")
                     .append("'").append(code).append("'").append(", ")
                     .append("'").append(nombre).append("'").append(")");
 
-            /// Agregar una coma si no es el último registro
+            // Agregar una coma si no es el último registro
             if (i < listRegistroGc.size() - 1) {
                 insertSql.append(", ");
             }
         }
 
-        /// Ejecutar la consulta
+        // Ejecutar la consulta
         session.createNativeQuery(insertSql.toString()).executeUpdate();
     }
 
@@ -286,7 +291,7 @@ public class RepositoryImpl implements Repository {
      */
     public List<FicheroGc> getListFicherosGc(Session session) {
 
-        ///
+        //
         String jpql = "SELECT f FROM FicheroGc f";
 
         List<FicheroGc> listFicherosGc = new ArrayList<>();
@@ -297,14 +302,14 @@ public class RepositoryImpl implements Repository {
 
         } catch (HibernateException ex) {
 
-            /// Registro la excepción con información adicional
+            // Registro la excepción con información adicional
             log.error("Error en el método: getListFicherosGc(). Error: {}", ex.getMessage());
 
-            /// Finaliza la ejecución del programa
+            // Finaliza la ejecución del programa
             FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
         }
 
-        ///
+        //
         return listFicherosGc;
     }
 }

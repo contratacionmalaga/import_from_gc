@@ -1,22 +1,20 @@
 package local.jarios;
 
+import local.jarios.email.exception.EmailException;
 import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.enums.TipoFinalEjecucion;
-import local.jarios.exceptions.MiMailException;
-import local.jarios.exceptions.MiSessionFactoryProviderException;
 import local.jarios.exceptions.MiUnknownHostException;
 import local.jarios.helpers.ComunHelper;
 import local.jarios.helpers.FileHelper;
 import local.jarios.helpers.ListHelper;
-import local.jarios.models.MiMail;
 import local.jarios.models.ParseoFicherosGc;
 import local.jarios.properties.PropertyConstantes;
-import local.jarios.properties.PropertyManager;
+import local.jarios.properties.config.PropertiesManager;
 import local.jarios.services.Service;
 import local.jarios.services.ServiceImpl;
-import local.jarios.utils.ConstantesGenerales;
+import local.jarios.utils.Constantes;
 import local.jarios.utils.FinalDelPrograma;
 import local.jarios.utils.Mensajes;
 import lombok.extern.slf4j.Slf4j;
@@ -27,202 +25,166 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Description: Importación de la información de diferentes ficheros de Excel a una base de datos PostgreSQL para
- * su posterior explotación.
- * Author: Juan Antonio
- * Date: 04/06/2024
- * Team: Juan Antonio
+ * Clase principal para la importación de información desde ficheros Excel al sistema.
+ * <p>
+ * Se encarga de leer ficheros GC, procesarlos, almacenar estadísticas y persistir los datos en base de datos.
+ * Controla la gestión de excepciones y trazas para facilitar el diagnóstico.
+ * </p>
+ *
+ * @author Juan Antonio
+ * @since 04/06/2024
  */
-
 @Slf4j
 public class ImportFromGc {
 
+    /**
+     * Método principal que ejecuta el proceso completo de importación.
+     *
+     * @param args argumentos de línea de comandos (no usados)
+     */
     public static void main(String[] args) {
-
-        ///
         try {
-
-            ///
             log.info(Mensajes.INICIO);
 
-            /// Cargo los ficheros properties utilizando el patrón SINGLETON
-            PropertyManager propertyManager = PropertyManager.getInstance();
+            // Cargo los ficheros properties utilizando el patrón SINGLETON
+            PropertiesManager propertiesManager = PropertiesManager.getInstance();
             log.info(Mensajes.PROPERTY_LOG);
 
-            /// Imprimo el contenido de los ficheros asociados a la configuración Local
+            // Imprimo el contenido de los ficheros asociados a la configuración Local (solo si debug activo)
             if (log.isDebugEnabled()) {
-                propertyManager.imprimirMapProperties();
+                propertiesManager.printAllProperties();
             }
 
-            /// Imprimo la versión del aplicativo desde el fichero de release
-            log.info(Mensajes.VERSION_APP, propertyManager.getProperty(PropertyConstantes.SCM_TAG));
-
-            /// ***** CREO EL OBJETO LogEntity
+            // Creo el objeto Log para esta ejecución
             Log miLog = new Log();
             log.info(Mensajes.LOG_CREACION, miLog);
 
-            /// Creo el objeto EstadisticaEntity que se inicializa con el LogEntity anteriormente creado y con la
-            ///         el valor Timestamp.valueOf(LocalDateTime.now()) para el campo fechaHoraInicial
-            var estadistica = new Estadistica(miLog);
+            // Creo Estadistica ligada al Log creado
+            Estadistica estadistica = new Estadistica(miLog);
             log.info(Mensajes.ESTADISTICA_CREACION);
 
-            ///
-            ///     CREO LA INSTANCIA DEL SERVICIO ENCARGADO DE INTERACTUAR CO LA BASE DE DATOS
-            ///
+            // Creo el servicio para interacción con la base de datos
             log.info(Mensajes.SERVICE_CREACION_INICIO);
-            Service service = new ServiceImpl(propertyManager);
+            Service service = new ServiceImpl(propertiesManager);
             log.info(Mensajes.SERVICE_CREACION_CREADO);
 
-            ///
-            ///     INICIO DEL PARSEO DE LOS FICHEROS GC
-            ///
+            // Inicio del parseo de ficheros GC
+            Timestamp timestampInicioParseo = Timestamp.valueOf(LocalDateTime.now());
+            estadistica.setFechaHoraInicialParseo(timestampInicioParseo);
+            log.info(Mensajes.ASIGN_FECHA_HORA_INICIAL_PARSEO_TO_ESTADISTICA, timestampInicioParseo);
 
-            /// Establecer fecha de inicio en el objeto Estadistica
-            Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
-            estadistica.setFechaHoraInicialParseo(timestamp);
-            log.info(Mensajes.ASIGN_FECHA_HORA_INICIAL_PARSEO_TO_ESTADISTICA, timestamp);
-
-            /// 1. OBTENGO LA LISTA DE ficherosGc EXISTENTES EN LA BASE DE DATOS
+            // Obtengo lista de ficheros GC ya existentes en base de datos
             List<FicheroGc> listFicherosGcEnBaseDatos = service.getListFicherosGc();
 
-            /// 2- OBTENGO LA RUTA DE LOS FICHERO A PARSEAR
-            var path = propertyManager.getProperty(PropertyConstantes.CONFIG_PATH);
+            // Obtengo la ruta de los ficheros a parsear desde configuración
+            var path = propertiesManager.getProperty(Constantes.CONFIG_PROPERTIES, PropertyConstantes.CONFIG_PATH);
             log.info(Mensajes.RUTA_FICHEROS, path);
 
-            /// 3- LEO TODOS LOS FICHEROS DESDE LA RUTA
+            // Obtengo el listado de ficheros en la ruta
             File[] arrayFiles = FileHelper.getListaFicherosFromPath(path);
 
-            /// 4.- ALMACENO EN ESTADISTICAS EL NÚMERO DE FICHEROS EXISTENTES EN LA RUTA
-            var nFilesLeidos = arrayFiles.length;
-            log.info (Mensajes.NUEMRO_FICHEROS_LEIDOS, nFilesLeidos, path);
+            // Almaceno la cantidad de ficheros encontrados en estadística
+            int nFilesLeidos = arrayFiles.length;
             estadistica.setNTotalFicherosLeidos(nFilesLeidos);
+            log.info(Mensajes.NUEMRO_FICHEROS_LEIDOS, nFilesLeidos, path);
 
-            /// Para no gestionar listas nulas, creo la lista que se rellenará si el número de ficheros es mayor que 0
+            // Creo objeto para almacenar el parseo
             ParseoFicherosGc parseoFicherosGc = new ParseoFicherosGc();
 
-            /// Unicamente proceso la lista de ficheros si el número de ficheros que contiene el array es mayor que 0
             if (nFilesLeidos > 0) {
-
-                /// Proceso la lista con los ficheros
+                // Proceso la lista de ficheros
                 parseoFicherosGc = FileHelper.procesarListaFicherosFromPath(miLog, arrayFiles);
+                log.debug("Procesados {} ficheros GC desde la ruta: {}", parseoFicherosGc.getListFicherosGc().size(), path);
+            } else {
+                log.warn("No se encontraron ficheros para procesar en la ruta: {}", path);
             }
 
-            ///
-            ///     UNIFICO LAS LISTAS (la existente en base de datos y la que está pendiente de importar)
-            ///
+            // Unifico la lista de ficheros existentes con los nuevos parseados
             ListHelper.unificarListas(miLog, listFicherosGcEnBaseDatos, parseoFicherosGc.getListFicherosGc());
 
-            /// ASIGNO LA LISTA DE FICHEROS (unificada) AL OBJETO logEntity
+            // Asigno la lista unificada al Log
             miLog.setFicherosGc(listFicherosGcEnBaseDatos);
 
-            ///
-            ///     OBTENGO LAS ESTADÍSTICAS DE DURACIÓN DEL PARSEO
-            ///
+            // Registro fecha final del parseo
+            Timestamp timestampFinParseo = Timestamp.valueOf(LocalDateTime.now());
+            estadistica.setFechaHoraFinalParseo(timestampFinParseo);
+            log.info(Mensajes.ASIGN_FECHA_HORA_FINAL_PARSEO_TO_ESTADISTICA, timestampFinParseo);
 
-            timestamp = Timestamp.valueOf(LocalDateTime.now());
-            estadistica.setFechaHoraInicialParseo(timestamp);
-            log.info(Mensajes.ASIGN_FECHA_HORA_FINAL_PARSEO_TO_ESTADISTICA, timestamp);
-
-            /// Número de ficheros procesados
-            int nFicherosProcesados = parseoFicherosGc.getListFicherosGc().size();
+            // Actualizo estadísticas
+            int nFicherosProcesados = (parseoFicherosGc.getListFicherosGc() != null) ? parseoFicherosGc.getListFicherosGc().size() : 0;
             estadistica.setNTotalFicherosProcesados(nFicherosProcesados);
-            log.info (Mensajes.NUEMRO_FICHEROS_PROCESADOS, nFicherosProcesados, path);
+            log.info(Mensajes.NUEMRO_FICHEROS_PROCESADOS, nFicherosProcesados, path);
 
-            /// Número total de RegistrosGc
-            int nRegistrosGc = parseoFicherosGc.getMapRegistrosGcByFicheroGc().values().stream()
-                    .mapToInt(List::size)  /// Convierte cada lista en su tamaño
-                    .sum();                /// Suma los tamaños de todas las listas
-            estadistica.setNRregistrosGc(nRegistrosGc);
-            log.info (Mensajes.NUEMRO_REGISTROS_GC, nRegistrosGc);
+            int nRegistrosGc = (parseoFicherosGc.getMapRegistrosGcByFicheroGc() != null)
+                    ? parseoFicherosGc.getMapRegistrosGcByFicheroGc().values().stream()
+                    .mapToInt(List::size)
+                    .sum()
+                    : 0;
+            estadistica.setNRegistrosGc(nRegistrosGc);
+            log.info(Mensajes.NUEMRO_REGISTROS_GC, nRegistrosGc);
 
-            /// Establezco la fecha y hora final de la ejeucicón
-            estadistica.setFechaHoraFinalParseo(new Timestamp(System.currentTimeMillis()));
-
-            /// Calculo el tiempo de ejecución con el formato deseado
-            String duracion = ComunHelper.calcularTiempoEjecucion(
+            // Calculo duración del parseo
+            String duracionParseo = ComunHelper.calcularTiempoEjecucion(
                     estadistica.getFechaHoraInicialParseo(),
                     estadistica.getFechaHoraFinalParseo());
+            estadistica.setDuracionParseo(duracionParseo);
 
-            /// Asigno la duración al objeto EstadisticaEntity
-            estadistica.setDuracionParseo(duracion);
+            // Inicio persistencia en base de datos
+            Timestamp timestampInicioBD = Timestamp.valueOf(LocalDateTime.now());
+            estadistica.setFechaHoraInicialBaseDatos(timestampInicioBD);
+            log.info(Mensajes.ASIGN_FECHA_HORA_INICIAL_BASE_DATOS_TO_ESTADISTICA, timestampInicioBD);
 
-            ///
-            ///     FINAL DEL PARSEO DE LOS FICHEROS GC
-            ///
-
-            ///
-            ///     INICIO PERSISTENCIA EN LA BASE DE DATOS DE LOS OBJETOS
-            ///
-
-            /// Establecer fecha de inicio de la persistencia en base de datos
-            timestamp = Timestamp.valueOf(LocalDateTime.now());
-            estadistica.setFechaHoraInicialBaseDatos(timestamp);
-            log.info(Mensajes.ASIGN_FECHA_HORA_INICIAL_BASE_DATOS_TO_ESTADISTICA, timestamp);
-
-            /// Persisto el objeto Log
+            // Persisto los objetos
             service.persistir(miLog);
             log.info(Mensajes.PERSISTIDO_LOG);
 
-            /// Persisto el objeto List<FicherosGc>
             service.persistir(listFicherosGcEnBaseDatos);
             log.info(Mensajes.PERSISTIDO_FICHEROS_GC);
 
-            /// Persisto el objeto ParseoFicherosGc
-            service.persistir(parseoFicherosGc);
+            service.persistir(parseoFicherosGc, propertiesManager);
             log.info(Mensajes.PERSISTIDO_PARSEO_FICHEROS_GC);
 
-            /// Establecer fecha final de la persistencia en base de datos
-            timestamp = Timestamp.valueOf(LocalDateTime.now());
-            estadistica.setFechaHoraFinalBaseDatos(timestamp);
-            log.info(Mensajes.ASIGN_FECHA_HORA_FINAL_BASE_DATOS_TO_ESTADISTICA, timestamp);
+            // Final persistencia
+            Timestamp timestampFinBD = Timestamp.valueOf(LocalDateTime.now());
+            estadistica.setFechaHoraFinalBaseDatos(timestampFinBD);
+            log.info(Mensajes.ASIGN_FECHA_HORA_FINAL_BASE_DATOS_TO_ESTADISTICA, ComunHelper.getFechaHoraFormateada(timestampFinBD));
 
-            ///
-            ///     OBTENGO LAS ESTADÍSTICAS DE DURACIÓN
-            ///
-
-            /// Calculo el tiempo de ejecución con el formato deseado
-            duracion = ComunHelper.calcularTiempoEjecucion(
+            // Calculo duración persistencia
+            String duracionBaseDatos = ComunHelper.calcularTiempoEjecucion(
                     estadistica.getFechaHoraInicialBaseDatos(),
                     estadistica.getFechaHoraFinalBaseDatos());
+            estadistica.setDuracionBaseDatos(duracionBaseDatos);
+            log.info(Mensajes.ASIGN_DURACION_BASE_DATOS, duracionBaseDatos);
 
-            /// Asigno la duración al objeto Estadistica
-            estadistica.setDuracionBaseDatos(duracion);
-            log.info(Mensajes.ASIGN_DURACION_BASE_DATOS, duracion);
-
-            /// Persisto las estadisticas en la base de datos
+            // Persisto estadísticas finales
             service.persistir(estadistica);
             log.info(Mensajes.PERSISTIDO_ESTADISTICA);
 
-            ///
-            ///     FINAL PERSISTENCIA EN LA BASE DE DATOS DE LOS OBJETOS
-            ///
-
-            /// Creación del objeto Mail a partir de las Estadísticas para el envío de la información
-            MiMail miMail = new MiMail(propertyManager, estadistica);
-            log.info(Mensajes.MAIL_CREACION);
-
-            /// Envío un correo con la información de la ejecución del aplicativo
-            miMail.enviarEmail();
-            log.info(Mensajes.MAIL_ENVIADO);
-
-            /// Finalizar el programa correctamente
+            // Finalizo el programa correctamente
             FinalDelPrograma.finalizar(TipoFinalEjecucion.CORRECTO);
 
-        } catch (MiMailException | MiUnknownHostException | MiSessionFactoryProviderException ex) {
-
-            /// Registro la excepción
+        } catch (MiUnknownHostException ex) {
             log.error(Mensajes.EXCEPTION);
-            log.error(Mensajes.EXCEPTION_MENSAJE, ConstantesGenerales.TABULADOR_1, ex.getMessage());
-            log.error(Mensajes.EXCEPTION_STACK_TRACE, ConstantesGenerales.TABULADOR_1);
-
-            ///
-            for (StackTraceElement stackTraceElement : ex.getStackTrace()) {
-                log.error("{}{}", ConstantesGenerales.TABULADOR_2, stackTraceElement.toString());
+            log.error(Mensajes.EXCEPTION_MENSAJE, Constantes.TABULADOR_1, ex.getMessage());
+            log.error(Mensajes.EXCEPTION_STACK_TRACE, Constantes.TABULADOR_1);
+            for (StackTraceElement ste : ex.getStackTrace()) {
+                log.error("{}{}", Constantes.TABULADOR_2, ste.toString());
             }
-
-            /// Finalizo la ejecución del programa
             FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
 
+        } catch (EmailException ex) {
+            log.error("Error en envío de email: {}", ex.getMessage());
+            for (StackTraceElement ste : ex.getStackTrace()) {
+                log.error("{}{}", Constantes.TABULADOR_2, ste.toString());
+            }
+            FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
+
+        } catch (Exception ex) {
+            log.error("Error inesperado: {}", ex.getMessage());
+            for (StackTraceElement ste : ex.getStackTrace()) {
+                log.error("{}{}", Constantes.TABULADOR_2, ste.toString());
+            }
+            FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
         }
     }
 }

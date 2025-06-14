@@ -8,26 +8,38 @@ import lombok.Setter;
 import java.sql.Timestamp;
 
 /**
- * Description: Clase que añade elementos de Auditorías a las clases que la extienden
- * Author: juan
+ * Clase base para auditoría que añade timestamps de creación y actualización.
+ * Las entidades que la extiendan heredarán estos campos y comportamiento.
+ * Author: Juan Antonio
  * Date: 04/06/2024
- * Team: Juan Antonio
  */
 @Setter
 @Getter
 @NoArgsConstructor
 @MappedSuperclass
-/// Indica que esta clase no será una entidad por sí misma,
-/// pero sus propiedades serán incluidas en cualquier entidad que la extienda.
-public class Auditable {
+public abstract class Auditable {
 
-    /// Getters y Setters
     @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
+
+    /**
+     * Se invoca antes de persistir el objeto por primera vez.
+     */
     @PrePersist
     protected void onCreate() {
-        createdAt = new Timestamp(System.currentTimeMillis());
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        createdAt = now;
+        updatedAt = now;
     }
 
+    /**
+     * Se invoca antes de actualizar el objeto.
+     */
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = new Timestamp(System.currentTimeMillis());
+    }
 }

@@ -4,30 +4,46 @@ import local.jarios.utils.Mensajes;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Description:
- * Author: juan
- * Date: 04/02/2025
- * Team:
+ * Clase helper para manejo y registro de excepciones con trazabilidad de clase y método.
+ * <p>
+ * Proporciona un método estático para loggear excepciones indicando desde qué clase y método ocurrió.
+ * </p>
+ *
+ * @author Juan
+ * @since 04/02/2025
  */
 @Slf4j
-public class ExceptionHelper {
+public final class ExceptionHelper {
 
+    /**
+     * Constructor privado para evitar instanciación.
+     */
     private ExceptionHelper() { }
 
     /**
-     * Método para registrar la excepción con la clase, método y mensaje de error
-     * @param ex Excepción ocurrida
+     * Registra una excepción en el log con la clase y método donde ocurrió la llamada a este método.
+     *
+     * @param ex Excepción a registrar.
      */
     public static void logException(Exception ex) {
-
-        /// Obtener la pila de ejecución
+        // Obtenemos la pila de ejecución actual
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
-        /// El primer elemento es el getStackTrace(), el segundo es el método actual
-        String className = stackTrace[2].getClassName();        /// Nombre de la clase
-        String methodName = stackTrace[2].getMethodName();      /// Nombre del método
+        /*
+         * La pila tiene este esquema:
+         * 0 -> Thread.getStackTrace()
+         * 1 -> ExceptionHelper.logException()
+         * 2 -> método que llamó a logException (caller)
+         */
+        StackTraceElement caller = null;
+        if (stackTrace.length > 2) {
+            caller = stackTrace[2];
+        }
 
-        /// Registro la excepción
-        log.error(Mensajes.EXCEPTION_ERROR, className, methodName, ex.getMessage());
+        String className = caller != null ? caller.getClassName() : "UnknownClass";
+        String methodName = caller != null ? caller.getMethodName() : "UnknownMethod";
+
+        // Registro la excepción con la plantilla definida en Mensajes.EXCEPTION_ERROR
+        log.error(Mensajes.EXCEPTION_ERROR, className, methodName, ex.getMessage(), ex);
     }
 }

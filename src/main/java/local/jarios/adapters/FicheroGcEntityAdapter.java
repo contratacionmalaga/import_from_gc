@@ -8,52 +8,20 @@ import local.jarios.entity.FicheroGc;
 
 import java.lang.reflect.Type;
 
-/**
- * Description: Juan
- * Author: juan
- * Date: 09/07/2024
- * Team: Juan
- */
 public record FicheroGcEntityAdapter() implements JsonSerializer<FicheroGc> {
 
     @Override
-    public JsonElement serialize(
-            FicheroGc ficheroGcEntity,
-            Type typeOfSrc,
-            JsonSerializationContext context) {
-
-        ///
+    public JsonElement serialize(FicheroGc ficheroGcEntity, Type typeOfSrc, JsonSerializationContext context) {
         var jsonObject = new JsonObject();
 
-        ///
-        jsonObject.addProperty(
-                "Id", String.valueOf(ficheroGcEntity.getId()));
+        jsonObject.addProperty("id", ficheroGcEntity.getId().toString());
+        jsonObject.addProperty("shortName", ficheroGcEntity.getShortName());
+        jsonObject.addProperty("longName", ficheroGcEntity.getLongName());
+        jsonObject.addProperty("version", ficheroGcEntity.getVersion());
+        jsonObject.addProperty("canonicalUri", ficheroGcEntity.getCanonicalUri());
+        jsonObject.addProperty("canonicalVersionUri", ficheroGcEntity.getCanonicalVersionUri());
+        jsonObject.addProperty("locationUri", ficheroGcEntity.getLocationUri());
 
-        ///
-        jsonObject.addProperty(
-                "shortName", String.valueOf(ficheroGcEntity.getCanonicalUri()));
-
-        ///
-        jsonObject.addProperty(
-                "longName", String.valueOf(ficheroGcEntity.getLongName()));
-
-        ///
-        jsonObject.addProperty(
-                "version", String.valueOf(ficheroGcEntity.getVersion()));
-
-        ///
-        jsonObject.addProperty(
-                "canonicalUri", String.valueOf(ficheroGcEntity.getCanonicalUri()));
-
-        ///
-        jsonObject.addProperty(
-                "canonicalVersionUri", String.valueOf(ficheroGcEntity.getCanonicalVersionUri()));
-
-        ///
-        jsonObject.addProperty(
-                "locationUri", String.valueOf(ficheroGcEntity.getLocationUri()));
-
-        ///
         return jsonObject;
     }
 }
