@@ -1,6 +1,6 @@
 package local.jarios.helpers;
 
-import local.jarios.utils.Mensajes;
+import local.jarios.common.util.Mensajes;
 import lombok.extern.slf4j.Slf4j;
 
 /**

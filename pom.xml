@@ -2,17 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>local.jarios</groupId>
-    <artifactId>import-from-gc</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <artifactId>import_from_gc</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>import-from-gc.git</name>
+    <name>import_from_gc.git</name>
     <description>Cliente que parsea los datos abiertos de la Plataforma de Contratación del Sector Público</description>
 
     <scm>
-        <connection>scm:git:https://github.com/contratacionmalaga/import-from-gc.git</connection>
-        <developerConnection>scm:git:git@github.com:contratacionmalaga/import-from-gc.git</developerConnection>
-        <url>https://github.com/contratacionmalaga/import-from-gc</url>
+        <connection>scm:git:https://github.com/contratacionmalaga/import_from_gc.git</connection>
+        <developerConnection>scm:git:git@github.com:contratacionmalaga/import_from_gc.git</developerConnection>
+        <url>https://github.com/contratacionmalaga/import_from_gc</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -20,16 +20,18 @@
         <repository>
             <id>github-releases</id>
             <!-- Cambié la URL a la correcta para GitHub Packages -->
-            <url>https://maven.pkg.github.com/contratacionmalaga/import-from-gc</url>
+            <url>https://maven.pkg.github.com/contratacionmalaga/import_from_gc</url>
         </repository>
         <snapshotRepository>
             <id>github-snapshots</id>
             <!-- Cambié la URL a la correcta para GitHub Packages -->
-            <url>https://maven.pkg.github.com/contratacionmalaga/import-from-gc</url>
+            <url>https://maven.pkg.github.com/contratacionmalaga/import_from_gc</url>
         </snapshotRepository>
     </distributionManagement>
 
     <properties>
+        <version.trimmed>${project.version}</version.trimmed> <!-- Por defecto usa la versión completa -->
+        <final.name>${project.artifactId}-${version.trimmed}</final.name>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -122,14 +124,26 @@
 
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>email-helper</artifactId>
-            <version>1.0.3</version>
+            <artifactId>encrypt_helper</artifactId>
+            <version>1.3.0</version>
         </dependency>
 
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>properties-helper</artifactId>
-            <version>1.0.7</version>
+            <artifactId>version_helper</artifactId>
+            <version>1.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>local.jarios</groupId>
+            <artifactId>email_helper</artifactId>
+            <version>1.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>local.jarios</groupId>
+            <artifactId>properties_helper</artifactId>
+            <version>1.5.0</version>
         </dependency>
 
         <dependency>
@@ -164,13 +178,57 @@
             <version>5.1.0</version>
         </dependency>
 
+        <!-- Dependencias para JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.13.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.13.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- AssertJ (opcional, para aserciones más expresivas) -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>4.0.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.18.0</version> <!-- o última estable -->
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
 
-        <finalName>import-from-gc</finalName>
+        <!-- Nombre del JAR por defecto (incluye -SNAPSHOT si aplica) -->
+        <finalName>${final.name}</finalName>
 
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <useModulePath>false</useModulePath> <!-- importante si usas Java 9+ con módulos -->
+                    <argLine>
+                        -javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.17.5/byte-buddy-agent-1.17.5.jar" -XX:+EnableDynamicAgentLoading
+                    </argLine>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
@@ -268,25 +326,29 @@
                 </configuration>
             </plugin>
 
+            <!-- Plugin maven-jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <!-- No config aquí; se toma el finalName del <build> -->
+            </plugin>
+
+            <!-- Plugin para fat JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.7.1</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>local.jarios.ImportFromGc</mainClass>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
+                    <appendAssemblyId>true</appendAssemblyId>
+                    <finalName>${project.artifactId}-${version.trimmed}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
+                        <id>make-fat-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -295,20 +357,20 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version> <!-- o la versión que uses -->
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- Aquí defines manualmente la versión limpia -->
+                <version.trimmed>1.3.0</version.trimmed>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

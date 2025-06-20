@@ -4,7 +4,6 @@ import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.models.ParseoFicherosGc;
-import local.jarios.properties.config.PropertiesManager;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public interface Service {
      *
      * @param miLog Objeto {@link Log} a persistir.
      */
-    void persistir(Log miLog);
+    void persistirLog(Log miLog);
 
     /**
      * Persiste una lista de objetos {@link FicheroGc} en la base de datos.
@@ -44,7 +43,7 @@ public interface Service {
      *
      * @param listFicherosGc Lista de objetos {@link FicheroGc} a persistir.
      */
-    void persistir(List<FicheroGc> listFicherosGc);
+    void persistirListaFicherosGc(List<FicheroGc> listFicherosGc);
 
     /**
      * Persiste un objeto {@link ParseoFicherosGc} en la base de datos.
@@ -54,9 +53,9 @@ public interface Service {
      * </p>
      *
      * @param parseoFicherosGc Objeto {@link ParseoFicherosGc} a persistir.
-     * @param propertiesManager Objeto que proporciona las propiedades de configuración.
+     * @param prefijo Prefijo utilizado en la creación de las tablas.
      */
-    void persistir(ParseoFicherosGc parseoFicherosGc, PropertiesManager propertiesManager);
+    void persistirObjetoParseoFicherosGc(ParseoFicherosGc parseoFicherosGc, String prefijo);
 
     /**
      * Persiste un objeto {@link Estadistica} en la base de datos.
@@ -67,7 +66,7 @@ public interface Service {
      *
      * @param estadistica Objeto {@link Estadistica} a persistir.
      */
-    void persistir(Estadistica estadistica);
+    void persistirEstadistica(Estadistica estadistica);
 
     /**
      * Recupera una lista de objetos {@link FicheroGc} existentes en la base de datos.

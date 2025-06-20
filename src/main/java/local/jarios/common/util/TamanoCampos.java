@@ -1,4 +1,4 @@
-package local.jarios.utils;
+package local.jarios.common.util;
 
 /**
  * Clase utilitaria que define constantes para los tamaños máximos

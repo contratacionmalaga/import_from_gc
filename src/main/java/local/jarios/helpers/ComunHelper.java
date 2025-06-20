@@ -2,15 +2,21 @@ package local.jarios.helpers;
 
 import local.jarios.exceptions.MiUnknownHostException;
 import local.jarios.managers.ManagerGsons;
-import local.jarios.utils.Constantes;
+import local.jarios.common.util.Constantes;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.JarURLConnection;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * Clase auxiliar con métodos comunes y utilidades generales.
@@ -100,5 +106,48 @@ public final class ComunHelper {
         String fechaFormateada = fecha.format(formatter);
         log.debug("Fecha formateada: {}", fechaFormateada);
         return fechaFormateada;
+    }
+
+    /**
+     * Obtiene la versión (Implementation-Version) desde el MANIFEST.MF
+     * del JAR que contiene la clase especificada.
+     *
+     * @param clazz Clase de referencia para localizar el JAR
+     * @return Versión obtenida del MANIFEST.MF o "Desconocida" si no se encuentra
+     */
+    public static String getVersionFromManifest(Class<?> clazz) {
+        try {
+            String className = clazz.getSimpleName() + ".class";
+            URL classUrl = clazz.getResource(className);
+
+            if (classUrl == null) {
+                return "No se encontró recurso de clase";
+            }
+
+            if (!"jar".equals(classUrl.getProtocol())) {
+                // Probablemente en entorno desarrollo (no en JAR)
+                return "Ejecutando sin JAR (modo desarrollo)";
+            }
+
+            JarURLConnection jarConnection = (JarURLConnection) classUrl.openConnection();
+            JarFile jarFile = jarConnection.getJarFile();
+
+            Manifest manifest = jarFile.getManifest();
+            if (manifest == null) {
+                return "No se encontró MANIFEST.MF en el JAR";
+            }
+
+            Attributes mainAttributes = manifest.getMainAttributes();
+            String version = mainAttributes.getValue("Implementation-Version");
+
+            if (version == null || version.isEmpty()) {
+                return "Versión no especificada en MANIFEST.MF";
+            }
+
+            return version;
+
+        } catch (IOException e) {
+            return "Error leyendo MANIFEST.MF: " + e.getMessage();
+        }
     }
 }

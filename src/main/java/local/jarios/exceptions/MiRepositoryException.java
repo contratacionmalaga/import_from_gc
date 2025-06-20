@@ -5,26 +5,26 @@ package local.jarios.exceptions;
  * @author Juan Antonio
  * @since 28/12/2024
  */
-public class MiParseException extends RuntimeException {
+public class MiRepositoryException extends RuntimeException {
 
     /**
-     * Constructor que crea una excepción {@code MiParseException} con un mensaje
+     * Constructor que crea una excepción {@code MiRespositoryException} con un mensaje
      * y una causa especificada.
      *
      * @param message Mensaje descriptivo del error ocurrido.
      * @param cause   Causa original que produjo esta excepción.
      */
-    public MiParseException(String message, Throwable cause) {
+    public MiRepositoryException(String message, Throwable cause) {
         super(message, cause);
     }
 
     /**
      * Constructor que crea una excepción {@code MiParseException} con solo un mensaje
-     * descriptivo del error ocurrido.
+     * MiRespositoryException
      *
      * @param message Mensaje descriptivo del error.
      */
-    public MiParseException(String message) {
+    public MiRepositoryException(String message) {
         super(message);
     }
 }

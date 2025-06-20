@@ -1,5 +1,8 @@
 package local.jarios.database;
 
+import local.jarios.common.util.Constantes;
+import local.jarios.properties.api.PropertiesManagerService;
+import local.jarios.properties.api.PropertiesManagerServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
@@ -37,27 +40,36 @@ public class SessionFactoryProvider {
      * Construye y devuelve una instancia de {@link SessionFactory} configurada
      * con las propiedades Hibernate proporcionadas.
      *
-     * @param hibernateProperties Propiedades de configuración de Hibernate.
      * @return Instancia de {@link SessionFactory} configurada.
      * @throws HibernateException Si ocurre un error durante la creación de la SessionFactory.
      */
-    public SessionFactory getSessionFactory(Properties hibernateProperties) throws HibernateException {
-        log.debug("Iniciando construcción de SessionFactory con las propiedades proporcionadas.");
+    public SessionFactory getSessionFactory() throws HibernateException {
+        log.debug("[getSessionFactory] - Iniciando método.");
+
+        PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
+        log.debug("[getSessionFactory] - El servicio de consulta de los ficheros properties se ha creado correctamente.");
+
+        Properties hibernateProperties = propertiesManager.getProperties(Constantes.HIBERNATE_PROPERTIES);
+        log.debug("[getSessionFactory] - Obtenidas las Properties correctamente del fichero {}.", Constantes.HIBERNATE_PROPERTIES);
 
         var hibernateConfigurer = new HibernateConfigurer();
+        log.debug("[getSessionFactory] - Objeto HibernateConfigurer creado correctamente.");
+
         var configuration = hibernateConfigurer.buildConfiguration(hibernateProperties);
-        log.debug("Configuración Hibernate creada correctamente.");
+        log.debug("[getSessionFactory] - Configuración Hibernate creada correctamente.");
 
         var entityScanner = new EntityScanner();
+        log.debug("[getSessionFactory] - Objeto EntityScanner creado correctamente.");
+
         entityScanner.scanAndAddEntities(configuration, CONFIG_PACKAGE_NAME);
-        log.debug("Entidades escaneadas y añadidas desde el paquete '{}'.", CONFIG_PACKAGE_NAME);
+        log.debug("[getSessionFactory] - Entidades escaneadas y añadidas desde el paquete '{}'.", CONFIG_PACKAGE_NAME);
 
         try {
             var sessionFactory = configuration.buildSessionFactory();
-            log.info("SessionFactory creada exitosamente.");
+            log.debug("[getSessionFactory] - SessionFactory creada exitosamente.");
             return sessionFactory;
         } catch (HibernateException e) {
-            log.error("Error creando SessionFactory: {}", e.getMessage(), e);
+            log.error("[getSessionFactory] - Error creando SessionFactory: {}", e.getMessage());
             throw e; // Propagar la excepción para que el llamador la maneje
         }
     }

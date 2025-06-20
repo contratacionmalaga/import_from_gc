@@ -21,16 +21,13 @@ import java.util.List;
 public enum PropertyFile {
 
     /** Archivo de configuración general */
-    PROPERTY_CONFIG("config/config.properties"),
+    PROPERTY_CONFIG("config/app.properties"),
 
     /** Archivo de configuración de Hibernate */
     PROPERTY_HIBERNATE("config/hibernate.properties"),
 
     /** Archivo de configuración de correo */
-    PROPERTY_MAIL("config/mail.properties"),
-
-    /** Archivo de propiedades de release */
-    PROPERTY_RELEASE("release.properties");
+    PROPERTY_MAIL("config/email.properties");
 
     /** Ruta asociada al fichero de propiedades */
     private final String ruta;

@@ -46,7 +46,7 @@ public final class CodeListHelper {
             var unmarshaller = jc.createUnmarshaller();
             CodeList codeList = (CodeList) unmarshaller.unmarshal(file);
 
-            log.info("Fichero '{}' parseado correctamente.", file.getName());
+            log.debug("Fichero '{}' parseado correctamente.", file.getName());
             return codeList;
 
         } catch (JAXBException ex) {
@@ -62,7 +62,7 @@ public final class CodeListHelper {
      * @param codeList Objeto {@link CodeList} con la información parseada del fichero.
      * @return Objeto {@link FicheroGc} generado, o {@code null} si no se pudo mapear.
      */
-    public static FicheroGc procesarCodeList(Log logEntity, CodeList codeList) {
+    public static FicheroGc getFicheroGc(Log logEntity, CodeList codeList) {
         if (codeList == null) {
             log.warn("Se recibió un CodeList nulo. No se procesará.");
             return null;
@@ -78,7 +78,7 @@ public final class CodeListHelper {
         }
 
         ficheroGcEntity.setLogEntity(logEntity);
-        log.info("FicheroGc generado correctamente desde CodeList. ShortName: {}", ficheroGcEntity.getShortName());
+        log.debug("FicheroGc generado correctamente desde CodeList. ShortName: {}", ficheroGcEntity.getShortName());
 
         return ficheroGcEntity;
     }

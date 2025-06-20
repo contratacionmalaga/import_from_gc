@@ -3,7 +3,7 @@ package local.jarios.entity;
 import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
 import local.jarios.interfaces.Actualizable;
-import local.jarios.utils.TamanoCampos;
+import local.jarios.common.util.TamanoCampos;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +58,8 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
      * Se aplica borrado en cascada.
      * </p>
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(
+            fetch = FetchType.LAZY)
     @JoinColumn(
             name = "log_id",
             nullable = false,
@@ -127,14 +128,22 @@ public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> 
     @Column(name = "locationUri", nullable = false, length = TamanoCampos.TAMANO_250)
     private String locationUri;
 
-
-
     /**
      * Constructor que genera un UUID basado en tiempo y registra la creación del objeto.
      */
     public FicheroGc() {
+        // Constructor vacío
+    }
+
+    /**
+     * Genera un Id único para el objeto.
+     * <p>
+     * Cuando creo el objeto NO TIENE id y esto me permite determinar
+     * a la hora de grabarlo en la base de datos si tengo que hacer un PERSIST | MERGE
+     * </p>
+     */
+    public void setId(){
         this.id = Generators.timeBasedEpochGenerator().generate();
-        log.info("Creado FicheroGc con ID: {}", id);
     }
 
     /**

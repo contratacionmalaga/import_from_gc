@@ -1,4 +1,4 @@
-package local.jarios.utils;
+package local.jarios.common.util;
 
 /**
  * Clase final que contiene constantes de mensajes estáticos
@@ -23,7 +23,7 @@ public final class Mensajes {
     /**
      * Mensaje para indicar que los ficheros GC se han persistido correctamente en la base de datos.
      */
-    public static final String PERSISTIDO_FICHEROS_GC =
+    public static final String PERSISTIDO_LISTA_FICHEROS_GC =
             "Se han persistido correctamente, los ficheros GC en la base de datos.";
 
     /**
@@ -44,6 +44,13 @@ public final class Mensajes {
      */
     public static final String ASIGN_FECHA_HORA_INICIAL_PARSEO_TO_ESTADISTICA =
             "Asignada la fecha y hora de inicio del parseo al objeto Estadísitica. {}";
+
+    /**
+     * Mensaje para indicar que se ha asignado la fecha y hora de inicio del parseo al objeto Estadística.
+     * Contiene un marcador para la fecha y hora asignada.
+     */
+    public static final String AGIGN_LISTA_FICHEROS_LEIDOS_TO_LOG =
+            "Asignada la lista de ficheros leídos desde el directorio al Log.";
 
     /**
      * Mensaje para indicar que se ha asignado la fecha y hora final del parseo al objeto Estadística.
@@ -107,13 +114,19 @@ public final class Mensajes {
      * Contiene un marcador para el Id del log.
      */
     public static final String LOG_CREACION =
-            "Creación del objeto Log correctamente. Id: {}";
+            "Creación del objeto Log correctamente.";
 
     /**
      * Mensaje que indica el inicio de la ejecución del programa.
      */
     public static final String INICIO =
-            "**** Inicio de la ejecución del programa ****";
+            "**** Inicio del log";
+
+    /**
+     * Mensaje que indica el inicio de la ejecución del programa.
+     */
+    public static final String FINAL =
+            "**** Final del log";
 
     /**
      * Mensaje que indica que la ejecución ha finalizado con errores.
@@ -151,7 +164,7 @@ public final class Mensajes {
      * Mensaje que indica el número de ficheros leídos de un directorio.
      * Contiene marcadores para cantidad y ruta.
      */
-    public static final String NUEMRO_FICHEROS_LEIDOS =
+    public static final String NUMERO_FICHEROS_LEIDOS =
             "Se han leído {} ficheros del directorio: {}";
 
     /**
@@ -174,6 +187,27 @@ public final class Mensajes {
      */
     public static final String RUTA_FICHEROS =
             "Ruta desde la que se importarán los ficheros: {}";
+
+    /**
+     * Mensaje que indica la ruta desde la que se importarán los ficheros.
+     * Contiene marcador para la ruta.
+     */
+    public static final String N_FICHEROS_RUTA =
+            "Número de ficheros en la ruta: {}";
+
+    /**
+     * Mensaje que indica la ruta desde la que se importarán los ficheros.
+     * Contiene marcador para la ruta.
+     */
+    public static final String N_FICHEROS_PERSISTIDOS =
+            "Número de FicherosGc existentes en la base de datos: {}";
+
+    /**
+     * Mensaje que indica la ruta desde la que se importarán los ficheros.
+     * Contiene marcador para la ruta.
+     */
+    public static final String CONVERTIR_LISTA_PERSISTIDOS_EN_MAP =
+            "Convertida la lista de ficheros persistidos en un Map correctamente.";
 
     /**
      * Mensaje que indica que la ejecución ha finalizado correctamente.
@@ -219,5 +253,7 @@ public final class Mensajes {
     /**
      * Constructor privado para evitar la instanciación de esta clase de utilidades.
      */
-    private Mensajes() {}
+    private Mensajes() {
+        // Constructor privado
+    }
 }

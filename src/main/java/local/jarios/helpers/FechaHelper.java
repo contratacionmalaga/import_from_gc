@@ -1,6 +1,6 @@
 package local.jarios.helpers;
 
-import local.jarios.utils.Constantes;
+import local.jarios.common.util.Constantes;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;

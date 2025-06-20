@@ -1,8 +1,8 @@
 package local.jarios.database;
 
 import jakarta.persistence.Entity;
-import local.jarios.utils.Constantes;
-import local.jarios.utils.Mensajes;
+import local.jarios.common.util.Constantes;
+import local.jarios.common.util.Mensajes;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cfg.Configuration;
 import org.reflections.Reflections;
@@ -41,12 +41,12 @@ public class EntityScanner {
         Collection<Class<?>> entities = reflections.getTypesAnnotatedWith(Entity.class);
 
         // Log con el número de entidades encontradas
-        log.info(Mensajes.ENTIDADES, entities.size(), packageName);
+        log.debug(Mensajes.ENTIDADES, entities.size(), packageName);
 
         // Añadimos cada entidad a la configuración de Hibernate
         for (Class<?> entityClass : entities) {
             configuration.addAnnotatedClass(entityClass);
-            log.info("{}{}", Constantes.TABULADOR_1, entityClass.getName());
+            log.debug("{}{}", Constantes.TABULADOR_1, entityClass.getName());
         }
     }
 }

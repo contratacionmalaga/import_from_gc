@@ -1,258 +1,245 @@
 package local.jarios.repositorys;
 
 import com.fasterxml.uuid.Generators;
+import local.jarios.common.util.Mensajes;
+import local.jarios.database.SessionFactoryProvider;
 import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
-import local.jarios.enums.TipoFinalEjecucion;
+import local.jarios.exceptions.MiRepositoryException;
+import local.jarios.exceptions.MiServiceException;
 import local.jarios.interfaces.Actualizable;
 import local.jarios.models.ParseoFicherosGc;
 import local.jarios.models.RegistroGc;
-import local.jarios.properties.PropertyConstantes;
-import local.jarios.properties.config.PropertiesManager;
-import local.jarios.utils.Constantes;
-import local.jarios.utils.FinalDelPrograma;
-import local.jarios.utils.Mensajes;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * Implementación del repositorio para persistencia de entidades relacionadas
- * con la importación de ficheros GC, logs y estadísticas.
- * <p>
- * Permite persistir logs, estadísticas, listas de ficheros y parseos de registros GC,
- * manejando transacciones e integridad de datos.
- * </p>
- *
- * @author Juan Antonio
- * @since 04/06/2024
+ * Implementación del Repository
  */
 @Slf4j
 public class RepositoryImpl implements Repository {
 
     /**
-     * Constructor vacío.
+     * SessionFactory
+     */
+    private final SessionFactory sessionFactory;
+
+    /**
+     * TransactionManager
+     */
+    private final TransactionManager transactionManager;
+
+    /**
+     * Constructor
      */
     public RepositoryImpl() {
-        // Constructor vacío
-    }
-
-    /**
-     * Persiste un objeto {@link Log} en la base de datos.
-     *
-     * @param session     Sesión Hibernate activa.
-     * @param transaction Transacción activa.
-     * @param miLog       Entidad Log a persistir.
-     */
-    @Override
-    public void persistir(Session session, Transaction transaction, Log miLog) {
+        this.transactionManager = new TransactionManager();
         try {
-            session.persist(miLog);
-            log.info("Persistido Log con id: {}", miLog.getId());
-        } catch (HibernateException ex) {
-            log.error("Error persistiendo Log: {}", ex.getMessage(), ex);
-            rollbackAndExit(transaction);
+            this.sessionFactory = new SessionFactoryProvider().getSessionFactory();
+            log.debug("[RepositoryImpl] - SessionFactory inicializada correctamente.");
+        } catch (HibernateException e) {
+            log.error("[RepositoryImpl] - Error creando SessionFactory: {}", e.getMessage(), e);
+            throw new MiServiceException("Error creando SessionFactory.", e);
         }
     }
 
     /**
-     * Persiste una lista de {@link FicheroGc} en la base de datos.
-     *
-     * @param session       Sesión Hibernate activa.
-     * @param transaction   Transacción activa.
-     * @param listFicherosGc Lista de entidades FicheroGc a persistir.
+     * Persistir Log
+     * @param miLog Objeto Log a persistir
+     * @throws MiRepositoryException Excepción
      */
     @Override
-    public void persistir(Session session, Transaction transaction, List<FicheroGc> listFicherosGc) {
-        try {
-            grabarLista(session, listFicherosGc);
-            log.info("Persistida lista de FicheroGc con {} elementos", listFicherosGc.size());
-        } catch (HibernateException ex) {
-            log.error("Error persistiendo lista FicheroGc: {}", ex.getMessage(), ex);
-            rollbackAndExit(transaction);
-        }
+    public void persistirLog(Log miLog) throws MiRepositoryException {
+        ejecutarDentroDeTransaccion(session -> session.persist(miLog), "persistirLog");
     }
 
     /**
-     * Persiste una entidad {@link Estadistica} en la base de datos.
-     *
-     * @param session     Sesión Hibernate activa.
-     * @param transaction Transacción activa.
-     * @param estadistica Entidad Estadistica a persistir.
+     * Persistir Estadística
+     * @param estadistica Objeto Estadistica a persistir
+     * @throws MiRepositoryException Excepción
      */
     @Override
-    public void persistir(Session session, Transaction transaction, Estadistica estadistica) {
-        try {
-            session.persist(estadistica);
-            log.info("Persistida Estadistica con id: {}", estadistica.getId());
-        } catch (HibernateException ex) {
-            log.error("Error persistiendo Estadistica: {}", ex.getMessage(), ex);
-            rollbackAndExit(transaction);
-        }
+    public void persistirEstadistica(Estadistica estadistica) throws MiRepositoryException {
+        ejecutarDentroDeTransaccion(session -> session.persist(estadistica), "persistirEstadistica");
     }
 
     /**
-     * Persiste el parseo de ficheros GC y sus registros en tablas dinámicas.
-     * <p>
-     * Para cada fichero parseado, verifica si existe la tabla correspondiente,
-     * la elimina si existe, crea una nueva y luego inserta los registros asociados.
-     * </p>
-     *
-     * @param session           Sesión Hibernate activa.
-     * @param transaction       Transacción activa.
-     * @param parseoFicherosGc  Objeto con el parseo de ficheros GC.
-     * @param propertiesManager Gestor de propiedades para obtener configuraciones.
+     * Persistir Lista de FicheroGc
+     * @param ficherosGc Lista de FicheroGc a persistir
+     * @throws MiRepositoryException Excepción
      */
     @Override
-    public void persistir(Session session, Transaction transaction,
-                          ParseoFicherosGc parseoFicherosGc,
-                          PropertiesManager propertiesManager) {
-        try {
-            for (Map.Entry<String, List<RegistroGc>> entry : parseoFicherosGc.getMapRegistrosGcByFicheroGc().entrySet()) {
-                String prefijo = propertiesManager.getProperty(Constantes.CONFIG_PROPERTIES, PropertyConstantes.CONFIG_PREFIJO);
+    public void persistirListaFicherosGc(List<FicheroGc> ficherosGc) throws MiRepositoryException {
+        ejecutarDentroDeTransaccion(session -> {
+            borrarFicherosGc(session);
+            session.flush();
+            persistirLista(session, ficherosGc);
+        }, "persistirListaFicherosGc");
+    }
+
+    /**
+     * Persistir ParseoFicherosGc
+     * @param parseo Objeto ParseoFicherosGc a persistir
+     * @param prefijo Prefijo utilizado en la creación de las tablas.
+     * @throws MiRepositoryException Excepción
+     */
+    @Override
+    public void persistirObjetoParseoFicherosGc(ParseoFicherosGc parseo, String prefijo) throws MiRepositoryException {
+        ejecutarDentroDeTransaccion(session -> {
+            for (Map.Entry<String, List<RegistroGc>> entry : parseo.getMapRegistrosGcByFicheroGc().entrySet()) {
                 String nombreTabla = prefijo + entry.getKey().toLowerCase();
-
-                if (tablaExiste(session, nombreTabla)) {
+                if (existeTabla(session, nombreTabla)) {
                     session.createNativeQuery("DROP TABLE " + nombreTabla).executeUpdate();
-                    log.info(Mensajes.DROP_TABLE, Constantes.TABULADOR_1, nombreTabla);
+                    log.debug(Mensajes.DROP_TABLE, "[persistirObjetoParseoFicherosGc] -", nombreTabla);
                 }
-
                 crearTabla(session, nombreTabla);
-                log.info(Mensajes.CREATE_TABLE, Constantes.TABULADOR_1, nombreTabla);
-
-                insertarRegistrosEnTabla(session, nombreTabla, entry.getValue());
-                log.info(Mensajes.INSERT_RECORDS, Constantes.TABULADOR_2, entry.getValue().size(), nombreTabla);
+                insertarRegistros(session, nombreTabla, entry.getValue());
             }
+        }, "persistirObjetoParseoFicherosGc");
+    }
+
+    /**
+     * Obtener Lista de FicheroGc existente en el servidor
+     * @return Lista de FicheroGc
+     * @throws MiRepositoryException Excepción
+     */
+    @Override
+    public List<FicheroGc> getListFicherosGc() throws MiRepositoryException {
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery("FROM FicheroGc", FicheroGc.class).getResultList();
         } catch (HibernateException ex) {
-            log.error("Error persistiendo ParseoFicherosGc: {}", ex.getMessage(), ex);
-            rollbackAndExit(transaction);
+            log.error("[getListFicherosGc] - Error obteniendo lista FicheroGc: {}", ex.getMessage(), ex);
+            throw new MiRepositoryException("Error obteniendo lista FicheroGc", ex);
+        }
+    }
+
+    // ----------- MÉTODOS PRIVADOS -------------
+
+    /**
+     * Ejecutar dentro de Transacción
+     * @param consumer Objeto SessionConsumer
+     * @param metodo metodo
+     * @throws MiRepositoryException Excepción
+     */
+    private void ejecutarDentroDeTransaccion(SessionConsumer consumer, String metodo) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = transactionManager.beginTransaction(session);
+            consumer.accept(session);
+            transactionManager.commitTransaction(transaction);
+        } catch (HibernateException ex) {
+            transactionManager.rollbackTransaction(transaction);
+            log.error("[{}] - Error en transacción: {}", metodo, ex.getMessage(), ex);
+            throw new MiRepositoryException("Error en " + metodo, ex);
         }
     }
 
     /**
-     * Persiste o actualiza una lista de entidades que implementan {@link Actualizable}.
-     *
-     * @param session Sesión Hibernate activa.
-     * @param lista   Lista de entidades a persistir o actualizar.
-     * @param <T>     Tipo genérico que implementa Actualizable.
-     * @throws HibernateException Si ocurre un error durante la persistencia.
+     * Borrar FicherosGc del servidor de base de datos
+     * @param session Objeto Session
      */
-    private static <T extends Actualizable<T>> void grabarLista(Session session, List<T> lista) throws HibernateException {
+    private void borrarFicherosGc(Session session) {
+        session.createQuery("DELETE FROM FicheroGc").executeUpdate();
+        log.debug("[borrarFicherosGc] - Ficheros eliminados.");
+    }
+
+    /**
+     * Persistir Lista
+     * @param session Objeto Session
+     * @param lista Lista de Objetos T
+     * @param <T> Objeto
+     */
+    private <T extends Actualizable<T>> void persistirLista(Session session, List<T> lista) {
         for (T entidad : lista) {
-            if (entidad.getId() != null) {
-                session.merge(entidad);
-                log.debug("Entidad actualizada con merge: {}", entidad);
-            } else {
+            if (entidad.getId() == null) {
+                entidad.setId();
                 session.persist(entidad);
-                log.debug("Entidad persistida: {}", entidad);
+            } else {
+                session.merge(entidad);
             }
         }
+        log.debug("[persistirLista] - {} entidades procesadas.", lista.size());
     }
 
     /**
-     * Comprueba si una tabla existe en la base de datos.
-     *
-     * @param session            Sesión Hibernate activa.
-     * @param nombreTablaSinEsquema Nombre de la tabla a comprobar.
-     * @return true si la tabla existe, false en caso contrario.
+     * Devuelve si existe una tabla en el Servidor de Base de Datos
+     * @param session Objeto Session
+     * @param nombreTabla Nombre de la Tabla
+     * @return boolean
      */
-    private boolean tablaExiste(Session session, String nombreTablaSinEsquema) {
+    private boolean existeTabla(Session session, String nombreTabla) {
         String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :nombre";
         long count = ((Number) session.createNativeQuery(sql)
-                .setParameter("nombre", nombreTablaSinEsquema)
+                .setParameter("nombre", nombreTabla)
                 .getSingleResult()).longValue();
-        log.debug("Tabla '{}' existe: {}", nombreTablaSinEsquema, count > 0);
         return count > 0;
     }
 
     /**
-     * Crea una tabla con el esquema necesario si no existe.
-     *
-     * @param session           Sesión Hibernate activa.
-     * @param nombreTablaConEsquema Nombre completo de la tabla a crear.
+     * Crear Tabla
+     * @param session Objeto Session
+     * @param nombreTabla Nombre de la Tabla
      */
-    private void crearTabla(Session session, String nombreTablaConEsquema) {
-        String sql = "CREATE TABLE IF NOT EXISTS " + nombreTablaConEsquema + " (" +
+    private void crearTabla(Session session, String nombreTabla) {
+        String sql = "CREATE TABLE IF NOT EXISTS " + nombreTabla + " (" +
                 "id UUID NOT NULL, " +
                 "code VARCHAR(50) NOT NULL PRIMARY KEY, " +
-                "nombre VARCHAR(500)" +
-                ")";
+                "nombre VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" +
+                ") CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;";
         session.createNativeQuery(sql).executeUpdate();
-        log.debug("Tabla creada o existente: {}", nombreTablaConEsquema);
     }
 
     /**
-     * Inserta una lista de registros en la tabla especificada.
-     *
-     * @param session       Sesión Hibernate activa.
-     * @param tableName     Nombre de la tabla donde se insertan los registros.
-     * @param listRegistroGc Lista de registros a insertar.
+     * Insertar Registros
+     * @param session Objeto Session
+     * @param nombreTabla Nombre de la tabla
+     * @param registros Lista Registros Lista RegistroGc
      */
-    private void insertarRegistrosEnTabla(Session session, String tableName, List<RegistroGc> listRegistroGc) {
-        StringBuilder sql = new StringBuilder("INSERT INTO " + tableName + " (id, code, nombre) VALUES ");
-
-        for (int i = 0; i < listRegistroGc.size(); i++) {
-            RegistroGc registro = listRegistroGc.get(i);
-
+    private void insertarRegistros(Session session, String nombreTabla, List<RegistroGc> registros) {
+        StringBuilder sql = new StringBuilder("INSERT INTO " + nombreTabla + " (id, code, nombre) VALUES ");
+        for (int i = 0; i < registros.size(); i++) {
+            RegistroGc r = registros.get(i);
             UUID id = Generators.timeBasedEpochGenerator().generate();
-            String code = registro.getCode().replace("'", "''");
-            String nombre = registro.getNombre().replace("'", "''");
-
-            sql.append("('").append(id).append("','")
-                    .append(code).append("','")
-                    .append(nombre).append("')");
-
-            if (i < listRegistroGc.size() - 1) {
-                sql.append(", ");
-            }
+            sql.append("('")
+                    .append(id).append("','")
+                    .append(sanitizar(r.getCode())).append("','")
+                    .append(sanitizar(r.getNombre())).append("')");
+            if (i < registros.size() - 1) sql.append(", ");
         }
-
         session.createNativeQuery(sql.toString()).executeUpdate();
-        log.debug("Insertados {} registros en la tabla {}", listRegistroGc.size(), tableName);
+        log.debug("[insertarRegistros] - Insertados {} registros en la tabla {}", registros.size(), nombreTabla);
     }
 
     /**
-     * Obtiene la lista completa de objetos {@link FicheroGc} de la base de datos.
-     *
-     * @param session Sesión Hibernate activa.
-     * @return Lista de entidades FicheroGc recuperadas.
+     * Sanitizar
+     * @param valor Cadena
+     * @return Cadena sanitizada
      */
-    @Override
-    public List<FicheroGc> getListFicherosGc(Session session) {
-        List<FicheroGc> result = new ArrayList<>();
-        String jpql = "SELECT f FROM FicheroGc f";
-
-        try {
-            result = session.createQuery(jpql, FicheroGc.class).getResultList();
-            log.info("Recuperados {} registros FicheroGc", result.size());
-        } catch (HibernateException ex) {
-            log.error("Error obteniendo lista FicheroGc: {}", ex.getMessage(), ex);
-            FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
-        }
-        return result;
+    private String sanitizar(String valor) {
+        return valor == null ? "" : valor.replace("'", "''");
     }
 
     /**
-     * Realiza rollback en la transacción y finaliza el programa con código de error.
-     *
-     * @param transaction Transacción a revertir.
+     * Interface SessionConsumer
      */
-    private void rollbackAndExit(Transaction transaction) {
-        try {
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-                log.warn("Transacción revertida debido a error.");
-            }
-        } catch (HibernateException e) {
-            log.error("Error durante rollback de transacción: {}", e.getMessage(), e);
-        }
-        FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
+    @FunctionalInterface
+    private interface SessionConsumer {
+
+        /**
+         * Este método es un consumidor funcional que acepta una sesión de Hibernate.
+         * Se espera que realice alguna operación dentro de la sesión proporcionada.
+         *
+         * @param session la sesión de Hibernate que será consumida
+         * @throws HibernateException si ocurre un error durante la operación en la sesión
+         */
+        void accept(Session session) throws HibernateException;
     }
 }

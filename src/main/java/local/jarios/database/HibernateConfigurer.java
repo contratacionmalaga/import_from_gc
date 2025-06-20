@@ -31,8 +31,7 @@ public class HibernateConfigurer {
 
         // Seteamos las propiedades
         configuration.setProperties(hibernateProperties);
-
-        log.info("Hibernate Configuration creada con {} propiedades.", hibernateProperties.size());
+        log.debug("[buildConfiguration] - Hibernate Configuration creada con {} propiedades.", hibernateProperties.size());
 
         return configuration;
     }

@@ -1,10 +1,11 @@
 package local.jarios.helpers;
 
+import local.jarios.common.util.Constantes;
 import local.jarios.entity.Estadistica;
 import local.jarios.exceptions.MiUnknownHostException;
 import local.jarios.properties.PropertyConstantes;
-import local.jarios.properties.config.PropertiesManager;
-import local.jarios.utils.Constantes;
+import local.jarios.properties.api.PropertiesManagerService;
+import local.jarios.properties.api.PropertiesManagerServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -27,17 +28,18 @@ public final class MiMailHelper {
     /**
      * Genera el cuerpo del mensaje HTML con los datos de la ejecución.
      *
-     * @param propertiesManager Gestor de propiedades para leer configuraciones.
      * @param estadisticaEntity Objeto que contiene las estadísticas a mostrar.
      * @return Cadena HTML representando el cuerpo del mensaje.
      * @throws MiUnknownHostException Si no se puede obtener el nombre del host.
      */
     public static String getCuerpoMensaje(
-            PropertiesManager propertiesManager,
             Estadistica estadisticaEntity
     ) throws MiUnknownHostException {
 
-        log.debug("Generando cuerpo del mensaje de estadísticas...");
+        log.debug("[getCuerpoMensaje] - Generando cuerpo del mensaje de estadísticas...");
+        //
+        PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
+        log.debug("[getCuerpoMensaje] - El servicio de consulta de los ficheros properties se ha creado correctamente.");
 
         String html = "<!DOCTYPE html>" +
                 "<html lang='es'>" +
@@ -62,14 +64,14 @@ public final class MiMailHelper {
                 "<div class='container'>" +
                 "<div class='header'><h1>Reporte de Estadísticas</h1></div>" +
                 "<div class='content'>" +
-                getTablaEstadisticas(propertiesManager, estadisticaEntity) +
+                getTablaEstadisticas(estadisticaEntity) +
                 "</div>" +
                 "<div class='footer'><p>Reporte generado automáticamente.</p></div>" +
                 "</div>" +
                 "</body>" +
                 "</html>";
 
-        log.debug("Cuerpo del mensaje generado correctamente.");
+        log.debug("[getCuerpoMensaje] - Cuerpo del mensaje generado correctamente.");
 
         return html;
     }
@@ -77,20 +79,22 @@ public final class MiMailHelper {
     /**
      * Construye una tabla HTML con los valores estadísticos y de entorno.
      *
-     * @param propertiesManager Gestor de propiedades.
      * @param estadistica Objeto con las estadísticas procesadas.
      * @return Cadena HTML con la tabla de datos.
      * @throws MiUnknownHostException Si no se puede obtener el host local.
      */
     private static String getTablaEstadisticas(
-            PropertiesManager propertiesManager,
             Estadistica estadistica
     ) throws MiUnknownHostException {
 
-        log.debug("Construyendo tabla de estadísticas...");
+        log.debug("[getTablaEstadisticas] - Construyendo tabla de estadísticas...");
+
+        //
+        PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
+        log.debug("[getTablaEstadisticas] - El servicio de consulta de los ficheros properties se ha creado correctamente.");
 
         if (estadistica == null) {
-            log.warn("Objeto Estadística recibido es nulo. La tabla será generada vacía.");
+            log.debug("[getTablaEstadisticas] - Objeto Estadística recibido es nulo. La tabla será generada vacía.");
             estadistica = new Estadistica(); // Evitamos null
         }
 
@@ -107,9 +111,6 @@ public final class MiMailHelper {
                 "<tr><th>Número de ficheros en la carpeta</th><td>" +
                 estadistica.getNTotalFicherosLeidos() +
                 "</td></tr>" +
-                "<tr><th>Número de ficheros procesados</th><td>" +
-                estadistica.getNTotalFicherosProcesados() +
-                "</td></tr>" +
                 "<tr><th>Tiempo de ejecución (Parseo)</th><td>" +
                 estadistica.getDuracionParseo() +
                 "</td></tr>" +
@@ -118,28 +119,59 @@ public final class MiMailHelper {
                 "</td></tr>" +
                 "</table>";
 
-        log.debug("Tabla de estadísticas generada correctamente.");
+        log.debug("[getTablaEstadisticas] - Tabla de estadísticas generada correctamente.");
+
         return table;
     }
 
     /**
      * Genera el asunto del correo con nombre del equipo y timestamp.
      *
-     * @param propertiesManager Gestor de propiedades para obtener el nombre del sistema.
      * @return Asunto del correo electrónico.
      * @throws MiUnknownHostException Si no se puede obtener el nombre del host.
      */
-    public static String getAsunto(PropertiesManager propertiesManager) throws MiUnknownHostException {
-        log.debug("Generando asunto del correo...");
+    public static String getAsunto() throws MiUnknownHostException {
+
+        log.debug("[getAsunto] -Generando asunto del correo...");
+
+        //
+        PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
+        log.debug("[getAsunto] - El servicio de consulta de los ficheros properties se ha creado correctamente.");
 
         String asunto = String.format(
                 "%s - Reporte de Estadísticas. Equipo: (%s). Fecha y hora: (%s)",
-                propertiesManager.getProperty(Constantes.CONFIG_PROPERTIES, PropertyConstantes.CONFIG_NAME),
+                propertiesManager.getProperty(Constantes.APP_PROPERTIES, PropertyConstantes.APP_NAME),
                 ComunHelper.getHostName(),
                 ComunHelper.getFechaHoraFormateada(null)
         );
+        log.debug("Asunto del correo generado: {}", asunto);
 
-        log.info("Asunto del correo generado: {}", asunto);
         return asunto;
+    }
+
+    /**
+     * Construye un cuerpo de mensaje en formato HTML con información detallada de una excepción.
+     * <p>
+     * Incluye la clase de excepción, el mensaje y la traza completa con sangría para mejor lectura.
+     * </p>
+     *
+     * @param ex Excepción de la cual extraer la información.
+     * @return Cadena con el cuerpo HTML preparado para el email.
+     */
+    public static String buildHtmlExceptionBody(Exception ex) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><body>");
+        sb.append("<h2>Se ha producido una excepción:</h2>");
+        sb.append("<p><strong>Tipo:</strong> ").append(ex.getClass().getName()).append("</p>");
+        sb.append("<p><strong>Mensaje:</strong> ").append(ex.getMessage()).append("</p>");
+        sb.append("<pre>");
+
+        for (StackTraceElement ste : ex.getStackTrace()) {
+            sb.append("&nbsp;&nbsp;&nbsp;&nbsp;").append(ste.toString()).append("<br>");
+        }
+
+        sb.append("</pre>");
+        sb.append("</body></html>");
+        return sb.toString();
     }
 }

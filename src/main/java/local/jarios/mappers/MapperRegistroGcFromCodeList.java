@@ -4,7 +4,7 @@ import local.jarios.models.RegistroGc;
 import local.jarios.genericode.CodeList;
 import local.jarios.genericode.Row;
 import local.jarios.genericode.Value;
-import local.jarios.utils.Constantes;
+import local.jarios.common.util.Constantes;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public final class MapperRegistroGcFromCodeList {
             return listaRegistrosGc;
         }
 
-        log.info("Procesando {} fila(s) del CodeList.", filas.size());
+        log.debug("Procesando {} fila(s) del CodeList.", filas.size());
 
         for (Row row : filas) {
             String code = null;
@@ -80,7 +80,7 @@ public final class MapperRegistroGcFromCodeList {
             log.debug("RegistroGc añadido: code='{}', nombre='{}'", code, nombre);
         }
 
-        log.info("Se generaron {} registros desde el CodeList.", listaRegistrosGc.size());
+        log.debug("Se generaron {} registros desde el CodeList.", listaRegistrosGc.size());
         return listaRegistrosGc;
     }
 }

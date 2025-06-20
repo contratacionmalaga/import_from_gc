@@ -4,7 +4,7 @@ import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
 import local.jarios.exceptions.MiUnknownHostException;
 import local.jarios.helpers.ComunHelper;
-import local.jarios.utils.TamanoCampos;
+import local.jarios.common.util.TamanoCampos;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -75,12 +75,6 @@ public class Estadistica extends Auditable {
      */
     @Column(name = "nTotalFicherosLeidos")
     private int nTotalFicherosLeidos;
-
-    /**
-     * Número total de ficheros procesados correctamente.
-     */
-    @Column(name = "nTotalFicherosProcesados")
-    private int nTotalFicherosProcesados;
 
     /**
      * Número total de registros GC procesados.
@@ -155,7 +149,6 @@ public class Estadistica extends Auditable {
         this.logEntity = logEntity;
         this.fechaHoraInicialParseo = Timestamp.from(Instant.now());
         this.equipo = ComunHelper.getHostName();
-        log.info("Estadistica creada con ID: {}, equipo: {}, inicio parseo: {}", id, equipo, fechaHoraInicialParseo);
     }
 
     /**

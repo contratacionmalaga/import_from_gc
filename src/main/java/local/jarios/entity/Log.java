@@ -39,7 +39,7 @@ public class Log extends Auditable {
      * Lista de ficheros asociados a este log.
      * Cascada y eliminación en orfanato activados.
      */
-    @OneToMany(mappedBy = "logEntity", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "logEntity", orphanRemoval = true)
     private List<FicheroGc> ficherosGc = new ArrayList<>();
 
     /**
@@ -54,7 +54,6 @@ public class Log extends Auditable {
      */
     public Log() {
         this.id = Generators.timeBasedEpochGenerator().generate();
-        log.info("Creado Log con ID: {}", this.id);
     }
 
     /**

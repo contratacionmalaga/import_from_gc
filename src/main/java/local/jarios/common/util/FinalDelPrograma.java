@@ -1,4 +1,4 @@
-package local.jarios.utils;
+package local.jarios.common.util;
 
 import local.jarios.enums.TipoFinalEjecucion;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +32,19 @@ public final class FinalDelPrograma {
      * @param tipoFinal Tipo de finalización de la ejecución.
      */
     public static void finalizar(TipoFinalEjecucion tipoFinal) {
+        String mensaje;
+        int exitCode;
+
         if (tipoFinal == TipoFinalEjecucion.CORRECTO) {
-            log.info(Mensajes.FINAL_CORRECTO);
-            System.exit(0);
+            mensaje = Mensajes.FINAL_CORRECTO;
+            exitCode = 0;
         } else {
-            log.error(Mensajes.FINAL_ERROR);
-            System.exit(1);
+            mensaje = Mensajes.FINAL_ERROR;
+            exitCode = 1;
         }
+
+        log.info(mensaje);
+        log.info(Mensajes.FINAL);
+        System.exit(exitCode);
     }
 }

@@ -34,6 +34,11 @@ public interface Actualizable<T> {
     UUID getId();
 
     /**
+     * Asigna el identificador único al objeto.
+     */
+    void setId();
+
+    /**
      * Actualiza los atributos del objeto actual usando los valores de otro objeto del mismo tipo.
      * <p>
      * Este método no debería modificar campos inmutables como el ID o claves únicas.

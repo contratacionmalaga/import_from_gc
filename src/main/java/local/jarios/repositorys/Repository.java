@@ -3,10 +3,8 @@ package local.jarios.repositorys;
 import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
+import local.jarios.exceptions.MiRepositoryException;
 import local.jarios.models.ParseoFicherosGc;
-import local.jarios.properties.config.PropertiesManager;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import java.util.List;
 
@@ -23,62 +21,37 @@ public interface Repository {
     /**
      * Persiste un objeto Log en la base de datos dentro de una transacción.
      *
-     * @param session La sesión Hibernate activa
-     * @param transaction La transacción en curso
      * @param miLog Objeto Log a persistir
      */
-    void persistir(
-            Session session,
-            Transaction transaction,
-            Log miLog
-    );
+    void persistirLog(Log miLog) throws MiRepositoryException;
 
     /**
      * Persiste una lista de objetos FicheroGc en la base de datos dentro de una transacción.
      *
-     * @param session La sesión Hibernate activa
-     * @param transaction La transacción en curso
      * @param listFicherosGc Lista de FicheroGc a persistir
      */
-    void persistir(
-            Session session,
-            Transaction transaction,
-            List<FicheroGc> listFicherosGc
-    );
+    void persistirListaFicherosGc(List<FicheroGc> listFicherosGc) throws MiRepositoryException;
 
     /**
      * Persiste un objeto Estadistica en la base de datos dentro de una transacción.
      *
-     * @param session La sesión Hibernate activa
-     * @param transaction La transacción en curso
      * @param estadistica Objeto Estadistica a persistir
      */
-    void persistir(
-            Session session,
-            Transaction transaction,
-            Estadistica estadistica
-    );
+    void persistirEstadistica(Estadistica estadistica) throws MiRepositoryException;
 
     /**
      * Persiste un objeto ParseoFicherosGc en la base de datos dentro de una transacción.
      *
-     * @param session La sesión Hibernate activa
-     * @param transaction La transacción en curso
      * @param parseoFicherosGc Objeto ParseoFicherosGc a persistir
-     * @param propertiesManager Objeto PropertiesManager que me permite el acceso a las key de los ficheros
+     * @param prefijo Prefijo utilizado en la creación de las tablas.
      */
-    void persistir(
-            Session session,
-            Transaction transaction,
-            ParseoFicherosGc parseoFicherosGc,
-            PropertiesManager propertiesManager
-    );
+    void persistirObjetoParseoFicherosGc(ParseoFicherosGc parseoFicherosGc, String prefijo)
+            throws MiRepositoryException;
 
     /**
      * Obtiene la lista de objetos FicheroGc desde la base de datos.
      *
-     * @param session La sesión Hibernate activa
      * @return Lista de FicheroGc recuperados
      */
-    List<FicheroGc> getListFicherosGc(Session session);
+    List<FicheroGc> getListFicherosGc() throws MiRepositoryException;
 }

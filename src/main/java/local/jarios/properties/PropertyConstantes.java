@@ -12,17 +12,22 @@ public final class PropertyConstantes {
     /**
      * Clave para la ruta base de configuración.
      */
-    public static final String CONFIG_PATH = "config.path";
-
-    /**
-     * Clave para el prefijo de configuración.
-     */
-    public static final String CONFIG_PREFIJO = "config.prefijo";
+    public static final String APP_PATH = "app.path";
 
     /**
      * Clave para el nombre de la configuración.
      */
-    public static final String CONFIG_NAME = "config.name";
+    public static final String APP_DESCRIPCION = "app.descripcion";
+
+    /**
+     * Clave para el prefijo de configuración.
+     */
+    public static final String APP_PREFIJO = "app.prefijo";
+
+    /**
+     * Clave para el nombre de la configuración.
+     */
+    public static final String APP_NAME = "app.name";
 
     /**
      * Clave para la URL JDBC de Jakarta Persistence.
@@ -32,5 +37,7 @@ public final class PropertyConstantes {
     /**
      * Constructor privado para evitar instanciación.
      */
-    private PropertyConstantes() { }
+    private PropertyConstantes() {
+        // Constructor vacío
+    }
 }
