@@ -289,6 +289,7 @@ public class ImportFromGc {
      *
      * @param existente  Fichero persistido previamente en el sistema.
      * @param nuevo      Nuevo objeto {@link FicheroGc} generado a partir del fichero actual.
+     * @param parseoFicherosGc Objeto que aglutina la importación
      */
     private static void procesarFicheroExistente(
             FicheroGc existente,
