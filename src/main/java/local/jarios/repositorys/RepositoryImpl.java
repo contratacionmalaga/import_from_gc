@@ -43,11 +43,15 @@ public class RepositoryImpl implements Repository {
     public RepositoryImpl() {
         this.transactionManager = new TransactionManager();
         try {
+
             this.sessionFactory = new SessionFactoryProvider().getSessionFactory();
             log.debug("[RepositoryImpl] - SessionFactory inicializada correctamente.");
+
         } catch (HibernateException e) {
-            log.error("[RepositoryImpl] - Error creando SessionFactory: {}", e.getMessage(), e);
+
+            log.error("[RepositoryImpl] - Error creando SessionFactory: {}", e.getMessage());
             throw new MiServiceException("Error creando SessionFactory.", e);
+
         }
     }
 

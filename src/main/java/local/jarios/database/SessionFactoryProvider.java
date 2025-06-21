@@ -65,9 +65,11 @@ public class SessionFactoryProvider {
         log.debug("[getSessionFactory] - Entidades escaneadas y añadidas desde el paquete '{}'.", CONFIG_PACKAGE_NAME);
 
         try {
+
             var sessionFactory = configuration.buildSessionFactory();
             log.debug("[getSessionFactory] - SessionFactory creada exitosamente.");
             return sessionFactory;
+
         } catch (HibernateException e) {
             log.error("[getSessionFactory] - Error creando SessionFactory: {}", e.getMessage());
             throw e; // Propagar la excepción para que el llamador la maneje

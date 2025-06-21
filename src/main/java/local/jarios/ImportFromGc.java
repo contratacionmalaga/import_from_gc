@@ -1,25 +1,24 @@
 package local.jarios;
 
 import local.jarios.common.util.Constantes;
-import local.jarios.common.util.FinalDelPrograma;
 import local.jarios.common.util.Mensajes;
+import local.jarios.email.api.EmailSender;
+import local.jarios.email.api.EmailSenderImpl;
 import local.jarios.email.api.EmailService;
 import local.jarios.email.api.EmailServiceImpl;
 import local.jarios.email.exception.EmailServiceException;
+import local.jarios.email.helper.EmailHelper;
+import local.jarios.email.model.EmailData;
+import local.jarios.email.validator.EmailRequestValidator;
 import local.jarios.encryptor.exception.EncryptorException;
 import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
-import local.jarios.enums.TipoFinalEjecucion;
 import local.jarios.exceptions.MiParseException;
 import local.jarios.exceptions.MiServiceException;
 import local.jarios.exceptions.MiUnknownHostException;
-import local.jarios.genericode.CodeList;
-import local.jarios.helpers.CodeListHelper;
 import local.jarios.helpers.ComunHelper;
 import local.jarios.helpers.FileHelper;
-import local.jarios.helpers.MiMailHelper;
-import local.jarios.mappers.MapperRegistroGcFromCodeList;
 import local.jarios.models.ParseoFicherosGc;
 import local.jarios.properties.PropertyConstantes;
 import local.jarios.properties.api.PropertiesManagerService;
@@ -33,14 +32,14 @@ import local.jarios.version.exception.VersionException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static local.jarios.helpers.FicheroGcHelper.getParseoFicherosGc;
 
 /**
  * Clase principal para la importación de información desde ficheros Excel al sistema.
@@ -54,6 +53,33 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class ImportFromGc {
+
+    /**
+     * Servicio de gestión de propiedades de configuración.
+     * <p>
+     * Se obtiene como instancia singleton mediante {@link PropertiesManagerServiceImpl#getInstance()}.
+     * Permite cargar, acceder y gestionar propiedades definidas en ficheros externos.
+     * </p>
+     */
+    public static final PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
+
+    /**
+     * Nombre de la aplicación, cargado desde las propiedades externas.
+     * <p>
+     * Se obtiene desde el fichero de configuración a través de {@code propertiesManager}
+     * utilizando la clave {@code Constantes.KEY_APP_NAME}.
+     * </p>
+     */
+    public static String appName = null;
+
+    /**
+     * Versión de la aplicación en ejecución.
+     * <p>
+     * Se determina mediante el componente {@link local.jarios.version.api.Version}
+     * que analiza los metadatos del JAR en ejecución.
+     * </p>
+     */
+    public static String appVersion = null;
 
     /**
      * Constructor sin argumentos.
@@ -78,9 +104,6 @@ public class ImportFromGc {
             Version versionService = new VersionImpl();
             log.info("El servicio de consulta de la versión del JAR se ha creado correctamente.");
 
-            PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
-            log.info("El servicio de consulta de los ficheros properties se ha creado correctamente.");
-
             propertiesManager.setConfigDir(Constantes.CONFIG_DIR);
             log.info("Directorio configurado: {}", Constantes.CONFIG_DIR);
 
@@ -97,13 +120,12 @@ public class ImportFromGc {
             propertiesManager.loadAllProperties();
             log.info("Ficheros .properties cargados desde /{} correctamente", Constantes.CONFIG_DIR);
 
-            String appName = propertiesManager.getProperty(Constantes.APP_PROPERTIES, Constantes.KEY_APP_NAME);
+            // Muestro el valor de APP_NAME
+            appName = propertiesManager.getProperty(Constantes.APP_PROPERTIES, Constantes.KEY_APP_NAME);
             log.info("AppName: {}", appName);
 
-            String appDescripcion = propertiesManager.getProperty(Constantes.APP_PROPERTIES, Constantes.KEY_APP_DESCRIPTION);
-            log.info("AppDescription: {}", appDescripcion);
-
-            String appVersion = versionService.getVersion(VersionDemo.class);
+            // Obtengo y muestro el valor de APP_VERSION
+            appVersion = versionService.getVersion(VersionDemo.class);
             log.info("AppVersion: {}", appVersion);
 
             // Creo el objeto Log para esta ejecución
@@ -202,11 +224,12 @@ public class ImportFromGc {
             service.persistirEstadistica(estadistica);
             log.info(Mensajes.PERSISTIDO_ESTADISTICA);
 
-            enviarEmail(MiMailHelper.getAsunto(), MiMailHelper.getCuerpoMensaje(estadistica));
-            log.info("Enviado email correctamente.");
+            //
+            enviarEmail(estadistica, null, true);
+            log.info("Email enviado correctamente.");
 
             // Finalizo el programa correctamente
-            FinalDelPrograma.finalizar(TipoFinalEjecucion.CORRECTO);
+            finalizar (Mensajes.FINAL_CORRECTO, 0);
 
         } catch (MiServiceException ex) {
             manejarExcepcion(ex, "[MiServiceException] - ");
@@ -240,129 +263,75 @@ public class ImportFromGc {
      */
     private static void manejarExcepcion(Exception ex, String mensajeError) {
 
-        log.info("[manejarExcepcion] -");
-        log.error(mensajeError, ex.getMessage());
+        log.error("[manejarExcepcion] - Mensaje: {}. Error: {}", mensajeError, ex.getMessage());
 
         for (StackTraceElement ste : ex.getStackTrace()) {
-            log.error("{}", ste);
+            log.error("[manejarExcepcion] - {}", ste);
         }
 
         try {
 
-            // Construcción de asunto y cuerpo HTML para el email de error
-            String asunto = "ERROR - Fallo en ejecución: " + ex.getClass().getSimpleName();
-            String cuerpoHtml = MiMailHelper.buildHtmlExceptionBody(ex);
-
-            enviarEmail(asunto, cuerpoHtml);
-            log.info("Correo de error enviado correctamente.");
+            //
+            enviarEmail(null, ex, false);
+            log.info("[manejarExcepcion] -Correo de error enviado correctamente.");
 
         } catch (EmailServiceException e) {
-            log.error("Error inesperado al intentar enviar email de fallo: {}", e.getMessage());
+
+            log.error("[manejarExcepcion] -Error inesperado al intentar enviar email de fallo: {}", e.getMessage());
         }
 
-        FinalDelPrograma.finalizar(TipoFinalEjecucion.ERROR);
+        finalizar(Mensajes.FINAL_ERRONEO, 1);
     }
 
     /**
-     * Procesa un fichero que no existe aún en el sistema persistido.
-     * Agrega el nuevo fichero a la lista de ficheros a persistir y registra los datos asociados.
+     * Construye un objeto {@link EmailData} con toda la información necesaria para el envío de un correo,
+     * en función del resultado del proceso (éxito o error).
+     * <p>
+     * Utiliza la configuración cargada desde el sistema de propiedades para establecer remitente y destinatario.
+     * El asunto y el cuerpo del mensaje se generan usando las utilidades de {@link EmailHelper}.
+     * </p>
      *
-     * @param ficheroGc         Objeto {@link FicheroGc} creado a partir del fichero nuevo.
-     * @param codeList          Lista de {@link CodeList} extraída del fichero.
-     * @param parseoFicherosGc  Estructura que contiene los ficheros y registros procesados.
+     * @param estadistica Objeto {@link Estadistica} que contiene datos del proceso. Puede ser {@code null} en caso de error.
+     * @param ex Excepción lanzada durante la ejecución, en caso de fallo. Puede ser {@code null} si el proceso fue exitoso.
+     * @param success Indicador booleano que señala si el proceso finalizó correctamente ({@code true}) o con error ({@code false}).
+     * @return Objeto {@link EmailData} completamente inicializado y listo para ser enviado.
+     * @throws EmailServiceException Si ocurre un error al obtener el nombre del host o las propiedades necesarias.
      */
-    private static void procesarFicheroNuevo(
-            FicheroGc ficheroGc,
-            CodeList codeList,
-            ParseoFicherosGc parseoFicherosGc
-    ) {
-        parseoFicherosGc.getListFicherosGc().add(ficheroGc);
-        parseoFicherosGc.getMapRegistrosGcByFicheroGc()
-                .put(ficheroGc.getShortName(), MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(codeList));
-        log.info("  El fichero es nuevo. Se añade para realizar un persist.");
-    }
+    private static EmailData construirEmailData(Estadistica estadistica, Exception ex, boolean success) {
 
-    /**
-     * Procesa un fichero que ya existe en el sistema persistido.
-     * Compara el fichero nuevo con el existente para detectar si ha sido modificado.
-     * Si hay diferencias, se actualiza el fichero existente.
-     *
-     * @param existente  Fichero persistido previamente en el sistema.
-     * @param nuevo      Nuevo objeto {@link FicheroGc} generado a partir del fichero actual.
-     * @param parseoFicherosGc Objeto que aglutina la importación
-     */
-    private static void procesarFicheroExistente(
-            FicheroGc existente,
-            FicheroGc nuevo,
-            ParseoFicherosGc parseoFicherosGc
-    ) {
-        if (!existente.equals(nuevo)) {
-            log.info("  El fichero se encuentra modificado.");
-            existente.actualizarCon(nuevo);
-            parseoFicherosGc.getListFicherosGc().remove(existente);
-            log.info("  Elimino de la lista el antiguo.");
-            parseoFicherosGc.getListFicherosGc().add(nuevo);
-            log.info("  Elimino de la lista el nuevo.");
-        } else {
-            log.info("  El fichero no presenta cambios.");
-        }
-    }
+        try {
 
-    /**
-     * Procesa los ficheros del directorio, comparando con los ya persistidos, y construye
-     * una estructura para su posterior almacenamiento en base de datos.
-     *
-     * @param miLog                     Log asociado a la ejecución actual.
-     * @param arrayFicherosDirecotorio  Array con los ficheros en el directorio para su procesamiento.
-     * @param mapaPersistidos           Mapa con los ficheros actualmente persistidos en la base de datos.
-     * @return {@link ParseoFicherosGc} con los datos procesados listos para persistencia.
-     */
-    private static ParseoFicherosGc getParseoFicherosGc(
-            Log miLog,
-            File[] arrayFicherosDirecotorio,
-            Map<String, FicheroGc> mapaPersistidos
-    ) {
+            String equipo = ComunHelper.getHostName();
+            log.info("[construirEmailData] - Equipo desde el que se envía el email: {}", equipo);
 
-        log.info(">>>> Inicio del parse de FicherosGc. Parseando: {}", arrayFicherosDirecotorio.length);
+            String from = propertiesManager.getProperty(Constantes.EMAIL_PROPERTIES, Constantes.KEY_EMAIL_FROM);
+            log.info("[construirEmailData] - Remitente: {}", from);
 
-        // Creo el objeto encargado de almacenar la información del Parseo para despues persistirla
-        ParseoFicherosGc parseoFicherosGc = new ParseoFicherosGc();
+            String to = propertiesManager.getProperty(Constantes.EMAIL_PROPERTIES, Constantes.KEY_EMAIL_TO);
+            log.info("[construirEmailData] - Destinatarios: {}", to);
 
-        // Procesa todos los ficheros del directorio
-        for (File fichero : arrayFicherosDirecotorio) {
-            String nombreFichero = fichero.getName();
-            log.info("Procesando fichero '{}'.", nombreFichero);
+            // Defino el asunto y el cupero del Email
+            String asunto = EmailHelper.getAsunto(appName, appVersion, equipo, success);
+            log.info("[construirEmailData] - Asunto del correo: {}.", asunto);
 
-            boolean ficheroValido = !FileHelper.esIncorrectoFichero(fichero);
-            log.info("  Fichero válido: {}", ficheroValido);
-
-            if (ficheroValido) {
-                var codeList = CodeListHelper.getCodeListFromFile(fichero);
-                log.info("  Obtención correcta de CodeList a partir del fichero.");
-                var ficheroGc = CodeListHelper.getFicheroGc(miLog, codeList);
-                log.info("  Obtención correcta de FicheroGc a partir del CodeList.");
-
-                if (ficheroGc != null) {
-                    log.info("  FicheroGc no Nulo.");
-                    FicheroGc existente = mapaPersistidos.get(nombreFichero);
-                    if (existente == null) {
-                        log.info("  No existe FicheroGc en el MAP.");
-                        procesarFicheroNuevo(ficheroGc, codeList, parseoFicherosGc);
-                        log.info("  FicheroGc procesado como nuevo correctamente.");
-                    } else {
-                        log.info("  Existe FicheroGc en el MAP.");
-                        procesarFicheroExistente(existente, ficheroGc, parseoFicherosGc);
-                        log.info(  "FicheroGc procesado como existente correctamente.");
-                    }
-                } else {
-                    log.debug("  FicheroGc es null y será ignorado.");
-                }
+            String cuerpo = "";
+            if (success) {
+                cuerpo = EmailHelper.getCuerpoEstadistica(toStringMatrix(estadistica));
             } else {
-                log.debug("  No es un fichero válido y será ignorado.");
+                cuerpo = EmailHelper.getCuerpoExcepcion(obtenerStackTraceComoArray(ex));
             }
-        }
+            log.info("[construirEmailData] - Cuerpo del email creado correctamente");
 
-        return parseoFicherosGc;
+            return new EmailData(from, to, asunto, cuerpo);
+
+        } catch (MiUnknownHostException e) {
+            log.error("[construirEmailData] - Error al obtener el nombre del host. Error: {}", e.getMessage());
+            throw new EmailServiceException("Error al obtener el nombre del host.", e);
+
+        } catch (PropertiesManagerException e) {
+            log.error("Error al leer las propiedades. Error: {}", e.getMessage());
+            throw new EmailServiceException("Error al leer las propiedades.", e);
+        }
     }
 
     /**
@@ -372,33 +341,131 @@ public class ImportFromGc {
      * Controla excepciones relacionadas con el envío y las registra.
      * </p>
      *
-     * @param asunto            Asunto del email a enviar.
-     * @param cuerpoHtml        Cuerpo del email en formato HTML.
+     * @param estadistica            Asunto del email a enviar.
+     * @param ex        Cuerpo del email en formato HTML.
+     * @param success        Cuerpo del email en formato HTML.
      */
-    private static void enviarEmail(String asunto, String cuerpoHtml) {
+    private static void enviarEmail(Estadistica estadistica, Exception ex, boolean success) {
         try {
 
-            //
-            PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
-            log.info("El servicio de consulta de los ficheros properties se ha creado correctamente.");
+            // Configuración del servidor SMTP
+            Properties emailProps = propertiesManager.getProperties(Constantes.EMAIL_PROPERTIES);
+            log.info("[enviarEmail] - Properties cargadas correctamente.");
 
-            //
-            Properties emailProperties = propertiesManager.getProperties(Constantes.EMAIL_PROPERTIES);
-            log.info("Leídas las propiedades del fichero: {}", Constantes.EMAIL_PROPERTIES);
-            String from = emailProperties.getProperty(Constantes.KEY_EMAIL_FROM);
-            log.info("Remitente: {}", from);
-            String to = emailProperties.getProperty(Constantes.KEY_EMAIL_TO);
-            log.info("Destinatarios: {}", to);
+            // Construcción de los datos del correo
+            EmailData emailData = construirEmailData(estadistica, ex, success);
+            log.info("[enviarEmail] - EmailData creado correctamente.");
 
-            EmailService emailService = new EmailServiceImpl();
-            log.info("Leídas las propiedades del fichero: {}", Constantes.EMAIL_PROPERTIES);
+            EmailRequestValidator.validarEmailRequest(emailProps, emailData);
+            log.info("[enviarEmail] - Properties e EmailData validados correctamente.");
 
-            emailService.enviarEmail(emailProperties, from, to, asunto, cuerpoHtml);
-            log.info("Leídas las propiedades del fichero: {}", Constantes.EMAIL_PROPERTIES);
+            // Creación del servicio de correo con la implementación de envío SMTP
+            EmailSender emailSender = new EmailSenderImpl();
+            log.info("[enviarEmail] - Creación del objeto EmailSender correctamente.");
+
+            EmailService emailService = new EmailServiceImpl(emailSender);
+            log.info("[enviarEmail] - Creado el objeto EmailService correctamente.");
+
+            // Envío del correo
+            emailService.sendEmail(emailProps, emailData);
+            log.info("[enviarEmail] - Correo enviado correctamente.");
 
         } catch (EmailServiceException e) {
-            log.error("No se pudo enviar el email: Error en el servicio de correo -> {}", e.getMessage());
+            log.error("[enviarEmail] - No se pudo enviar el email: Error en el servicio de correo -> {}", e.getMessage());
             throw new EmailServiceException ("No se pudo enviar el email: Error en el servicio de correo", e);
         }
+    }
+
+    /**
+     * Finaliza la ejecución del programa mostrando un mensaje de log
+     * y llamando a System.exit con el código proporcionado.
+     *
+     * @param mensaje  Mensaje que se mostrará en el log.
+     * @param exitCode Código de salida del sistema:
+     *                 0 para éxito, 1 para error. Otros valores también serán aceptados.
+     */
+    public static void finalizar(String mensaje, int exitCode) {
+        if (exitCode == 0) {
+            log.info(mensaje);
+        } else {
+            log.error("{} (Código de salida: {})", mensaje, exitCode);
+        }
+
+        log.info(Mensajes.FINAL); // Se asume que FINAL es una constante tipo String
+        System.exit(exitCode);
+    }
+
+    /**
+     * Convierte los campos de una instancia de {@link Estadistica} en una matriz de cadenas de texto.
+     * <p>
+     * Cada fila de la matriz representa un par clave-valor donde:
+     * <ul>
+     *     <li>La primera columna es el nombre del campo.</li>
+     *     <li>La segunda columna es el valor del campo convertido a {@code String}.</li>
+     * </ul>
+     * Para campos que son instancias de {@link Log}, se utiliza el valor del identificador ({@code getId()}).
+     *
+     * @param estadistica la instancia de {@code Estadistica} que se va a procesar
+     * @return una matriz de {@code String} con los nombres y valores de los campos de la instancia
+     */
+    private static String[][] toStringMatrix(Estadistica estadistica) {
+
+        List<String[]> datos = new ArrayList<>();
+        log.debug("[toStringMatrix] - Creación de List<String[]>");
+
+        Field[] fields = Estadistica.class.getDeclaredFields(); // también corregido esto: getClass() → .class
+        log.debug("[toStringMatrix] - Creación de Field[]");
+
+        for (Field field : fields) {
+            log.debug("[toStringMatrix] - Campo: {}", field.getName());
+            field.setAccessible(true);
+
+            try {
+
+                Object value = field.get(estadistica); //
+                log.debug("[toStringMatrix] - Obtengo el valor: {}", value);
+
+                String nombreCampo = field.getName();
+                String valorCampo;
+
+                if (value instanceof Log logEntity && logEntity.getId() != null) {
+                    valorCampo = logEntity.getId().toString();
+                } else {
+                    valorCampo = String.valueOf(value); // Maneja null de forma segura
+                }
+
+                datos.add(new String[]{nombreCampo, valorCampo});
+                log.debug("[toStringMatrix] - {} - {}", nombreCampo, valorCampo);
+
+            } catch (IllegalAccessException e) {
+                log.debug("[toStringMatrix] - Error de acceso ilegal. Error: {}", e.getMessage());
+                datos.add(new String[]{field.getName(), "Error al acceder"});
+            }
+        }
+
+        return datos.toArray(new String[0][0]);
+    }
+
+    /**
+     * Convierte el stack trace de una excepción en un arreglo de cadenas de texto.
+     * <p>
+     * Cada elemento del arreglo representa una línea del stack trace, tal como se imprimiría
+     * en un log o consola. Este método es útil para enviar errores por correo o almacenarlos
+     * en sistemas donde no se puede registrar el {@code Throwable} directamente.
+     * </p>
+     *
+     * @param ex la excepción de la cual se extrae el stack trace
+     * @return un arreglo de {@code String} que representa línea por línea el stack trace
+     */
+    public static String[] obtenerStackTraceComoArray(Throwable ex) {
+        StackTraceElement[] elementos = ex.getStackTrace();
+        log.debug("[obtenerStackTraceComoArray] - Obtenidos los elementos del StactTrace. Nº elementos: {}", elementos.length);
+        String[] resultado = new String[elementos.length];
+        log.debug("[obtenerStackTraceComoArray] - Defino un String[] con el número de elementos del StackTrace.");
+        for (int i = 0; i < elementos.length; i++) {
+            resultado[i] = elementos[i].toString();
+            log.debug("[obtenerStackTraceComoArray] - Elemento: {} - {}", i, elementos[i].toString());
+        }
+        return resultado;
     }
 }

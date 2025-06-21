@@ -47,9 +47,17 @@ public class ServiceImpl implements Service {
      * @throws HibernateException Si ocurre un error al crear la {@link SessionFactory}.
      */
     public ServiceImpl() throws MiServiceException {
-        log.debug("[ServiceImpl] - ");
-        this.repository = new RepositoryImpl();
-        log.debug("[ServiceImpl] - Creado el objeto RepositoryImpl correctamente.");
+        try {
+
+            this.repository = new RepositoryImpl();
+            log.debug("[ServiceImpl] - Creado el objeto RepositoryImpl correctamente.");
+
+        } catch (MiRepositoryException ex) {
+
+            log.error("[ServiceImpl] - Error creando Repository: {}", ex.getMessage());
+            throw new MiServiceException("Error creando Repository.", ex);
+
+        }
     }
 
     /**
