@@ -32,20 +32,18 @@ public class EntityScanner {
      */
     public void scanAndAddEntities(Configuration configuration, String packageName) {
 
-        log.debug("[scanAndAddEntities] - ");
-
         // Usamos Reflections para escanear el paquete indicado
         var reflections = new Reflections(packageName);
-        log.debug("[Reflections] - Objeto Relections creado correctamente para el paquete: {}", packageName);
+        log.debug("[scanAndAddEntities] - Objeto Relections creado correctamente para el paquete: {}", packageName);
 
         // Obtenemos todas las clases anotadas con @Entity
         Collection<Class<?>> entities = reflections.getTypesAnnotatedWith(Entity.class);
-        log.debug("[Reflections] - Colección con todas las clases anotadas con @entity: {}", entities.size());
+        log.debug("[scanAndAddEntities] - Colección con todas las clases anotadas con @entity: {}", entities.size());
 
         // Añadimos cada entidad a la configuración de Hibernate
         for (Class<?> entityClass : entities) {
             configuration.addAnnotatedClass(entityClass);
-            log.debug("[Reflections] - {}", entityClass.getName());
+            log.debug("[scanAndAddEntities] - {}", entityClass.getName());
         }
     }
 }

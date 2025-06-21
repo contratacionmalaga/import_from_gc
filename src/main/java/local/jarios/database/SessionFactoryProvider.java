@@ -44,7 +44,6 @@ public class SessionFactoryProvider {
      * @throws HibernateException Si ocurre un error durante la creación de la SessionFactory.
      */
     public SessionFactory getSessionFactory() throws HibernateException {
-        log.debug("[getSessionFactory] - Iniciando método.");
 
         PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
         log.debug("[getSessionFactory] - El servicio de consulta de los ficheros properties se ha creado correctamente.");

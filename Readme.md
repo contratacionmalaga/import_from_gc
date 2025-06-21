@@ -34,7 +34,7 @@
 
 ## Requisitos
 
-- Java 11+ (o versión compatible)
+- Java 21+ (o versión compatible)
 - Dependencias:
   - Lombok (para anotaciones como `@Slf4j`)
   - Framework de persistencia compatible (Hibernate, JPA, JDBC, etc. según implementación en `ServiceImpl`)

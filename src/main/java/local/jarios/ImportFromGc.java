@@ -263,7 +263,7 @@ public class ImportFromGc {
      */
     private static void manejarExcepcion(Exception ex, String mensajeError) {
 
-        log.error("[manejarExcepcion] - Mensaje: {}. Error: {}", mensajeError, ex.getMessage());
+        log.error("{}. Error: {}", mensajeError, ex.getMessage());
 
         for (StackTraceElement ste : ex.getStackTrace()) {
             log.error("[manejarExcepcion] - {}", ste);
