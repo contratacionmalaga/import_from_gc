@@ -8,7 +8,7 @@ import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.exceptions.MiRepositoryException;
 import local.jarios.exceptions.MiServiceException;
-import local.jarios.interfaces.Actualizable;
+import local.jarios.interfaces.EsActualizable;
 import local.jarios.models.ParseoFicherosGc;
 import local.jarios.models.RegistroGc;
 import lombok.extern.slf4j.Slf4j;
@@ -161,7 +161,7 @@ public class RepositoryImpl implements Repository {
      * @param lista Lista de Objetos T
      * @param <T> Objeto
      */
-    private <T extends Actualizable<T>> void persistirLista(Session session, List<T> lista) {
+    private <T extends EsActualizable<T>> void persistirLista(Session session, List<T> lista) {
         for (T entidad : lista) {
             if (entidad.getId() == null) {
                 entidad.setId();

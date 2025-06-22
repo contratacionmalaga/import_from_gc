@@ -16,7 +16,7 @@ import java.util.UUID;
  * @author Juan
  * @since 01/03/2025
  */
-public interface Actualizable<T> {
+public interface EsActualizable<T> {
 
     /**
      * Obtiene una clave única representativa del objeto (por ejemplo, una combinación de campos clave).

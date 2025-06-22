@@ -2,7 +2,7 @@ package local.jarios.entity;
 
 import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
-import local.jarios.interfaces.Actualizable;
+import local.jarios.interfaces.EsActualizable;
 import local.jarios.common.util.TamanoCampos;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import java.util.UUID;
  * Representa la importación de ficheros Excel desde Internet,
  * con sus metadatos y URIs asociados.
  * <p>
- * Esta clase implementa la interfaz {@link Actualizable} para permitir
+ * Esta clase implementa la interfaz {@link EsActualizable} para permitir
  * actualizaciones basadas en otra instancia de {@code FicheroGc}.
  * </p>
  * <p>
@@ -37,7 +37,7 @@ import java.util.UUID;
                 @Index(name = "idx_ficheros_gc_shortname", columnList = "shortName", unique = true)
         }
 )
-public class FicheroGc extends AuditablePlus implements Actualizable<FicheroGc> {
+public class FicheroGc extends AuditablePlus implements EsActualizable<FicheroGc> {
 
     /**
      * Identificador único del registro.
