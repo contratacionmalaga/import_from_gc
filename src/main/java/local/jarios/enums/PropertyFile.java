@@ -27,7 +27,7 @@ public enum PropertyFile {
     PROPERTY_HIBERNATE("config/hibernate.properties"),
 
     /** Archivo de configuración de correo */
-    PROPERTY_MAIL("config/email.properties");
+    PROPERTY_MAIL("config/mail.properties");
 
     /** Ruta asociada al fichero de propiedades */
     private final String ruta;
