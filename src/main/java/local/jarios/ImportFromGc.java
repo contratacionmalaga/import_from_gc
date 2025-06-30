@@ -6,7 +6,7 @@ import local.jarios.email.api.EmailSender;
 import local.jarios.email.api.EmailSenderImpl;
 import local.jarios.email.api.EmailService;
 import local.jarios.email.api.EmailServiceImpl;
-import local.jarios.email.exception.EmailServiceException;
+import local.jarios.email.exception.EmailException;
 import local.jarios.email.helper.EmailHelper;
 import local.jarios.email.model.EmailData;
 import local.jarios.email.validator.EmailRequestValidator;
@@ -239,7 +239,7 @@ public class ImportFromGc {
             manejarExcepcion(ex, "[MiUnknownHostException] - ");
         } catch (EncryptorException ex) {
             manejarExcepcion(ex, "[EncryptorException] - ");
-        } catch (EmailServiceException ex) {
+        } catch (EmailException ex) {
             manejarExcepcion(ex, "[EmailServiceException] - ");
         } catch (PropertiesManagerException ex) {
             manejarExcepcion(ex, "[PropertiesManaerException] - ");
@@ -275,7 +275,7 @@ public class ImportFromGc {
             enviarEmail(null, ex, false);
             log.info("[manejarExcepcion] -Correo de error enviado correctamente.");
 
-        } catch (EmailServiceException e) {
+        } catch (EmailException e) {
 
             log.error("[manejarExcepcion] -Error inesperado al intentar enviar email de fallo: {}", e.getMessage());
         }
@@ -295,9 +295,10 @@ public class ImportFromGc {
      * @param ex Excepción lanzada durante la ejecución, en caso de fallo. Puede ser {@code null} si el proceso fue exitoso.
      * @param success Indicador booleano que señala si el proceso finalizó correctamente ({@code true}) o con error ({@code false}).
      * @return Objeto {@link EmailData} completamente inicializado y listo para ser enviado.
-     * @throws EmailServiceException Si ocurre un error al obtener el nombre del host o las propiedades necesarias.
+     * @throws EmailException Si ocurre un error al obtener el nombre del host o las propiedades necesarias.
      */
-    private static EmailData construirEmailData(Estadistica estadistica, Exception ex, boolean success) {
+    private static EmailData construirEmailData(Estadistica estadistica, Exception ex, boolean success)
+            throws EmailException  {
 
         try {
 
@@ -314,7 +315,7 @@ public class ImportFromGc {
             String asunto = EmailHelper.getAsunto(appName, appVersion, equipo, success);
             log.info("[construirEmailData] - Asunto del correo: {}.", asunto);
 
-            String cuerpo = "";
+            String cuerpo;
             if (success) {
                 cuerpo = EmailHelper.getCuerpoEstadistica(toStringMatrix(estadistica));
             } else {
@@ -326,11 +327,11 @@ public class ImportFromGc {
 
         } catch (MiUnknownHostException e) {
             log.error("[construirEmailData] - Error al obtener el nombre del host. Error: {}", e.getMessage());
-            throw new EmailServiceException("Error al obtener el nombre del host.", e);
+            throw new EmailException("Error al obtener el nombre del host.", e);
 
         } catch (PropertiesManagerException e) {
             log.error("Error al leer las propiedades. Error: {}", e.getMessage());
-            throw new EmailServiceException("Error al leer las propiedades.", e);
+            throw new EmailException("Error al leer las propiedades.", e);
         }
     }
 
@@ -345,7 +346,9 @@ public class ImportFromGc {
      * @param ex        Cuerpo del email en formato HTML.
      * @param success        Cuerpo del email en formato HTML.
      */
-    private static void enviarEmail(Estadistica estadistica, Exception ex, boolean success) {
+    private static void enviarEmail(Estadistica estadistica, Exception ex, boolean success)
+            throws EmailException {
+
         try {
 
             // Configuración del servidor SMTP
@@ -370,9 +373,9 @@ public class ImportFromGc {
             emailService.sendEmail(emailProps, emailData);
             log.info("[enviarEmail] - Correo enviado correctamente.");
 
-        } catch (EmailServiceException e) {
+        } catch (EmailException e) {
             log.error("[enviarEmail] - No se pudo enviar el email: Error en el servicio de correo -> {}", e.getMessage());
-            throw new EmailServiceException ("No se pudo enviar el email: Error en el servicio de correo", e);
+            throw new EmailException ("No se pudo enviar el email: Error en el servicio de correo", e);
         }
     }
 
