@@ -1,11 +1,13 @@
 package local.jarios.database;
 
-import local.jarios.common.util.Constantes;
+import local.jarios.common.util.PropertiesFiles;
+import local.jarios.common.util.PropertiesKeys;
 import local.jarios.properties.api.PropertiesManagerService;
 import local.jarios.properties.api.PropertiesManagerServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.JdbcSettings;
 
 import java.util.Properties;
 
@@ -24,16 +26,17 @@ import java.util.Properties;
 @Slf4j
 public class SessionFactoryProvider {
 
-    /**
-     * Paquete donde se encuentran las entidades JPA para el escaneo automático.
-     */
+    /** Paquete donde se encuentran las entidades JPA para el escaneo automático. */
     private static final String CONFIG_PACKAGE_NAME = "local.jarios.entity";
+
+    /** Objeto para gestionar los ficheros properties. */
+    private final PropertiesManagerService propertyManager;
 
     /**
      * Constructor vacío.
      */
     public SessionFactoryProvider() {
-        // Constructor por defecto
+        this.propertyManager = PropertiesManagerServiceImpl.getInstance();
     }
 
     /**
@@ -48,8 +51,8 @@ public class SessionFactoryProvider {
         PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
         log.debug("[getSessionFactory] - El servicio de consulta de los ficheros properties se ha creado correctamente.");
 
-        Properties hibernateProperties = propertiesManager.getProperties(Constantes.HIBERNATE_PROPERTIES);
-        log.debug("[getSessionFactory] - Obtenidas las Properties correctamente del fichero {}.", Constantes.HIBERNATE_PROPERTIES);
+        final var hibernateProperties = configurePrincipalProperties(propertyManager.getProperties(PropertiesFiles.HIBERNATE));
+        log.debug("[getSessionFactory] - Propiedades de conexión a la BD: {}", hibernateProperties);
 
         var hibernateConfigurer = new HibernateConfigurer();
         log.debug("[getSessionFactory] - Objeto HibernateConfigurer creado correctamente.");
@@ -73,5 +76,33 @@ public class SessionFactoryProvider {
             log.error("[getSessionFactory] - Error creando SessionFactory: {}", e.getMessage());
             throw e; // Propagar la excepción para que el llamador la maneje
         }
+    }
+
+    /**
+     * Configura propiedades para la conexión principal.
+     * @param props objeto Properties
+     * @return objeto Properties
+     */
+    private Properties configurePrincipalProperties(Properties props) {
+        setCommonConnectionProperties(props, PropertiesFiles.JAKARTA_PRINCIPAL);
+        return props;
+    }
+
+    /**
+     * Asigna las propiedades JDBC comúnes
+     * @param props objeto Properties
+     * @param file fichero desde el que cargar las propiedaes
+     */
+    private void setCommonConnectionProperties(Properties props, String file) {
+        props.setProperty(JdbcSettings.JAKARTA_JDBC_URL,
+                propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_URL));
+        props.setProperty(JdbcSettings.JAKARTA_JDBC_DRIVER,
+                propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_DRIVER));
+        props.setProperty(JdbcSettings.JAKARTA_JDBC_USER,
+                propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_USER));
+        props.setProperty(JdbcSettings.JAKARTA_JDBC_PASSWORD,
+                propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_PASSWORD));
+
+        log.debug("Propiedades configuradas desde archivo '{}': {}", file, props);
     }
 }

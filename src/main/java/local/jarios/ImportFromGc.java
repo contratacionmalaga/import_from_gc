@@ -2,6 +2,8 @@ package local.jarios;
 
 import local.jarios.common.util.Constantes;
 import local.jarios.common.util.Mensajes;
+import local.jarios.common.util.PropertiesFiles;
+import local.jarios.common.util.PropertiesKeys;
 import local.jarios.email.api.EmailSender;
 import local.jarios.email.api.EmailSenderImpl;
 import local.jarios.email.api.EmailService;
@@ -20,7 +22,6 @@ import local.jarios.exceptions.MiUnknownHostException;
 import local.jarios.helpers.ComunHelper;
 import local.jarios.helpers.FileHelper;
 import local.jarios.models.ParseoFicherosGc;
-import local.jarios.properties.PropertyConstantes;
 import local.jarios.properties.api.PropertiesManagerService;
 import local.jarios.properties.api.PropertiesManagerServiceImpl;
 import local.jarios.properties.exception.PropertiesManagerException;
@@ -121,7 +122,7 @@ public class ImportFromGc {
             log.info("Ficheros .properties cargados desde /{} correctamente", Constantes.CONFIG_DIR);
 
             // Muestro el valor de APP_NAME
-            appName = propertiesManager.getProperty(Constantes.APP_PROPERTIES, Constantes.KEY_APP_NAME);
+            appName = propertiesManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_NAME);
             log.info("AppName: {}", appName);
 
             // Obtengo y muestro el valor de APP_VERSION
@@ -148,7 +149,7 @@ public class ImportFromGc {
                     ComunHelper.getFechaHoraFormateada(timestampInicioParseo));
 
             // Obtengo la ruta de los ficheros a parsear desde el directorio definido en el fichero properties
-            var path = propertiesManager.getProperty(Constantes.APP_PROPERTIES, PropertyConstantes.APP_PATH);
+            var path = propertiesManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_PATH);
             log.info(Mensajes.RUTA_FICHEROS, path);
 
             // Obtengo el listado de ficheros en la ruta
@@ -200,7 +201,7 @@ public class ImportFromGc {
             service.persistirListaFicherosGc(parseoFicherosGc.getListFicherosGc());
             log.info(Mensajes.PERSISTIDO_LISTA_FICHEROS_GC);
 
-            String prefijo = propertiesManager.getProperty(Constantes.APP_PROPERTIES, Constantes.KEY_APP_PREFIX);
+            String prefijo = propertiesManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_PREFIX);
             log.info("Prefijo de las tablas: {}", prefijo);
 
             service.persistirObjetoParseoFicherosGc(parseoFicherosGc, prefijo);
@@ -305,10 +306,10 @@ public class ImportFromGc {
             String equipo = ComunHelper.getHostName();
             log.info("[construirEmailData] - Equipo desde el que se envía el email: {}", equipo);
 
-            String from = propertiesManager.getProperty(Constantes.EMAIL_PROPERTIES, Constantes.KEY_EMAIL_FROM);
+            String from = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_FROM);
             log.info("[construirEmailData] - Remitente: {}", from);
 
-            String to = propertiesManager.getProperty(Constantes.EMAIL_PROPERTIES, Constantes.KEY_EMAIL_TO);
+            String to = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_TO);
             log.info("[construirEmailData] - Destinatarios: {}", to);
 
             // Defino el asunto y el cupero del Email
@@ -352,7 +353,7 @@ public class ImportFromGc {
         try {
 
             // Configuración del servidor SMTP
-            Properties emailProps = propertiesManager.getProperties(Constantes.EMAIL_PROPERTIES);
+            Properties emailProps = propertiesManager.getProperties(PropertiesFiles.MAIL);
             log.info("[enviarEmail] - Properties cargadas correctamente.");
 
             // Construcción de los datos del correo
