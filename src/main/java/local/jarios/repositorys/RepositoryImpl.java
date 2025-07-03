@@ -211,9 +211,10 @@ public class RepositoryImpl implements Repository {
         String sql = "CREATE TABLE IF NOT EXISTS " + nombreTabla + " (" +
                 "id UUID NOT NULL, " +
                 "code VARCHAR(50) NOT NULL PRIMARY KEY, " +
-                "nombre VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" +
+                "nombre VARCHAR(500), " +
+                "created_at DATETIME DEFAULT CURRENT_TIMESTAMP" +
                 ") CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;";
-        log.debug("[crearTabla] - SQL: {}", sql);
+        log.info("[crearTabla] - SQL: {}", sql);
         session.createNativeQuery(sql).executeUpdate();
     }
 
