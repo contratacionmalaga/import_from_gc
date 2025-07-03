@@ -47,6 +47,8 @@ public class ServiceImpl implements Service {
      * @throws HibernateException Si ocurre un error al crear la {@link SessionFactory}.
      */
     public ServiceImpl() throws MiServiceException {
+
+        //
         try {
 
             this.repository = new RepositoryImpl();
@@ -54,8 +56,9 @@ public class ServiceImpl implements Service {
 
         } catch (MiRepositoryException ex) {
 
-            log.error("[ServiceImpl] - Error creando Repository: {}", ex.getMessage());
-            throw new MiServiceException("Error creando Repository.", ex);
+            String msg = String.format("[ServiceImpl] - Error creando el constructor: %s", ex.getMessage());
+            log.error(msg, ex);
+            throw new MiServiceException(msg, ex);
 
         }
     }
@@ -63,18 +66,23 @@ public class ServiceImpl implements Service {
     /**
      * Persiste un objeto {@link Log} en la base de datos.
      *
-     * @param logEntity Objeto {@link Log} a persistir.
+     * @param miLog Objeto {@link Log} a persistir.
      */
-    public void persistirLog(Log logEntity) throws MiServiceException{
+    public void persistirLog(Log miLog) throws MiServiceException{
+
         // Inicio
-        log.debug("[persistirLog] - Iniciando el proceso de persistencia.");
         try {
+
             // El repositorio se encarga de la persistencia y manejo de la las transacciones
-            repository.persistirLog(logEntity);
-            log.debug("[persistirLog] - LogEntity persistido correctamente.");
-        } catch (Exception e) {
-            log.error("[persistirLog] - Error persistiendo Log con ID {}: {}", logEntity.getId(), e.getMessage());
-            throw new MiServiceException ("[persistirLog] - Error persistiendo el Log.", e);
+            repository.persistirLog(miLog);
+            log.debug("[persistirLog] - miLog persistido correctamente.");
+
+        } catch (MiRepositoryException ex) {
+
+            String msg = String.format("[persistirLog] - Error persistiendo Log con ID %s: %s", miLog.getId(), ex.getMessage());
+            log.error(msg, ex.getMessage(), ex);
+            throw new MiServiceException (msg, ex);
+
         }
     }
 
@@ -85,15 +93,20 @@ public class ServiceImpl implements Service {
      */
     @Override
     public void persistirListaFicherosGc(List<FicheroGc> listFicherosGc) throws MiServiceException {
+
         // Inicio
-        log.debug("[persistirListaFicherosGc] - Iniciando persistencia de {} FicheroGc.", listFicherosGc.size());
         try {
+
             // Delegamos la persistencia y la gestión de la transacción al repositorio
             repository.persistirListaFicherosGc(listFicherosGc);
             log.debug("[persistirListaFicherosGc] - {} FicheroGc persistidos correctamente.", listFicherosGc.size());
-        } catch (Exception e) {
-            log.error("[persistirListaFicherosGc] - Error persistiendo FicheroGc: {}", e.getMessage());
-            throw new MiServiceException("[persistirListaFicherosGc] - Error persistiendo la List<FicherosGc>.", e);
+
+        } catch (MiRepositoryException ex) {
+
+            String msg = String.format("[persistirListaFicherosGc] - Error persistiendo la List<FicherosGc>: %s, Error: %s", listFicherosGc, ex.getMessage());
+            log.error(msg, ex.getMessage(), ex);
+            throw new MiServiceException(msg, ex);
+
         }
     }
 
@@ -104,15 +117,20 @@ public class ServiceImpl implements Service {
      * @param prefijo Prefijo utilizado en la creación de las tablas.
      */
     public void persistirObjetoParseoFicherosGc(ParseoFicherosGc parseoFicherosGc, String prefijo) throws MiServiceException {
+
         // Inicio
-        log.debug("[persistirObjetoParseoFicherosGc] - Iniciando persistencia de ParseoFicherosGc.");
         try {
+
             // Delegamos la persistencia y la gestión de la transacción al repositorio
             repository.persistirObjetoParseoFicherosGc(parseoFicherosGc, prefijo);
             log.debug("[persistirObjetoParseoFicherosGc] - ParseoFicherosGc persistido correcamente.");
-        } catch (MiRepositoryException e) {
-            log.error("[persistirObjetoParseoFicherosGc] - Error persistiendo ParseoFicherosGc: {}", e.getMessage());
-            throw new MiServiceException("[persistirObjetoParseoFicherosGc] - Error persistiendo el objeto ParseoFicherosGc.", e);
+
+        } catch (MiRepositoryException ex) {
+
+            String msg = String.format("[persistirObjetoParseoFicherosGc] - Error persistiendo el objeto ParseoFicherosGc: %s, Error: %s", parseoFicherosGc, ex.getMessage());
+            log.error(msg, ex.getMessage(), ex);
+            throw new MiServiceException(msg, ex);
+
         }
     }
 
@@ -129,9 +147,10 @@ public class ServiceImpl implements Service {
             // Delegamos la persistencia y la gestión de la transacción al repositorio
             repository.persistirEstadistica(estadistica);
             log.debug("[persistirEstadistica] - Estadistica persistido correcamente.");
-        } catch (Exception e) {
-            log.error("[persistirEstadistica] - Error persistiendo Estadistica: {}", e.getMessage());
-            throw new MiServiceException("Error persistiendo Estadistica.", e);
+        } catch (MiRepositoryException ex) {
+            String msg = String.format("[persistirEstadistica] - Error persistiendo Estadistica. Error: %s", ex.getMessage());
+            log.error(msg, ex);
+            throw new MiServiceException(msg, ex);
         }
     }
 
@@ -142,18 +161,17 @@ public class ServiceImpl implements Service {
      */
     @Override
     public List<FicheroGc> getListFicherosGc() throws MiServiceException {
-        // Inicio
-        log.debug("[getListFicherosGc] - Iniciando consulta de List<FicheroGc>.");
 
-        List<FicheroGc> listFicherosGc;
+        // Inicio
         try {
             // Delegamos la persistencia y la gestión de la transacción al repositorio
-            listFicherosGc = repository.getListFicherosGc();
+            List<FicheroGc>  listFicherosGc = repository.getListFicherosGc();
             log.debug("[getListFicherosGc] - List<FicheroGc> obtenida correctamente..");
-        } catch (Exception e) {
-            log.error("[getListFicherosGc] - Error obteniendo List<FicheroGc>: {}", e.getMessage());
-            throw new MiServiceException("Error obteniendo List<FicheroGc>.", e);
+            return listFicherosGc;
+        } catch (MiRepositoryException ex) {
+            String msg = String.format("[getListFicherosGc] - Error obteniendo List<FicheroGc>. Error: %s", ex.getMessage());
+            log.error(msg, ex);
+            throw new MiServiceException(msg, ex);
         }
-        return listFicherosGc;
     }
 }

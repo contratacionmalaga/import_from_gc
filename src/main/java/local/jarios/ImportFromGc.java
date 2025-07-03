@@ -36,7 +36,11 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -259,26 +263,19 @@ public class ImportFromGc {
      * y finaliza el programa indicando un error en la ejecución.
      * </p>
      *
-     * @param ex           La excepción que fue lanzada.
+     * @param originalException           La excepción que fue lanzada.
      * @param mensajeError El mensaje personalizado que describe el contexto del error.
      */
-    private static void manejarExcepcion(Exception ex, String mensajeError) {
+    private static void manejarExcepcion(Exception originalException, String mensajeError) {
 
-        log.error("{}. Error: {}", mensajeError, ex.getMessage());
-
-        for (StackTraceElement ste : ex.getStackTrace()) {
-            log.error("[manejarExcepcion] - {}", ste);
-        }
+        log.error("{}. Error: {}", mensajeError, originalException);
 
         try {
+            enviarEmail(null, originalException, false);
+            log.info("[manejarExcepcion] - Correo de error enviado correctamente.");
 
-            //
-            enviarEmail(null, ex, false);
-            log.info("[manejarExcepcion] -Correo de error enviado correctamente.");
-
-        } catch (EmailException e) {
-
-            log.error("[manejarExcepcion] -Error inesperado al intentar enviar email de fallo: {}", e.getMessage());
+        } catch (EmailException | MiUnknownHostException | PropertiesManagerException emailEx) {
+            log.error("[manejarExcepcion] - Error al enviar el correo con los errores:", emailEx);
         }
 
         finalizar(Mensajes.FINAL_ERRONEO, 1);
@@ -296,44 +293,35 @@ public class ImportFromGc {
      * @param ex Excepción lanzada durante la ejecución, en caso de fallo. Puede ser {@code null} si el proceso fue exitoso.
      * @param success Indicador booleano que señala si el proceso finalizó correctamente ({@code true}) o con error ({@code false}).
      * @return Objeto {@link EmailData} completamente inicializado y listo para ser enviado.
-     * @throws EmailException Si ocurre un error al obtener el nombre del host o las propiedades necesarias.
+     * @throws MiUnknownHostException En caso de no poder obtener el nombre del equipo
+     * @throws PropertiesManagerException En caso de tener problemas para leer el fichero properties
      */
     private static EmailData construirEmailData(Estadistica estadistica, Exception ex, boolean success)
-            throws EmailException  {
+            throws MiUnknownHostException, PropertiesManagerException  {
 
-        try {
+        String equipo = ComunHelper.getHostName();
+        log.info("[construirEmailData] - Equipo desde el que se envía el email: {}", equipo);
 
-            String equipo = ComunHelper.getHostName();
-            log.info("[construirEmailData] - Equipo desde el que se envía el email: {}", equipo);
+        String from = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_FROM);
+        log.info("[construirEmailData] - Remitente: {}", from);
 
-            String from = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_FROM);
-            log.info("[construirEmailData] - Remitente: {}", from);
+        String to = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_TO);
+        log.info("[construirEmailData] - Destinatarios: {}", to);
 
-            String to = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_TO);
-            log.info("[construirEmailData] - Destinatarios: {}", to);
+        // Defino el asunto y el cupero del Email
+        String asunto = EmailHelper.getAsunto(appName, appVersion, equipo, success);
+        log.info("[construirEmailData] - Asunto del correo: {}.", asunto);
 
-            // Defino el asunto y el cupero del Email
-            String asunto = EmailHelper.getAsunto(appName, appVersion, equipo, success);
-            log.info("[construirEmailData] - Asunto del correo: {}.", asunto);
-
-            String cuerpo;
-            if (success) {
-                cuerpo = EmailHelper.getCuerpoEstadistica(toStringMatrix(estadistica));
-            } else {
-                cuerpo = EmailHelper.getCuerpoExcepcion(obtenerStackTraceComoArray(ex));
-            }
-            log.info("[construirEmailData] - Cuerpo del email creado correctamente");
-
-            return new EmailData(from, to, asunto, cuerpo);
-
-        } catch (MiUnknownHostException e) {
-            log.error("[construirEmailData] - Error al obtener el nombre del host. Error: {}", e.getMessage());
-            throw new EmailException("Error al obtener el nombre del host.", e);
-
-        } catch (PropertiesManagerException e) {
-            log.error("Error al leer las propiedades. Error: {}", e.getMessage());
-            throw new EmailException("Error al leer las propiedades.", e);
+        String cuerpo;
+        if (success) {
+            cuerpo = EmailHelper.getCuerpoEstadistica(toStringMatrix(estadistica));
+        } else {
+            cuerpo = EmailHelper.getCuerpoExcepcion(obtenerStackTraceComoArray(ex));
         }
+        log.info("[construirEmailData] - Cuerpo del email creado correctamente");
+
+        return new EmailData(from, to, asunto, cuerpo);
+
     }
 
     /**
@@ -346,38 +334,35 @@ public class ImportFromGc {
      * @param estadistica            Asunto del email a enviar.
      * @param ex        Cuerpo del email en formato HTML.
      * @param success        Cuerpo del email en formato HTML.
+     * @throws MiUnknownHostException generada al intentar acceder al nombre del equipo
+     * @throws PropertiesManagerException generada al intentar acceder a un fichero properties
+     * @throws EmailException generada al intentar envair un email
      */
     private static void enviarEmail(Estadistica estadistica, Exception ex, boolean success)
-            throws EmailException {
+            throws MiUnknownHostException, PropertiesManagerException, EmailException {
 
-        try {
+        // Configuración del servidor SMTP
+        Properties emailProps = propertiesManager.getProperties(PropertiesFiles.MAIL);
+        log.info("[enviarEmail] - Properties cargadas correctamente.");
 
-            // Configuración del servidor SMTP
-            Properties emailProps = propertiesManager.getProperties(PropertiesFiles.MAIL);
-            log.info("[enviarEmail] - Properties cargadas correctamente.");
+        // Construcción de los datos del correo
+        EmailData emailData = construirEmailData(estadistica, ex, success);
+        log.info("[enviarEmail] - EmailData creado correctamente.");
 
-            // Construcción de los datos del correo
-            EmailData emailData = construirEmailData(estadistica, ex, success);
-            log.info("[enviarEmail] - EmailData creado correctamente.");
+        EmailRequestValidator.validarEmailRequest(emailProps, emailData);
+        log.info("[enviarEmail] - Properties e EmailData validados correctamente.");
 
-            EmailRequestValidator.validarEmailRequest(emailProps, emailData);
-            log.info("[enviarEmail] - Properties e EmailData validados correctamente.");
+        // Creación del servicio de correo con la implementación de envío SMTP
+        EmailSender emailSender = new EmailSenderImpl();
+        log.info("[enviarEmail] - Creación del objeto EmailSender correctamente.");
 
-            // Creación del servicio de correo con la implementación de envío SMTP
-            EmailSender emailSender = new EmailSenderImpl();
-            log.info("[enviarEmail] - Creación del objeto EmailSender correctamente.");
+        EmailService emailService = new EmailServiceImpl(emailSender);
+        log.info("[enviarEmail] - Creado el objeto EmailService correctamente.");
 
-            EmailService emailService = new EmailServiceImpl(emailSender);
-            log.info("[enviarEmail] - Creado el objeto EmailService correctamente.");
+        // Envío del correo
+        emailService.sendEmail(emailProps, emailData);
+        log.info("[enviarEmail] - Correo enviado correctamente.");
 
-            // Envío del correo
-            emailService.sendEmail(emailProps, emailData);
-            log.info("[enviarEmail] - Correo enviado correctamente.");
-
-        } catch (EmailException e) {
-            log.error("[enviarEmail] - No se pudo enviar el email: Error en el servicio de correo -> {}", e.getMessage());
-            throw new EmailException ("No se pudo enviar el email: Error en el servicio de correo", e);
-        }
     }
 
     /**
@@ -389,6 +374,8 @@ public class ImportFromGc {
      *                 0 para éxito, 1 para error. Otros valores también serán aceptados.
      */
     public static void finalizar(String mensaje, int exitCode) {
+
+        //
         if (exitCode == 0) {
             log.info(mensaje);
         } else {
@@ -421,6 +408,7 @@ public class ImportFromGc {
         log.debug("[toStringMatrix] - Creación de Field[]");
 
         for (Field field : fields) {
+
             log.debug("[toStringMatrix] - Campo: {}", field.getName());
             field.setAccessible(true);
 
@@ -442,8 +430,10 @@ public class ImportFromGc {
                 log.debug("[toStringMatrix] - {} - {}", nombreCampo, valorCampo);
 
             } catch (IllegalAccessException e) {
+
                 log.debug("[toStringMatrix] - Error de acceso ilegal. Error: {}", e.getMessage());
                 datos.add(new String[]{field.getName(), "Error al acceder"});
+
             }
         }
 
@@ -462,6 +452,8 @@ public class ImportFromGc {
      * @return un arreglo de {@code String} que representa línea por línea el stack trace
      */
     public static String[] obtenerStackTraceComoArray(Throwable ex) {
+
+        //
         StackTraceElement[] elementos = ex.getStackTrace();
         log.debug("[obtenerStackTraceComoArray] - Obtenidos los elementos del StactTrace. Nº elementos: {}", elementos.length);
         String[] resultado = new String[elementos.length];

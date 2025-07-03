@@ -2,8 +2,10 @@ package local.jarios.database;
 
 import local.jarios.common.util.PropertiesFiles;
 import local.jarios.common.util.PropertiesKeys;
+import local.jarios.exceptions.MiSessionFactoryProvider;
 import local.jarios.properties.api.PropertiesManagerService;
 import local.jarios.properties.api.PropertiesManagerServiceImpl;
+import local.jarios.properties.exception.PropertiesManagerException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
@@ -46,10 +48,7 @@ public class SessionFactoryProvider {
      * @return Instancia de {@link SessionFactory} configurada.
      * @throws HibernateException Si ocurre un error durante la creación de la SessionFactory.
      */
-    public SessionFactory getSessionFactory() throws HibernateException {
-
-        PropertiesManagerService propertiesManager = PropertiesManagerServiceImpl.getInstance();
-        log.debug("[getSessionFactory] - El servicio de consulta de los ficheros properties se ha creado correctamente.");
+    public SessionFactory getSessionFactory() throws MiSessionFactoryProvider {
 
         final var hibernateProperties = configurePrincipalProperties(propertyManager.getProperties(PropertiesFiles.HIBERNATE));
         log.debug("[getSessionFactory] - Propiedades de conexión a la BD: {}", hibernateProperties);
@@ -72,9 +71,11 @@ public class SessionFactoryProvider {
             log.debug("[getSessionFactory] - SessionFactory creada exitosamente.");
             return sessionFactory;
 
-        } catch (HibernateException e) {
-            log.error("[getSessionFactory] - Error creando SessionFactory: {}", e.getMessage());
-            throw e; // Propagar la excepción para que el llamador la maneje
+        } catch (HibernateException | PropertiesManagerException ex) {
+
+            String msg = String.format("[getSessionFactory] - Error creando SessionFactory: %s", ex.getMessage());
+            log.error(msg, ex.getMessage());
+            throw new MiSessionFactoryProvider(msg, ex);
         }
     }
 
@@ -83,7 +84,7 @@ public class SessionFactoryProvider {
      * @param props objeto Properties
      * @return objeto Properties
      */
-    private Properties configurePrincipalProperties(Properties props) {
+    private Properties configurePrincipalProperties(Properties props) throws PropertiesManagerException {
         setCommonConnectionProperties(props, PropertiesFiles.JAKARTA_PRINCIPAL);
         return props;
     }
@@ -93,7 +94,9 @@ public class SessionFactoryProvider {
      * @param props objeto Properties
      * @param file fichero desde el que cargar las propiedaes
      */
-    private void setCommonConnectionProperties(Properties props, String file) {
+    private void setCommonConnectionProperties(Properties props, String file) throws PropertiesManagerException {
+
+        //
         props.setProperty(JdbcSettings.JAKARTA_JDBC_URL,
                 propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_URL));
         props.setProperty(JdbcSettings.JAKARTA_JDBC_DRIVER,

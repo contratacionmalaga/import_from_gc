@@ -32,39 +32,50 @@ public final class FileHelper {
      * @return Array de ficheros encontrados. Si el path no es válido, se retorna un array vacío.
      */
     public static File[] getListaFicherosFromPath(String path) {
-        log.debug("Intentando obtener ficheros desde la ruta: {}", path);
+        log.debug("[getListaFicherosFromPath] - Intentando obtener ficheros desde la ruta: {}", path);
 
         File directorio = new File(path);
 
         if (!directorio.exists() || !directorio.isDirectory()) {
-            log.warn("El path '{}' no existe o no es un directorio válido.", path);
+            log.warn("[getListaFicherosFromPath] - El path '{}' no existe o no es un directorio válido.", path);
             return new File[0];
         }
 
         File[] ficheros = directorio.listFiles();
         int total = (ficheros != null) ? ficheros.length : 0;
 
-        log.debug("Se han encontrado {} fichero(s) en el directorio '{}'.", total, path);
+        log.debug("[getListaFicherosFromPath] - Se han encontrado {} fichero(s) en el directorio '{}'.", total, path);
         return (ficheros != null) ? ficheros : new File[0];
     }
 
     /**
-     * Verifica si un fichero es válido para su procesamiento.
-     * Un fichero es válido si:
-     * <ul>
-     *     <li>Existe</li>
-     *     <li>Es legible</li>
-     * </ul>
+     * Analiza si un String que se pasa es un File válido (EXISTE, SE PUEDA LEER, .entity..)
      *
-     * @param file Objeto {@link File} a verificar.
-     * @return {@code true} si es válido, {@code false} en caso contrario.
+     * @param file Fichero con la ruta absoluta
+     * @return Devuelve un valor indicando si el fichero es valido y en caso contrario indica el motivo
      */
-    public static boolean esIncorrectoFichero(File file) {
-        boolean valido = file == null || !file.exists() || !file.canRead();
-        log.debug(
-                "Validación del fichero '{}': {}",
-                file != null ? file.getName() : "null",
-                valido ? "Correcto" : "Incorrecto");
-        return valido;
+    public static boolean isInvalidFile(File file) {
+
+        if (file == null) {
+            log.debug("[isInvalidFile] - El fichero es null.");
+            return true;
+        }
+
+        if (!file.exists()) {
+            log.debug("[isInvalidFile] - El fichero no existe: {}", file.getAbsolutePath());
+            return true;
+        }
+
+        if (!file.isFile()) {
+            log.debug("[isInvalidFile] - El fichero no es un fichero: {}", file.getAbsolutePath());
+            return true;
+        }
+
+        if (!file.canRead()) {
+            log.debug("[isInvalidFile] - El fichero no se puede leer: {}", file.getAbsolutePath());
+            return true;
+        }
+
+        return false;
     }
 }

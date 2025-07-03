@@ -7,7 +7,8 @@ import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.exceptions.MiRepositoryException;
-import local.jarios.exceptions.MiServiceException;
+import local.jarios.exceptions.MiSessionFactoryProvider;
+import local.jarios.exceptions.MiTransactionManagerException;
 import local.jarios.interfaces.EsActualizable;
 import local.jarios.models.ParseoFicherosGc;
 import local.jarios.models.RegistroGc;
@@ -33,24 +34,19 @@ public class RepositoryImpl implements Repository {
     private final SessionFactory sessionFactory;
 
     /**
-     * TransactionManager
-     */
-    private final TransactionManager transactionManager;
-
-    /**
      * Constructor
      */
     public RepositoryImpl() {
-        this.transactionManager = new TransactionManager();
         try {
 
             this.sessionFactory = new SessionFactoryProvider().getSessionFactory();
             log.debug("[RepositoryImpl] - SessionFactory inicializada correctamente.");
 
-        } catch (HibernateException e) {
+        } catch (MiSessionFactoryProvider ex) {
 
-            log.error("[RepositoryImpl] - Error creando SessionFactory: {}", e.getMessage());
-            throw new MiServiceException("Error creando SessionFactory.", e);
+            String msg = String.format("[RepositoryImpl] - Error creando SessionFactory. Error: %s", ex.getMessage());
+            log.error(msg, ex);
+            throw new MiRepositoryException(msg, ex);
 
         }
     }
@@ -100,12 +96,15 @@ public class RepositoryImpl implements Repository {
         ejecutarDentroDeTransaccion(session -> {
             for (Map.Entry<String, List<RegistroGc>> entry : parseo.getMapRegistrosGcByFicheroGc().entrySet()) {
                 String nombreTabla = prefijo + entry.getKey().toLowerCase();
+                log.debug("[RepositoryImpl] - Nombre tabla {}", nombreTabla.toLowerCase());
                 if (existeTabla(session, nombreTabla)) {
                     session.createNativeQuery("DROP TABLE " + nombreTabla).executeUpdate();
                     log.debug(Mensajes.DROP_TABLE, "[persistirObjetoParseoFicherosGc] -", nombreTabla);
                 }
                 crearTabla(session, nombreTabla);
+                log.debug("[RepositoryImpl] - Creada la tabla.");
                 insertarRegistros(session, nombreTabla, entry.getValue());
+                log.debug("[RepositoryImpl] - Insertados los registros: {}", entry.getValue());
             }
         }, "persistirObjetoParseoFicherosGc");
     }
@@ -118,10 +117,13 @@ public class RepositoryImpl implements Repository {
     @Override
     public List<FicheroGc> getListFicherosGc() throws MiRepositoryException {
         try (Session session = sessionFactory.openSession()) {
-            return session.createQuery("FROM FicheroGc", FicheroGc.class).getResultList();
-        } catch (HibernateException ex) {
-            log.error("[getListFicherosGc] - Error obteniendo lista FicheroGc: {}", ex.getMessage(), ex);
-            throw new MiRepositoryException("Error obteniendo lista FicheroGc", ex);
+            List<FicheroGc> listFicherosGc = session.createQuery("FROM FicheroGc", FicheroGc.class).getResultList();
+            log.debug("[getListFicherosGc] - List<FicheroGc>: {}", listFicherosGc);
+            return listFicherosGc;
+        } catch (Exception ex) {
+            String msg = String.format("[getListFicherosGc] - Error obteniendo lista FicheroGc: %s", ex.getMessage());
+            log.error(msg, ex);
+            throw new MiRepositoryException(msg, ex);
         }
     }
 
@@ -133,15 +135,21 @@ public class RepositoryImpl implements Repository {
      * @param metodo metodo
      * @throws MiRepositoryException Excepción
      */
-    private void ejecutarDentroDeTransaccion(SessionConsumer consumer, String metodo) {
+    private void ejecutarDentroDeTransaccion(SessionConsumer consumer, String metodo) throws MiRepositoryException {
         Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
-            transaction = transactionManager.beginTransaction(session);
+            transaction = local.jarios.repositories.TransactionManager.beginTransaction(session);
             consumer.accept(session);
-            transactionManager.commitTransaction(transaction);
-        } catch (HibernateException ex) {
-            transactionManager.rollbackTransaction(transaction);
-            log.error("[{}] - Error en transacción: {}", metodo, ex.getMessage(), ex);
+            local.jarios.repositories.TransactionManager.commitTransaction(transaction);
+        } catch (Exception ex) {
+            if ((transaction != null) && transaction.getStatus().canRollback()) {
+                try {
+                    local.jarios.repositories.TransactionManager.rollbackTransaction(transaction);
+                } catch (MiTransactionManagerException rollbackEx) {
+                    log.error("[ejecutarDentroDeTransaccion] - Error durante rollback de la transacción.");
+
+                }
+            }
             throw new MiRepositoryException("Error en " + metodo, ex);
         }
     }
@@ -163,11 +171,14 @@ public class RepositoryImpl implements Repository {
      */
     private <T extends EsActualizable<T>> void persistirLista(Session session, List<T> lista) {
         for (T entidad : lista) {
+            log.debug("[persistirLista] - Entidad: {}.", entidad.toString());
             if (entidad.getId() == null) {
                 entidad.setId();
                 session.persist(entidad);
+                log.debug("[persistirLista] - entidad.getId() es null. Entidad persistida.");
             } else {
                 session.merge(entidad);
+                log.debug("[persistirLista] - entidad.getId() NO es null. Entidad actualizada.");
             }
         }
         log.debug("[persistirLista] - {} entidades procesadas.", lista.size());
@@ -180,10 +191,14 @@ public class RepositoryImpl implements Repository {
      * @return boolean
      */
     private boolean existeTabla(Session session, String nombreTabla) {
+
+        //
         String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :nombre";
+        log.debug("[existeTabla] - SQL: {}", sql);
         long count = ((Number) session.createNativeQuery(sql)
                 .setParameter("nombre", nombreTabla)
                 .getSingleResult()).longValue();
+        log.debug("[existeTabla] - Count: {}", count);
         return count > 0;
     }
 
@@ -198,6 +213,7 @@ public class RepositoryImpl implements Repository {
                 "code VARCHAR(50) NOT NULL PRIMARY KEY, " +
                 "nombre VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" +
                 ") CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;";
+        log.debug("[crearTabla] - SQL: {}", sql);
         session.createNativeQuery(sql).executeUpdate();
     }
 
@@ -209,14 +225,18 @@ public class RepositoryImpl implements Repository {
      */
     private void insertarRegistros(Session session, String nombreTabla, List<RegistroGc> registros) {
         StringBuilder sql = new StringBuilder("INSERT INTO " + nombreTabla + " (id, code, nombre) VALUES ");
+        log.debug("[insertarRegistros] - SQL: {}", sql);
         for (int i = 0; i < registros.size(); i++) {
             RegistroGc r = registros.get(i);
+            log.debug("[insertarRegistros] - ({}/{}) - RegistroGc: {}", i, registros.size(), r.toString());
             UUID id = Generators.timeBasedEpochGenerator().generate();
+            log.debug("[insertarRegistros] - Generado el id del registro: {}", id);
             sql.append("('")
                     .append(id).append("','")
                     .append(sanitizar(r.getCode())).append("','")
                     .append(sanitizar(r.getNombre())).append("')");
             if (i < registros.size() - 1) sql.append(", ");
+            log.debug("[insertarRegistros] - SQL Actualizado: {}", sql);
         }
         session.createNativeQuery(sql.toString()).executeUpdate();
         log.debug("[insertarRegistros] - Insertados {} registros en la tabla {}", registros.size(), nombreTabla);
@@ -228,7 +248,10 @@ public class RepositoryImpl implements Repository {
      * @return Cadena sanitizada
      */
     private String sanitizar(String valor) {
-        return valor == null ? "" : valor.replace("'", "''");
+
+         String cadenaSanitizada = valor == null ? "" : valor.replace("'", "''");
+         log.debug("[sanitizar] - Cadena: {}, Cadena Sanitizada: {}", valor, cadenaSanitizada);
+         return cadenaSanitizada;
     }
 
     /**

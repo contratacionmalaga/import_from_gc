@@ -1,91 +1,77 @@
-package local.jarios.repositorys;
+package local.jarios.repositories;
 
+import local.jarios.exceptions.MiTransactionManagerException;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 /**
- * Description:
- * Author: juan
- * Date: 28/12/2024
- * Team:
+ * Clase utilitaria para la gestión de transacciones Hibernate.
+ * <p>
+ * Proporciona métodos estáticos para iniciar, confirmar y revertir transacciones
+ * en una sesión de Hibernate, con logging de las acciones realizadas.
+ * </p>
+ * <p>
+ * Esta clase es final y su constructor privado evita la instanciación.
+ * </p>
+ *
+ * @author juan
+ * @since 28/12/2024
  */
-public class TransactionManager {
+@Slf4j
+public final class TransactionManager {
 
     /**
-     * Constructor sin argumentos.
+     * Constructor privado para evitar instanciación de la clase utilitaria.
      */
-    public TransactionManager() {
-        // Constructor vacío
+    private TransactionManager() {
+        // Evita instancias
     }
 
     /**
-     * Metodo que obtiene una sesión con la base de datos
+     * Inicia una nueva transacción en la sesión Hibernate proporcionada.
      *
-     * @param sessionFactory Configuración del acceso a la base de datos
-     * @return Sesión con la base de datos
+     * @param session Sesión Hibernate donde se iniciará la transacción.
+     * @return La transacción iniciada.
      */
-    public Session getSession(SessionFactory sessionFactory) {
-
-        return sessionFactory.openSession();
+    public static Transaction beginTransaction(Session session) {
+        Transaction transaction = session.beginTransaction();
+        log.debug("[beginTransaction] - Inicio de transacción.");
+        return transaction;
     }
 
     /**
-     * Metodo utilizado para iniciar una transacción
+     * Realiza commit de la transacción si esta no está marcada para rollback.
      *
-     * @param session Sesión con la base de datos
-     * @return Transacción devuelta
+     * @param transaction Transacción a confirmar.
      */
-    public Transaction beginTransaction(Session session) {
-
-        return session.beginTransaction();
-    }
-
-    //
-    /**
-     * Metodo para cerrar la sesión
-     *
-     * @param session Sesión con la base de datos
-     */
-
-    public void closeSession(Session session) {
-
-        //
-        if (session != null && session.isOpen()) {
-
-            session.close();
-        }
-    }
-
-    /**
-     * Metodo para realizar commit
-     *
-     * @param transaction Transacción sobre la que se realiza el commit
-     */
-    public void commitTransaction(Transaction transaction) {
-
-        //
-        if (transaction != null) {
-
+    public static void commitTransaction(Transaction transaction) {
+        if ((transaction != null) && !transaction.getRollbackOnly()) {
             transaction.commit();
+            log.debug("[commitTransaction] - Commit de la transacción.");
         }
     }
 
     /**
-     * Realiza un rollback (deshace) la transacción proporcionada si no es nula.
-     * <p>
-     * Este método garantiza que la transacción se revierta para evitar
-     * que cambios no deseados queden persistidos en caso de error.
-     * </p>
+     * Realiza rollback de la transacción indicada.
      *
-     * @param transaction La transacción que se desea revertir. Si es {@code null}, no se realiza ninguna acción.
+     * @param transaction Transacción a revertir.
+     * @throws MiTransactionManagerException Si ocurre un error durante el rollback.
      */
-    public void rollbackTransaction(Transaction transaction) {
-
-        //
+    public static void rollbackTransaction(Transaction transaction) throws MiTransactionManagerException {
         if (transaction != null) {
+            try {
 
-            transaction.rollback();
+                transaction.rollback();
+                log.warn("[rollbackTransaction] - Rollback ejecutado correctamente.");
+
+            } catch (Exception ex) {
+
+                String msg = String.format("[rollbackTransaction] - Error haciendo rollback: %s", ex.getMessage());
+                log.error(msg, ex);
+                throw new MiTransactionManagerException(msg, ex);
+
+            }
         }
     }
 }

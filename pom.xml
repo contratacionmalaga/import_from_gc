@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>local.jarios</groupId>
     <artifactId>import_from_gc</artifactId>
-    <version>1.6.1-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>import_from_gc.git</name>
+    <name>import_from_gc</name>
     <description>Cliente que parsea los datos abiertos de la Plataforma de Contratación del Sector Público</description>
 
     <scm>
@@ -182,14 +182,14 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.13.1</version>
+            <version>6.0.0-M1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.13.1</version>
+            <version>6.0.0-M1</version>
             <scope>test</scope>
         </dependency>
 
@@ -387,7 +387,7 @@
             </activation>
             <properties>
                 <!-- Aquí defines manualmente la versión limpia -->
-                <version.trimmed>1.6.0</version.trimmed>
+                <version.trimmed>2.0.0</version.trimmed>
             </properties>
         </profile>
     </profiles>

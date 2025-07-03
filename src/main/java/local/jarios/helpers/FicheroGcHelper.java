@@ -47,7 +47,7 @@ public final class FicheroGcHelper {
         parseoFicherosGc.getListFicherosGc().add(ficheroGc);
         parseoFicherosGc.getMapRegistrosGcByFicheroGc()
                 .put(ficheroGc.getShortName(), MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(codeList));
-        log.info("  El fichero es nuevo. Se añade para realizar un persist.");
+        log.info("[procesarFicheroNuevo] - El fichero es nuevo. Se añade para realizar un persist.");
     }
 
     /**
@@ -65,14 +65,14 @@ public final class FicheroGcHelper {
             ParseoFicherosGc parseoFicherosGc
     ) {
         if (!existente.equals(nuevo)) {
-            log.info("  El fichero se encuentra modificado.");
+            log.info("[procesarFicheroExistente] - El fichero se encuentra modificado.");
             existente.actualizarCon(nuevo);
             parseoFicherosGc.getListFicherosGc().remove(existente);
-            log.info("  Elimino de la lista el antiguo.");
+            log.info("[procesarFicheroExistente] - Elimino de la lista el antiguo.");
             parseoFicherosGc.getListFicherosGc().add(nuevo);
-            log.info("  Elimino de la lista el nuevo.");
+            log.info("[procesarFicheroExistente] - Elimino de la lista el nuevo.");
         } else {
-            log.info("  El fichero no presenta cambios.");
+            log.info("[procesarFicheroExistente] - El fichero no presenta cambios.");
         }
     }
 
@@ -91,7 +91,7 @@ public final class FicheroGcHelper {
             Map<String, FicheroGc> mapaPersistidos
     ) {
 
-        log.info(">>>> Inicio del parse de FicherosGc. Parseando: {}", arrayFicherosDirecotorio.length);
+        log.info("[getParseoFicherosGc] - Nº de ficheros: {}", arrayFicherosDirecotorio.length);
 
         // Creo el objeto encargado de almacenar la información del Parseo para despues persistirla
         ParseoFicherosGc parseoFicherosGc = new ParseoFicherosGc();
@@ -99,37 +99,37 @@ public final class FicheroGcHelper {
         // Procesa todos los ficheros del directorio
         for (File fichero : arrayFicherosDirecotorio) {
             String nombreFichero = fichero.getName();
-            log.info("Procesando fichero '{}'.", nombreFichero);
+            log.info("[getParseoFicherosGc] - Procesando fichero '{}'.", nombreFichero);
 
-            boolean ficheroValido = !FileHelper.esIncorrectoFichero(fichero);
-            log.info("  Fichero válido: {}", ficheroValido);
+            boolean isInvalidFile = FileHelper.isInvalidFile(fichero);
 
-            if (ficheroValido) {
-                var codeList = CodeListHelper.getCodeListFromFile(fichero);
-                log.info("  Obtención correcta de CodeList a partir del fichero.");
-                var ficheroGc = CodeListHelper.getFicheroGc(miLog, codeList);
-                log.info("  Obtención correcta de FicheroGc a partir del CodeList.");
+            if (isInvalidFile) {
+                log.info("[getParseoFicherosGc] - No es un fichero válido y será ignorado.");
+            }
 
-                if (ficheroGc != null) {
-                    log.info("  FicheroGc no Nulo.");
-                    FicheroGc existente = mapaPersistidos.get(nombreFichero);
-                    if (existente == null) {
-                        log.info("  No existe FicheroGc en el MAP.");
-                        procesarFicheroNuevo(ficheroGc, codeList, parseoFicherosGc);
-                        log.info("  FicheroGc procesado como nuevo correctamente.");
-                    } else {
-                        log.info("  Existe FicheroGc en el MAP.");
-                        procesarFicheroExistente(existente, ficheroGc, parseoFicherosGc);
-                        log.info(  "FicheroGc procesado como existente correctamente.");
-                    }
+            var codeList = CodeListHelper.getCodeListFromFile(fichero);
+            log.info("[getParseoFicherosGc] - Obtención correcta de CodeList a partir del fichero.");
+            var ficheroGc = CodeListHelper.getFicheroGc(miLog, codeList);
+            log.info("[getParseoFicherosGc] - Obtención correcta de FicheroGc a partir del CodeList.");
+
+            if (ficheroGc != null) {
+                log.info("[getParseoFicherosGc] - FicheroGc no Nulo.");
+                FicheroGc existente = mapaPersistidos.get(nombreFichero);
+                if (existente == null) {
+                    log.info("[getParseoFicherosGc] - No existe FicheroGc en el MAP.");
+                    procesarFicheroNuevo(ficheroGc, codeList, parseoFicherosGc);
+                    log.info("[getParseoFicherosGc] - FicheroGc procesado como nuevo correctamente.");
                 } else {
-                    log.debug("  FicheroGc es null y será ignorado.");
+                    log.info("[getParseoFicherosGc] - Existe FicheroGc en el MAP.");
+                    procesarFicheroExistente(existente, ficheroGc, parseoFicherosGc);
+                    log.info("[getParseoFicherosGc] - FicheroGc procesado como existente correctamente.");
                 }
             } else {
-                log.debug("  No es un fichero válido y será ignorado.");
+                log.info("[getParseoFicherosGc] - FicheroGc es null y será ignorado.");
             }
         }
 
+        //
         return parseoFicherosGc;
     }
 }
