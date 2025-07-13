@@ -37,7 +37,7 @@ import java.util.UUID;
                 @Index(name = "idx_ficheros_gc_shortname", columnList = "shortName", unique = true)
         }
 )
-public class FicheroGc extends AuditablePlus implements EsActualizable<FicheroGc> {
+public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<FicheroGc> {
 
     /**
      * Identificador único del registro.

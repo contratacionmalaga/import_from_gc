@@ -21,7 +21,7 @@ import local.jarios.exceptions.MiServiceException;
 import local.jarios.exceptions.MiUnknownHostException;
 import local.jarios.helpers.ComunHelper;
 import local.jarios.helpers.FileHelper;
-import local.jarios.models.ParseoFicherosGc;
+import local.jarios.entity.ParseoFicherosGc;
 import local.jarios.properties.api.PropertiesManagerService;
 import local.jarios.properties.api.PropertiesManagerServiceImpl;
 import local.jarios.properties.exception.PropertiesManagerException;

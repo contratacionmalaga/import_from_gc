@@ -1,6 +1,6 @@
 package local.jarios.mappers;
 
-import local.jarios.models.RegistroGc;
+import local.jarios.entity.RegistroGc;
 import local.jarios.genericode.CodeList;
 import local.jarios.genericode.Row;
 import local.jarios.genericode.Value;

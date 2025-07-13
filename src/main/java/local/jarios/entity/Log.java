@@ -22,7 +22,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "log")
-public class Log extends Auditable {
+public class Log extends AuditableCreatedAt {
 
     /**
      * Identificador único del registro.
@@ -54,15 +54,5 @@ public class Log extends Auditable {
      */
     public Log() {
         this.id = Generators.timeBasedEpochGenerator().generate();
-    }
-
-    /**
-     * Representación en texto del ID del log.
-     *
-     * @return cadena con el UUID en formato String
-     */
-    @Override
-    public String toString() {
-        return this.id.toString();
     }
 }

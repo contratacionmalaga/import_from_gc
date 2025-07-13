@@ -1,7 +1,5 @@
-package local.jarios.models;
+package local.jarios.entity;
 
-import local.jarios.entity.Auditable;
-import local.jarios.entity.FicheroGc;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +13,7 @@ import java.util.Map;
  * Clase para manejar las importaciones de ficheros Excel desde Internet,
  * agrupando los ficheros y sus registros asociados.
  * <p>
- * Esta clase extiende {@link Auditable} para heredar propiedades de auditoría.
+ * Esta clase extiende {@link AuditableCreatedAt} para heredar propiedades de auditoría.
  * </p>
  *
  * @author Juan Antonio
@@ -25,7 +23,7 @@ import java.util.Map;
 @Setter
 @Getter
 @Slf4j
-public class ParseoFicherosGc extends Auditable {
+public class ParseoFicherosGc extends AuditableCreatedAt {
 
     /**
      * Lista de objetos {@link FicheroGc} importados.

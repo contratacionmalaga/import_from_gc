@@ -4,7 +4,7 @@ import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.genericode.CodeList;
 import local.jarios.mappers.MapperRegistroGcFromCodeList;
-import local.jarios.models.ParseoFicherosGc;
+import local.jarios.entity.ParseoFicherosGc;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;

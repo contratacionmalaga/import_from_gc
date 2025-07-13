@@ -5,7 +5,7 @@ import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.exceptions.MiRepositoryException;
 import local.jarios.exceptions.MiServiceException;
-import local.jarios.models.ParseoFicherosGc;
+import local.jarios.entity.ParseoFicherosGc;
 import local.jarios.repositorys.Repository;
 import local.jarios.repositorys.RepositoryImpl;
 import lombok.extern.slf4j.Slf4j;

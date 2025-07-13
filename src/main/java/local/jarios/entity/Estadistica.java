@@ -29,7 +29,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "estadistica")
-public class Estadistica extends Auditable {
+public class Estadistica extends AuditableCreatedAt {
 
     /**
      * Identificador único del registro.

@@ -3,7 +3,7 @@ package local.jarios.services;
 import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
-import local.jarios.models.ParseoFicherosGc;
+import local.jarios.entity.ParseoFicherosGc;
 
 import java.util.List;
 

@@ -1,6 +1,5 @@
-package local.jarios.models;
+package local.jarios.entity;
 
-import local.jarios.entity.Auditable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Representa un registro de importación de un fichero Excel desde Internet.
- * Extiende {@link Auditable} para añadir auditoría.
+ * Extiende {@link AuditableCreatedAt} para añadir auditoría.
  * Contiene un código identificador y un nombre descriptivo.
  *
  * @author Juan Antonio
@@ -19,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @NoArgsConstructor
 @Slf4j
-public class RegistroGc extends Auditable {
+public class RegistroGc extends AuditableCreatedAt {
 
     /** Código identificador del registro */
     private String code;
