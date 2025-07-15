@@ -179,8 +179,7 @@ public class RepositoryImpl implements Repository {
      */
     private void borrarTodos(Session session, Class<?> entidadClass) {
         String hql = "delete from " + entidadClass.getSimpleName();
-        log.info("[borrarTodos] Borrado masivo con HQL: {}", hql);
         int resultado = session.createMutationQuery(hql).executeUpdate();
-        log.info("[borrarTodos] Número de registros borrados: {}", resultado);
+        log.info("[borrarTodos] Borrados todos los registros ({}) de {}", resultado, entidadClass.getSimpleName());
     }
 }

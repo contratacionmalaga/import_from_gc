@@ -69,7 +69,7 @@ public class RegistroGcDao {
                     "code VARCHAR(50) NOT NULL PRIMARY KEY, " +
                     "nombre VARCHAR(500), " +
                     "created_at DATETIME DEFAULT CURRENT_TIMESTAMP" +
-                    ") CHARACTER SET = " + encoding +" COLLATE = " + encoding + ";";
+                    ") CHARACTER SET = " + encoding +" COLLATE = " + collate + ";";
             log.info("[crearTabla] - SQL: {}", sql);
             session.createNativeQuery(sql).executeUpdate();
 
