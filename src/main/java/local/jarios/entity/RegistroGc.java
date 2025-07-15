@@ -2,6 +2,7 @@ package local.jarios.entity;
 
 import local.jarios.helpers.ComunHelper;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,6 +19,7 @@ import java.util.UUID;
  */
 @Setter
 @Getter
+@NoArgsConstructor
 @Slf4j
 public class RegistroGc extends AuditableCreatedAt {
 
@@ -58,10 +60,5 @@ public class RegistroGc extends AuditableCreatedAt {
                 "createdAt='" + ComunHelper.getFechaHoraFormateada(this.getCreatedAt()) +
                 "']";
 
-    }
-
-    /** Constructor privado */
-    private RegistroGc() {
-        //
     }
 }

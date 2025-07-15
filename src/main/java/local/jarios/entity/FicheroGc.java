@@ -2,7 +2,6 @@ package local.jarios.entity;
 
 import jakarta.persistence.*;
 import local.jarios.common.util.TamanoCampos;
-import local.jarios.interfaces.EsActualizable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +11,6 @@ import java.util.UUID;
 /**
  * Representa la importación de ficheros Excel desde Internet,
  * con sus metadatos y URIs asociados.
- * <p>
- * Esta clase implementa la interfaz {@link EsActualizable} para permitir
- * actualizaciones basadas en otra instancia de {@code FicheroGc}.
- * </p>
  * <p>
  * Contiene trazabilidad mediante logs para la creación y actualización de instancias.
  * </p>
