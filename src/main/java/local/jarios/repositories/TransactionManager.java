@@ -36,7 +36,7 @@ public final class TransactionManager {
      */
     public static Transaction beginTransaction(Session session) {
         Transaction transaction = session.beginTransaction();
-        log.debug("[beginTransaction] - Inicio de transacción.");
+        log.debug("[beginTransaction] Inicio de transacción.");
         return transaction;
     }
 
@@ -48,9 +48,9 @@ public final class TransactionManager {
     public static void commitTransaction(Transaction transaction) {
         if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
             transaction.commit();
-            log.debug("[commitTransaction] - Commit de la transacción.");
+            log.debug("[commitTransaction] Commit de la transacción.");
         } else {
-            log.warn("[commitTransaction] - No se puede hacer commit porque la transacción no está activa o está marcada para rollback.");
+            log.warn("[commitTransaction] No se puede hacer commit porque la transacción no está activa o está marcada para rollback.");
         }
     }
 
@@ -65,17 +65,17 @@ public final class TransactionManager {
             try {
                 if (transaction.isActive() && !transaction.getRollbackOnly()) {
                     transaction.rollback();
-                    log.warn("[rollbackTransaction] - Rollback ejecutado correctamente.");
+                    log.warn("[rollbackTransaction] Rollback ejecutado correctamente.");
                 } else {
-                    log.warn("[rollbackTransaction] - La transacción no está activa o ya está marcada para rollback. No se realiza rollback.");
+                    log.warn("[rollbackTransaction] La transacción no está activa o ya está marcada para rollback. No se realiza rollback.");
                 }
             } catch (Exception ex) {
-                String msg = String.format("[rollbackTransaction] - Error haciendo rollback: %s", ex.getMessage());
+                String msg = String.format("[rollbackTransaction] Error haciendo rollback: %s", ex.getMessage());
                 log.error(msg, ex);
                 throw new MiTransactionManagerException(msg, ex);
             }
         } else {
-            log.warn("[rollbackTransaction] - La transacción es null. No se realiza rollback.");
+            log.warn("[rollbackTransaction] La transacción es null. No se realiza rollback.");
         }
     }
 

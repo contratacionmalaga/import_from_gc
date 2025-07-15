@@ -1,9 +1,6 @@
 package local.jarios.helpers;
 
-import local.jarios.entity.FicheroGc;
-import local.jarios.entity.Log;
-import local.jarios.entity.ParseoFicherosGc;
-import local.jarios.entity.RegistroGc;
+import local.jarios.entity.*;
 import local.jarios.genericode.CodeList;
 import local.jarios.mappers.MapperRegistroGcFromCodeList;
 import lombok.extern.slf4j.Slf4j;
@@ -36,39 +33,42 @@ public class FicheroGcParser {
      * @param arrayFicherosDirectorio Array con los ficheros en el directorio para su procesamiento.
      * @return Objeto {@link ParseoFicherosGc} con la información procesada lista para persistencia.
      */
-    public ParseoFicherosGc parsearFicheros(Log miLog, File[] arrayFicherosDirectorio) {
+    public ParseoFicherosGc parsearFicheros(
+            Log miLog, File[] arrayFicherosDirectorio, Estadistica estadistica) {
 
-        log.info("[parsearFicheros] - Nº de ficheros: {}", arrayFicherosDirectorio.length);
+        log.info("[parsearFicheros] Nº de ficheros: {}", arrayFicherosDirectorio.length);
 
         ParseoFicherosGc parseoFicherosGc = new ParseoFicherosGc();
 
         for (File fichero : arrayFicherosDirectorio) {
             String nombreFichero = fichero.getName();
-            log.info("[parsearFicheros] - Procesando fichero '{}'.", nombreFichero);
+            log.info("[parsearFicheros] Procesando fichero '{}'.", nombreFichero);
 
             if (FileHelper.isInvalidFile(fichero)) {
-                log.info("[parsearFicheros] - Fichero inválido, se ignora.");
+                log.info("[parsearFicheros] Fichero inválido, se ignora.");
                 continue;
             }
 
             CodeList codeList = CodeListHelper.getCodeListFromFile(fichero);
-            log.info("[parsearFicheros] - Código extraído correctamente.");
+            log.info("[parsearFicheros] Código extraído correctamente.");
 
             FicheroGc ficheroGc = CodeListHelper.getFicheroGc(miLog, codeList);
-            log.info("[parsearFicheros] - FicheroGc obtenido.");
+            log.info("[parsearFicheros] FicheroGc obtenido.");
 
             if (ficheroGc != null) {
                 // Obtengo la lista de RegistroGc asociada al FicheroGc
-                List<RegistroGc> listRegistroGc = MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(codeList, miLog.getId());
-                log.info("[parsearFicheros] - List<RegistroGc> {}", listRegistroGc.size());
+                List<RegistroGc> listRegistroGc = MapperRegistroGcFromCodeList
+                                                        .getListRegistroGcFromCodeList(codeList, miLog.getId());
+                estadistica.aumentarNRegistrosGc(listRegistroGc.size());
+                log.info("[parsearFicheros] List<RegistroGc> {}", listRegistroGc.size());
                 parseoFicherosGc.getListFicherosGc().add(ficheroGc);
-                log.info("[parsearFicheros] - FicheroGc añadido a la listFicherosGc en el objeto ParseoFicheroGc.");
+                log.info("[parsearFicheros] FicheroGc añadido a la listFicherosGc en el objeto ParseoFicheroGc.");
                 Map<String, List<RegistroGc>> mapFicherosGc = parseoFicherosGc.getMapRegistrosGcByFicheroGc();
-                log.info("[parsearFicheros] - Obtengo el Map de FicherosGc.");
+                log.info("[parsearFicheros] Obtengo el Map de FicherosGc.");
                 mapFicherosGc.put(ficheroGc.getShortName(), listRegistroGc);
-                log.debug("[procesarFicheroGc] - FicheroGc y su List<RegistroGc> añadido al mapa correctamente.");
+                log.debug("[procesarFicheroGc] FicheroGc y su List<RegistroGc> añadido al mapa correctamente.");
             } else {
-                log.info("[parsearFicheros] - FicheroGc es NULL, ignorado.");
+                log.info("[parsearFicheros] FicheroGc es NULL, ignorado.");
             }
         }
 

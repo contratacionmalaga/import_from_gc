@@ -100,27 +100,27 @@ public class ImportFromGc {
 
             // Obtener la instancia singleton
             Version versionService = new VersionImpl();
-            log.info("El servicio de consulta de la versión del JAR se ha creado correctamente.");
+            log.info("[main] El servicio de consulta de la versión del JAR se ha creado correctamente.");
 
             propertiesManager.setConfigDir(Constantes.CONFIG_DIR);
-            log.info("Directorio configurado: {}", Constantes.CONFIG_DIR);
+            log.info("[main] Directorio configurado: {}", Constantes.CONFIG_DIR);
 
             // === Configuración inicial ===
             Set<String> clavesSensibles = Set.of("password");
             propertiesManager.setSensitiveKeys(clavesSensibles);  // Ahora se aplica sobre la instancia
-            log.info("Establezco el conjunto de claves Sensibles: {}", clavesSensibles);
+            log.info("[main] Establezco el conjunto de claves Sensibles: {}", clavesSensibles);
 
             // Cargar todas las propiedades desde el directorio de configuración
             propertiesManager.loadAllProperties();
-            log.info("Ficheros .properties cargados desde /{} correctamente", Constantes.CONFIG_DIR);
+            log.info("[main] Ficheros .properties cargados desde /{} correctamente", Constantes.CONFIG_DIR);
 
             // Muestro el valor de APP_NAME
             appName = propertiesManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_NAME);
-            log.info("AppName: {}", appName);
+            log.info("[main] AppName: {}", appName);
 
             // Obtengo y muestro el valor de APP_VERSION
             appVersion = versionService.getVersion(VersionDemo.class);
-            log.info("AppVersion: {}", appVersion);
+            log.info("[main] AppVersion: {}", appVersion);
 
             // Creo el objeto Log para esta ejecución
             Log miLog = new Log();
@@ -149,7 +149,8 @@ public class ImportFromGc {
 
             // Obtengo encargado del procesamiento de los ficheros
             FicheroGcParser ficheroGcParser = new FicheroGcParser();
-            ParseoFicherosGc parseoFicherosGc = ficheroGcParser.parsearFicheros(miLog, arrayFicherosDirectorio);
+            ParseoFicherosGc parseoFicherosGc = ficheroGcParser.parsearFicheros(
+                    miLog, arrayFicherosDirectorio, estadistica);
 
             // Asigno la lista unificada al Log
             miLog.setFicherosGc(parseoFicherosGc.getListFicherosGc());
@@ -167,7 +168,7 @@ public class ImportFromGc {
                     estadistica.getFechaHoraInicial(),
                     estadistica.getFechaHoraFinal());
             estadistica.setDuracion(duracion);
-            log.info("Asignada la duracion de la ejecución ({})", duracion);
+            log.info("[main] Asignada la duracion de la ejecución ({})", duracion);
             miLog.setEstadistica(estadistica);
 
             // Persisto los objetos
@@ -176,27 +177,27 @@ public class ImportFromGc {
 
             //
             enviarEmail(estadistica, null, true);
-            log.info("Email enviado correctamente.");
+            log.info("[main] Email enviado correctamente.");
 
             // Finalizo el programa correctamente
             finalizar (Mensajes.FINAL_CORRECTO, 0);
 
         } catch (MiServiceException ex) {
-            manejarExcepcion(ex, "[MiServiceException] - ");
+            manejarExcepcion(ex, "[MiServiceException] ");
         } catch (MiParseException ex) {
-            manejarExcepcion(ex, "[MiParseException] - ");
+            manejarExcepcion(ex, "[MiParseException] ");
         } catch (MiUnknownHostException ex) {
-            manejarExcepcion(ex, "[MiUnknownHostException] - ");
+            manejarExcepcion(ex, "[MiUnknownHostException] ");
         } catch (EncryptorException ex) {
-            manejarExcepcion(ex, "[EncryptorException] - ");
+            manejarExcepcion(ex, "[EncryptorException] ");
         } catch (EmailException ex) {
-            manejarExcepcion(ex, "[EmailServiceException] - ");
+            manejarExcepcion(ex, "[EmailServiceException] ");
         } catch (PropertiesManagerException ex) {
-            manejarExcepcion(ex, "[PropertiesManaerException] - ");
+            manejarExcepcion(ex, "[PropertiesManaerException] ");
         } catch (VersionException ex) {
-            manejarExcepcion(ex, "[VersionException] - ");
+            manejarExcepcion(ex, "[VersionException] ");
         } catch (Exception ex) {
-            manejarExcepcion(ex, "[Exception] - ");
+            manejarExcepcion(ex, "[Exception] ");
         }
     }
 
@@ -217,10 +218,10 @@ public class ImportFromGc {
 
         try {
             enviarEmail(null, originalException, false);
-            log.info("[manejarExcepcion] - Correo de error enviado correctamente.");
+            log.info("[manejarExcepcion] Correo de error enviado correctamente.");
 
         } catch (EmailException | MiUnknownHostException | PropertiesManagerException emailEx) {
-            log.error("[manejarExcepcion] - Error al enviar el correo con los errores:", emailEx);
+            log.error("[manejarExcepcion] Error al enviar el correo con los errores:", emailEx);
         }
 
         finalizar(Mensajes.FINAL_ERRONEO, 1);
@@ -245,17 +246,17 @@ public class ImportFromGc {
             throws MiUnknownHostException, PropertiesManagerException  {
 
         String equipo = ComunHelper.getHostName();
-        log.info("[construirEmailData] - Equipo desde el que se envía el email: {}", equipo);
+        log.info("[construirEmailData] Equipo desde el que se envía el email: {}", equipo);
 
         String from = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_FROM);
-        log.info("[construirEmailData] - Remitente: {}", from);
+        log.info("[construirEmailData] Remitente: {}", from);
 
         String to = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_TO);
-        log.info("[construirEmailData] - Destinatarios: {}", to);
+        log.info("[construirEmailData] Destinatarios: {}", to);
 
         // Defino el asunto y el cupero del Email
         String asunto = EmailHelper.getAsunto(appName, appVersion, equipo, success);
-        log.info("[construirEmailData] - Asunto del correo: {}.", asunto);
+        log.info("[construirEmailData] Asunto del correo: {}.", asunto);
 
         String cuerpo;
         if (success) {
@@ -263,7 +264,7 @@ public class ImportFromGc {
         } else {
             cuerpo = EmailHelper.getCuerpoExcepcion(obtenerStackTraceComoArray(ex));
         }
-        log.info("[construirEmailData] - Cuerpo del email creado correctamente");
+        log.info("[construirEmailData] Cuerpo del email creado correctamente");
 
         return new EmailData(from, to, asunto, cuerpo);
 
@@ -288,25 +289,25 @@ public class ImportFromGc {
 
         // Configuración del servidor SMTP
         Properties emailProps = propertiesManager.getProperties(PropertiesFiles.MAIL);
-        log.info("[enviarEmail] - Properties cargadas correctamente.");
+        log.info("[enviarEmail] Properties cargadas correctamente.");
 
         // Construcción de los datos del correo
         EmailData emailData = construirEmailData(estadistica, ex, success);
-        log.info("[enviarEmail] - EmailData creado correctamente.");
+        log.info("[enviarEmail] EmailData creado correctamente.");
 
         EmailRequestValidator.validarEmailRequest(emailProps, emailData);
-        log.info("[enviarEmail] - Properties e EmailData validados correctamente.");
+        log.info("[enviarEmail] Properties e EmailData validados correctamente.");
 
         // Creación del servicio de correo con la implementación de envío SMTP
         EmailSender emailSender = new EmailSenderImpl();
-        log.info("[enviarEmail] - Creación del objeto EmailSender correctamente.");
+        log.info("[enviarEmail] Creación del objeto EmailSender correctamente.");
 
         EmailService emailService = new EmailServiceImpl(emailSender);
-        log.info("[enviarEmail] - Creado el objeto EmailService correctamente.");
+        log.info("[enviarEmail] Creado el objeto EmailService correctamente.");
 
         // Envío del correo
         emailService.sendEmail(emailProps, emailData);
-        log.info("[enviarEmail] - Correo enviado correctamente.");
+        log.info("[enviarEmail] Correo enviado correctamente.");
 
     }
 
@@ -347,20 +348,20 @@ public class ImportFromGc {
     private static String[][] toStringMatrix(Estadistica estadistica) {
 
         List<String[]> datos = new ArrayList<>();
-        log.debug("[toStringMatrix] - Creación de List<String[]>");
+        log.debug("[toStringMatrix] Creación de List<String[]>");
 
         Field[] fields = Estadistica.class.getDeclaredFields(); // también corregido esto: getClass() → .class
-        log.debug("[toStringMatrix] - Creación de Field[]");
+        log.debug("[toStringMatrix] Creación de Field[]");
 
         for (Field field : fields) {
 
-            log.debug("[toStringMatrix] - Campo: {}", field.getName());
+            log.debug("[toStringMatrix] Campo: {}", field.getName());
             field.setAccessible(true);
 
             try {
 
                 Object value = field.get(estadistica); //
-                log.debug("[toStringMatrix] - Obtengo el valor: {}", value);
+                log.debug("[toStringMatrix] Obtengo el valor: {}", value);
 
                 String nombreCampo = field.getName();
                 String valorCampo;
@@ -372,11 +373,11 @@ public class ImportFromGc {
                 }
 
                 datos.add(new String[]{nombreCampo, valorCampo});
-                log.debug("[toStringMatrix] - {} - {}", nombreCampo, valorCampo);
+                log.debug("[toStringMatrix] {} - {}", nombreCampo, valorCampo);
 
             } catch (IllegalAccessException e) {
 
-                log.debug("[toStringMatrix] - Error de acceso ilegal. Error: {}", e.getMessage());
+                log.debug("[toStringMatrix] Error de acceso ilegal. Error: {}", e.getMessage());
                 datos.add(new String[]{field.getName(), "Error al acceder"});
 
             }
@@ -400,12 +401,12 @@ public class ImportFromGc {
 
         //
         StackTraceElement[] elementos = ex.getStackTrace();
-        log.debug("[obtenerStackTraceComoArray] - Obtenidos los elementos del StactTrace. Nº elementos: {}", elementos.length);
+        log.debug("[obtenerStackTraceComoArray] Obtenidos los elementos del StactTrace. Nº elementos: {}", elementos.length);
         String[] resultado = new String[elementos.length];
-        log.debug("[obtenerStackTraceComoArray] - Defino un String[] con el número de elementos del StackTrace.");
+        log.debug("[obtenerStackTraceComoArray] Defino un String[] con el número de elementos del StackTrace.");
         for (int i = 0; i < elementos.length; i++) {
             resultado[i] = elementos[i].toString();
-            log.debug("[obtenerStackTraceComoArray] - Elemento: {} - {}", i, elementos[i].toString());
+            log.debug("[obtenerStackTraceComoArray] Elemento: {} - {}", i, elementos[i].toString());
         }
         return resultado;
     }

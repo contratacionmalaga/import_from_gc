@@ -60,7 +60,7 @@ public class RepositoryImpl implements Repository {
         try {
             this.sessionFactory = new SessionFactoryProvider().getSessionFactory();
         } catch (MiSessionFactoryProvider ex) {
-            String msg = "[RepositoryImpl] - Error creando SessionFactory: " + ex.getMessage();
+            String msg = "[RepositoryImpl] Error creando SessionFactory: " + ex.getMessage();
             log.error(msg, ex);
             throw new MiRepositoryException(msg, ex);
         }
@@ -149,7 +149,7 @@ public class RepositoryImpl implements Repository {
         } catch (Exception ex) {
             log.error(LOG_TRANSACCION_ERROR, metodo, ex.getMessage(), ex);
             rollbackTransaccion(transaction, metodo);
-            throw new MiRepositoryException("[ejecutarEnTransaccion] - Error durante la transacción.", ex);
+            throw new MiRepositoryException("[ejecutarEnTransaccion] Error durante la transacción.", ex);
         }
     }
 
@@ -167,7 +167,7 @@ public class RepositoryImpl implements Repository {
                 log.error(LOG_ROLLBACK_ERROR, metodo, rollbackEx);
             }
         } else {
-            log.warn("[rollbackTransaccion] - No se puede hacer rollback: la transacción no está activa.");
+            log.warn("[rollbackTransaccion] No se puede hacer rollback: la transacción no está activa.");
         }
     }
 

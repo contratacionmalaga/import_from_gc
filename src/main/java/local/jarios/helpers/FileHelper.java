@@ -32,19 +32,19 @@ public final class FileHelper {
      * @return Array de ficheros encontrados. Si el path no es válido, se retorna un array vacío.
      */
     public static File[] getListaFicherosFromPath(String path) {
-        log.debug("[getListaFicherosFromPath] - Intentando obtener ficheros desde la ruta: {}", path);
+        log.debug("[getListaFicherosFromPath] Intentando obtener ficheros desde la ruta: {}", path);
 
         File directorio = new File(path);
 
         if (!directorio.exists() || !directorio.isDirectory()) {
-            log.warn("[getListaFicherosFromPath] - El path '{}' no existe o no es un directorio válido.", path);
+            log.warn("[getListaFicherosFromPath] El path '{}' no existe o no es un directorio válido.", path);
             return new File[0];
         }
 
         File[] ficheros = directorio.listFiles();
         int total = (ficheros != null) ? ficheros.length : 0;
 
-        log.debug("[getListaFicherosFromPath] - Se han encontrado {} fichero(s) en el directorio '{}'.", total, path);
+        log.debug("[getListaFicherosFromPath] Se han encontrado {} fichero(s) en el directorio '{}'.", total, path);
         return (ficheros != null) ? ficheros : new File[0];
     }
 
@@ -57,22 +57,22 @@ public final class FileHelper {
     public static boolean isInvalidFile(File file) {
 
         if (file == null) {
-            log.debug("[isInvalidFile] - El fichero es null.");
+            log.debug("[isInvalidFile] El fichero es null.");
             return true;
         }
 
         if (!file.exists()) {
-            log.debug("[isInvalidFile] - El fichero no existe: {}", file.getAbsolutePath());
+            log.debug("[isInvalidFile] El fichero no existe: {}", file.getAbsolutePath());
             return true;
         }
 
         if (!file.isFile()) {
-            log.debug("[isInvalidFile] - El fichero no es un fichero: {}", file.getAbsolutePath());
+            log.debug("[isInvalidFile] El fichero no es un fichero: {}", file.getAbsolutePath());
             return true;
         }
 
         if (!file.canRead()) {
-            log.debug("[isInvalidFile] - El fichero no se puede leer: {}", file.getAbsolutePath());
+            log.debug("[isInvalidFile] El fichero no se puede leer: {}", file.getAbsolutePath());
             return true;
         }
 

@@ -79,9 +79,9 @@ public final class MapperRegistroGcFromCodeList {
             }
 
             RegistroGc registroGc = new RegistroGc(code, nombre, logId);
-            log.debug("[getListRegistroGcFromCodeList] - Creado {}", registroGc);
+            log.debug("[getListRegistroGcFromCodeList] Creado {}", registroGc);
             listaRegistrosGc.add(registroGc);
-            log.debug("[getListRegistroGcFromCodeList] - Añadido a la lista ({})", listaRegistrosGc.size());
+            log.debug("[getListRegistroGcFromCodeList] Añadido a la lista ({})", listaRegistrosGc.size());
         }
 
         log.debug("Se generaron {} registros desde el CodeList.", listaRegistrosGc.size());

@@ -50,11 +50,11 @@ public class ServiceImpl implements Service {
         try {
 
             this.repository = new RepositoryImpl();
-            log.debug("[ServiceImpl] - Creado el objeto RepositoryImpl correctamente.");
+            log.debug("[ServiceImpl] Creado el objeto RepositoryImpl correctamente.");
 
         } catch (MiRepositoryException ex) {
 
-            String msg = String.format("[ServiceImpl] - Error creando el constructor: %s", ex.getMessage());
+            String msg = String.format("[ServiceImpl] Error creando el constructor: %s", ex.getMessage());
             log.error(msg, ex);
             throw new MiServiceException(msg, ex);
 
@@ -73,11 +73,11 @@ public class ServiceImpl implements Service {
 
             // El repositorio se encarga de la persistencia y manejo de la las transacciones
             repository.persistirEnBaseDatos(miLog, parseoFicherosGc);
-            log.debug("[persistirLog] - Grabación en base de datos correcta.");
+            log.debug("[persistirLog] Grabación en base de datos correcta.");
 
         } catch (MiRepositoryException ex) {
 
-            String msg = String.format("[persistirLog] - Error persistiendo Log con ID %s: %s", miLog.getId(), ex.getMessage());
+            String msg = String.format("[persistirLog] Error persistiendo Log con ID %s: %s", miLog.getId(), ex.getMessage());
             log.error(msg, ex.getMessage(), ex);
             throw new MiServiceException (msg, ex);
 

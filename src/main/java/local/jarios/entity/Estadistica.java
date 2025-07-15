@@ -117,6 +117,14 @@ public class Estadistica extends AuditableCreatedAt {
     }
 
     /**
+     * Aumentar el número de regsitros según un valor
+     * @param incremento Valor que se incrementa el nRegistrosGc
+     */
+    public void aumentarNRegistrosGc(int incremento) {
+        this.nRegistrosGc += incremento;
+    }
+
+    /**
      * Representación en texto del objeto Estadistica con todos sus campos.
      *
      * @return String con la representación del objeto

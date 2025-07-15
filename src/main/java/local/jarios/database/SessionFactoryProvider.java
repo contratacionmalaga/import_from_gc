@@ -53,30 +53,30 @@ public class SessionFactoryProvider {
         try {
 
             Properties props = propertyManager.getProperties(PropertiesFiles.HIBERNATE);
-            log.debug("[getSessionFactory] - Propiedades leídas desde el fichero: {}", PropertiesFiles.HIBERNATE);
+            log.debug("[getSessionFactory] Propiedades leídas desde el fichero: {}", PropertiesFiles.HIBERNATE);
 
             final var hibernateProperties = configurePrincipalProperties(props);
-            log.debug("[getSessionFactory] - Propiedades de conexión a la BD: {}", hibernateProperties);
+            log.debug("[getSessionFactory] Propiedades de conexión a la BD: {}", hibernateProperties);
 
             var hibernateConfigurer = new HibernateConfigurer();
-            log.debug("[getSessionFactory] - Objeto HibernateConfigurer creado correctamente.");
+            log.debug("[getSessionFactory] Objeto HibernateConfigurer creado correctamente.");
 
             var configuration = hibernateConfigurer.buildConfiguration(hibernateProperties);
-            log.debug("[getSessionFactory] - Configuración Hibernate creada correctamente.");
+            log.debug("[getSessionFactory] Configuración Hibernate creada correctamente.");
 
             var entityScanner = new EntityScanner();
-            log.debug("[getSessionFactory] - Objeto EntityScanner creado correctamente.");
+            log.debug("[getSessionFactory] Objeto EntityScanner creado correctamente.");
 
             entityScanner.scanAndAddEntities(configuration, CONFIG_PACKAGE_NAME);
-            log.debug("[getSessionFactory] - Entidades añadidas desde el paquete '{}'.", CONFIG_PACKAGE_NAME);
+            log.debug("[getSessionFactory] Entidades añadidas desde el paquete '{}'.", CONFIG_PACKAGE_NAME);
 
             var sessionFactory = configuration.buildSessionFactory();
-            log.debug("[getSessionFactory] - SessionFactory creada exitosamente.");
+            log.debug("[getSessionFactory] SessionFactory creada exitosamente.");
             return sessionFactory;
 
         } catch (HibernateException | PropertiesManagerException ex) {
 
-            String msg = String.format("[getSessionFactory] - Error creando SessionFactory: %s", ex.getMessage());
+            String msg = String.format("[getSessionFactory] Error creando SessionFactory: %s", ex.getMessage());
             log.error(msg, ex.getMessage());
             throw new MiSessionFactoryProvider(msg, ex);
         }

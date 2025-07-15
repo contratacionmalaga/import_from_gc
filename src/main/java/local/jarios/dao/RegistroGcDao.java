@@ -43,11 +43,11 @@ public class RegistroGcDao {
      */
     public boolean existeTabla(Session session, String nombreTabla) {
         String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :nombre";
-        log.debug("[existeTabla] - SQL: {}", sql);
+        log.debug("[existeTabla] SQL: {}", sql);
         long count = ((Number) session.createNativeQuery(sql)
                 .setParameter("nombre", nombreTabla)
                 .getSingleResult()).longValue();
-        log.debug("[existeTabla] - Count: {}", count);
+        log.debug("[existeTabla] Count: {}", count);
         return count > 0;
     }
 
@@ -70,12 +70,12 @@ public class RegistroGcDao {
                     "nombre VARCHAR(500), " +
                     "created_at DATETIME DEFAULT CURRENT_TIMESTAMP" +
                     ") CHARACTER SET = " + encoding +" COLLATE = " + collate + ";";
-            log.info("[crearTabla] - SQL: {}", sql);
+            log.info("[crearTabla] SQL: {}", sql);
             session.createNativeQuery(sql).executeUpdate();
 
         } catch (HibernateException | PropertiesManagerException ex) {
 
-            String msg = String.format("[getSessionFactory] - Error creando SessionFactory: %s", ex.getMessage());
+            String msg = String.format("[getSessionFactory] Error creando SessionFactory: %s", ex.getMessage());
             log.error(msg, ex.getMessage());
             throw new MiRepositoryException(msg, ex);
 
@@ -91,7 +91,7 @@ public class RegistroGcDao {
      */
     public void insertarRegistros(Session session, String nombreTabla, List<RegistroGc> registros) {
         if (registros.isEmpty()) {
-            log.warn("[insertarRegistros] - Lista de registros vacía.");
+            log.warn("[insertarRegistros] Lista de registros vacía.");
             return;
         }
 
@@ -111,9 +111,9 @@ public class RegistroGcDao {
             }
         }
 
-        log.debug("[insertarRegistros] - SQL: {}", sql);
+        log.debug("[insertarRegistros] SQL: {}", sql);
         session.createNativeQuery(sql.toString()).executeUpdate();
-        log.debug("[insertarRegistros] - Insertados {} registros en {}", registros.size(), nombreTabla);
+        log.debug("[insertarRegistros] Insertados {} registros en {}", registros.size(), nombreTabla);
     }
 
     /**
@@ -134,7 +134,7 @@ public class RegistroGcDao {
      */
     public void eliminarTabla(Session session, String nombreTabla) {
         String sql = "DROP TABLE IF EXISTS " + nombreTabla;
-        log.info("[eliminarTabla] - SQL: {}", sql);
+        log.info("[eliminarTabla] SQL: {}", sql);
         session.createNativeQuery(sql).executeUpdate();
     }
 
