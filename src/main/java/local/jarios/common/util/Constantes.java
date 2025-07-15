@@ -31,9 +31,6 @@ public final class Constantes {
     /** Ruta del directorio con los ficheros properties */
     public static final String CONFIG_DIR = "config";
 
-    /** clave utilizada para la encriptación / desencriptación de las value con formato ENC(encrypt_value) */
-    public static final String ENCRYPT_PASSWORD = "Malaga$2025";
-
     /** Formato fecha hora. */
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
