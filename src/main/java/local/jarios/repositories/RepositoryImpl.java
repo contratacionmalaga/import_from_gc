@@ -1,6 +1,8 @@
 package local.jarios.repositories;
 
 import local.jarios.common.util.Mensajes;
+import local.jarios.common.util.PropertiesFiles;
+import local.jarios.common.util.PropertiesKeys;
 import local.jarios.dao.RegistroGcDao;
 import local.jarios.database.SessionFactoryProvider;
 import local.jarios.entity.FicheroGc;
@@ -10,6 +12,9 @@ import local.jarios.entity.RegistroGc;
 import local.jarios.exceptions.MiRepositoryException;
 import local.jarios.exceptions.MiSessionFactoryProvider;
 import local.jarios.exceptions.MiTransactionManagerException;
+import local.jarios.properties.api.PropertiesManagerService;
+import local.jarios.properties.api.PropertiesManagerServiceImpl;
+import local.jarios.properties.exception.PropertiesManagerException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -29,10 +34,10 @@ import java.util.function.Function;
 public class RepositoryImpl implements Repository {
 
     /** Variable global */
-    private static final String LOG_TRANSACCION_ERROR = "[ejecutarEnTransaccion] - Método: {}, Error en transacción: {}";
+    private static final String LOG_TRANSACCION_ERROR = "[ejecutarEnTransaccion] Método: {}, Error en transacción: {}";
 
     /** Variable global */
-    private static final String LOG_ROLLBACK_ERROR = "[ejecutarEnTransaccion] - Método: {}, Error durante rollback de la transacción.";
+    private static final String LOG_ROLLBACK_ERROR = "[ejecutarEnTransaccion] Método: {}, Error durante rollback.";
 
     /** Objeto SessionFactory */
     private final SessionFactory sessionFactory;
@@ -40,21 +45,27 @@ public class RepositoryImpl implements Repository {
     /** Objeto RegistroGcDao */
     private final RegistroGcDao registroGcDao;
 
+    /** Objeto para gestionar los ficheros properties. */
+    private final PropertiesManagerService propertyManager;
+
     /**
      * Constructor que inicializa el proveedor de sesiones Hibernate y el DAO.
      *
      * @throws MiRepositoryException si ocurre un error durante la inicialización
      */
     public RepositoryImpl() {
+        this.propertyManager = PropertiesManagerServiceImpl.getInstance();
+        this.registroGcDao = new RegistroGcDao(propertyManager);
+
         try {
             this.sessionFactory = new SessionFactoryProvider().getSessionFactory();
-            this.registroGcDao = new RegistroGcDao();
-            log.debug("[RepositoryImpl] - SessionFactory y DAO inicializados correctamente.");
         } catch (MiSessionFactoryProvider ex) {
-            String msg = String.format("[RepositoryImpl] - Error creando SessionFactory: %s", ex.getMessage());
+            String msg = "[RepositoryImpl] - Error creando SessionFactory: " + ex.getMessage();
             log.error(msg, ex);
             throw new MiRepositoryException(msg, ex);
         }
+
+        log.debug("[RepositoryImpl] Inicialización completada correctamente.");
     }
 
     /**
@@ -64,64 +75,61 @@ public class RepositoryImpl implements Repository {
      * @throws MiRepositoryException si ocurre un error durante la operación
      */
     @Override
-    public void persistirLog(Log miLog) throws MiRepositoryException {
-        ejecutarEnTransaccion(session -> {
-            borrarTodos(session, FicheroGc.class);
-            session.flush();
-            session.merge(miLog);
-            log.debug("[persistirLog] - Persistida entidad Log: {}", miLog);
-            return null;
-        }, "persistirLog");
-    }
+    public void persistirEnBaseDatos(final Log miLog, final ParseoFicherosGc parseo) throws MiRepositoryException {
+        final String prefijo = obtenerPrefijoAplicacion();
 
-    /**
-     * Persiste los registros de un objeto {@link ParseoFicherosGc} creando tablas dinámicas por cada fichero.
-     *
-     * @param parseo  Objeto que contiene los registros agrupados por fichero
-     * @param prefijo Prefijo para los nombres de las tablas dinámicas
-     * @throws MiRepositoryException si ocurre un error durante la transacción
-     */
-    @Override
-    public void persistirObjetoParseoFicherosGc(ParseoFicherosGc parseo, String prefijo) throws MiRepositoryException {
-        ejecutarEnTransaccion(session -> {
-            for (Map.Entry<String, List<RegistroGc>> entry : parseo.getMapRegistrosGcByFicheroGc().entrySet()) {
-                String nombreTabla = prefijo + entry.getKey().toLowerCase();
-                log.debug("[persistirObjetoParseoFicherosGc] - Nombre tabla: {}", nombreTabla);
+        try {
+            ejecutarEnTransaccion(session -> {
+                borrarTodos(session, FicheroGc.class);
+                session.flush();
+                session.merge(miLog);
+                log.debug("[persistirLog] Log persistido: {}", miLog);
 
-                if (registroGcDao.existeTabla(session, nombreTabla)) {
-                    registroGcDao.eliminarTabla(session, nombreTabla);
-                    log.debug(Mensajes.DROP_TABLE, "[persistirObjetoParseoFicherosGc]", nombreTabla);
+                for (Map.Entry<String, List<RegistroGc>> entry : parseo.getMapRegistrosGcByFicheroGc().entrySet()) {
+                    final String nombreTabla = prefijo + entry.getKey().toLowerCase();
+                    log.debug("[persistirObjetoParseoFicherosGc] Procesando tabla: {}", nombreTabla);
+
+                    if (registroGcDao.existeTabla(session, nombreTabla)) {
+                        registroGcDao.eliminarTabla(session, nombreTabla);
+                        log.debug(Mensajes.DROP_TABLE, "[persistirObjetoParseoFicherosGc]", nombreTabla);
+                    }
+
+                    try {
+                        registroGcDao.crearTabla(session, nombreTabla);
+                    } catch (MiRepositoryException e) {
+                        throw new RuntimeException("Error creando tabla " + nombreTabla, e);
+                    }
+
+                    registroGcDao.insertarRegistros(session, nombreTabla, entry.getValue());
                 }
 
-                registroGcDao.crearTabla(session, nombreTabla);
-                registroGcDao.insertarRegistros(session, nombreTabla, entry.getValue());
+                return null;
+            }, "persistirEnBaseDatos");
+        } catch (RuntimeException ex) {
+            if (ex.getCause() instanceof MiRepositoryException cause) {
+                throw cause;
             }
-            return null;
-        }, "persistirObjetoParseoFicherosGc");
-    }
-
-    /**
-     * Recupera todos los registros de {@link FicheroGc} desde la base de datos.
-     *
-     * @return Lista de objetos FicheroGc
-     * @throws MiRepositoryException si ocurre un error durante la consulta
-     */
-    @Override
-    public List<FicheroGc> getListFicherosGc() throws MiRepositoryException {
-        try (Session session = sessionFactory.openSession()) {
-            List<FicheroGc> ficheros = session
-                    .createQuery("FROM FicheroGc", FicheroGc.class)
-                    .getResultList();
-            log.debug("[getListFicherosGc] - Lista recuperada: {}", ficheros);
-            return ficheros;
-        } catch (Exception ex) {
-            String msg = String.format("[getListFicherosGc] - Error obteniendo lista: %s", ex.getMessage());
-            log.error(msg, ex);
-            throw new MiRepositoryException(msg, ex);
+            throw ex;
         }
     }
 
     // ---------- MÉTODOS PRIVADOS ----------
+
+    /**
+     * Obtiene el prefijo definido en el fichero de configuración de la aplicación.
+     *
+     * @return el prefijo definido en las propiedades
+     * @throws MiRepositoryException si no se puede acceder a la configuración
+     */
+    private String obtenerPrefijoAplicacion() throws MiRepositoryException {
+        try {
+            return propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_PREFIX);
+        } catch (PropertiesManagerException e) {
+            String msg = "[obtenerPrefijoAplicacion] Error al obtener prefijo de configuración: " + e.getMessage();
+            log.error(msg, e);
+            throw new MiRepositoryException(msg, e);
+        }
+    }
 
     /**
      * Ejecuta una operación dentro de una transacción Hibernate con rollback y logging de errores.
@@ -133,6 +141,7 @@ public class RepositoryImpl implements Repository {
      */
     private <T> void ejecutarEnTransaccion(Function<Session, T> function, String metodo) throws MiRepositoryException {
         Transaction transaction = null;
+
         try (Session session = sessionFactory.openSession()) {
             transaction = TransactionManager.beginTransaction(session);
             function.apply(session);

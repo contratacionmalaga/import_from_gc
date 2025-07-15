@@ -1,8 +1,14 @@
 package local.jarios.dao;
 
 import com.fasterxml.uuid.Generators;
-import lombok.extern.slf4j.Slf4j;
+import local.jarios.common.util.PropertiesFiles;
+import local.jarios.common.util.PropertiesKeys;
 import local.jarios.entity.RegistroGc;
+import local.jarios.exceptions.MiRepositoryException;
+import local.jarios.properties.api.PropertiesManagerService;
+import local.jarios.properties.exception.PropertiesManagerException;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -17,11 +23,15 @@ import java.util.UUID;
 @Slf4j
 public class RegistroGcDao {
 
+    /** Objeto para gestionar los ficheros properties. */
+    private final PropertiesManagerService propertyManager;
+
     /**
      * Constructor de la clase
+     * @param propertiesManager Manajeador de los ficheros properties
      */
-    public RegistroGcDao() {
-        //
+    public RegistroGcDao(PropertiesManagerService propertiesManager) {
+        this.propertyManager = propertiesManager;
     }
 
     /**
@@ -47,15 +57,29 @@ public class RegistroGcDao {
      * @param session     sesión de Hibernate activa
      * @param nombreTabla nombre de la tabla a crear
      */
-    public void crearTabla(Session session, String nombreTabla) {
-        String sql = "CREATE TABLE IF NOT EXISTS " + nombreTabla + " (" +
-                "id UUID NOT NULL, " +
-                "code VARCHAR(50) NOT NULL PRIMARY KEY, " +
-                "nombre VARCHAR(500), " +
-                "created_at DATETIME DEFAULT CURRENT_TIMESTAMP" +
-                ") CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;";
-        log.info("[crearTabla] - SQL: {}", sql);
-        session.createNativeQuery(sql).executeUpdate();
+    public void crearTabla(Session session, String nombreTabla) throws MiRepositoryException{
+
+        try {
+
+            String encoding = propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_CHARACTER_ENCODING);
+            String collate = propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_CONNECTION_COLLATION);
+
+            String sql = "CREATE TABLE IF NOT EXISTS " + nombreTabla + " (" +
+                    "id UUID NOT NULL, " +
+                    "code VARCHAR(50) NOT NULL PRIMARY KEY, " +
+                    "nombre VARCHAR(500), " +
+                    "created_at DATETIME DEFAULT CURRENT_TIMESTAMP" +
+                    ") CHARACTER SET = " + encoding +" COLLATE = " + encoding + ";";
+            log.info("[crearTabla] - SQL: {}", sql);
+            session.createNativeQuery(sql).executeUpdate();
+
+        } catch (HibernateException | PropertiesManagerException ex) {
+
+            String msg = String.format("[getSessionFactory] - Error creando SessionFactory: %s", ex.getMessage());
+            log.error(msg, ex.getMessage());
+            throw new MiRepositoryException(msg, ex);
+
+        }
     }
 
     /**

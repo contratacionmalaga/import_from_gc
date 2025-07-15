@@ -66,45 +66,20 @@ public class ServiceImpl implements Service {
      *
      * @param miLog Objeto {@link Log} a persistir.
      */
-    public void persistirLog(Log miLog) throws MiServiceException{
+    public void persistirEnBaseDeDatos(Log miLog, ParseoFicherosGc parseoFicherosGc) throws MiServiceException{
 
 
         try {
 
             // El repositorio se encarga de la persistencia y manejo de la las transacciones
-            repository.persistirLog(miLog);
-            log.debug("[persistirLog] - miLog persistido correctamente.");
+            repository.persistirEnBaseDatos(miLog, parseoFicherosGc);
+            log.debug("[persistirLog] - Grabación en base de datos correcta.");
 
         } catch (MiRepositoryException ex) {
 
             String msg = String.format("[persistirLog] - Error persistiendo Log con ID %s: %s", miLog.getId(), ex.getMessage());
             log.error(msg, ex.getMessage(), ex);
             throw new MiServiceException (msg, ex);
-
-        }
-    }
-
-
-    /**
-     * Persiste un objeto {@link ParseoFicherosGc} en la base de datos.
-     *
-     * @param parseoFicherosGc Objeto {@link ParseoFicherosGc} a persistir.
-     * @param prefijo Prefijo utilizado en la creación de las tablas.
-     */
-    public void persistirObjetoParseoFicherosGc(ParseoFicherosGc parseoFicherosGc, String prefijo) throws MiServiceException {
-
-        // Inicio
-        try {
-
-            // Delegamos la persistencia y la gestión de la transacción al repositorio
-            repository.persistirObjetoParseoFicherosGc(parseoFicherosGc, prefijo);
-            log.debug("[persistirObjetoParseoFicherosGc] - ParseoFicherosGc persistido correcamente.");
-
-        } catch (MiRepositoryException ex) {
-
-            String msg = String.format("[persistirObjetoParseoFicherosGc] - Error persistiendo el objeto ParseoFicherosGc: %s, Error: %s", parseoFicherosGc, ex.getMessage());
-            log.error(msg, ex.getMessage(), ex);
-            throw new MiServiceException(msg, ex);
 
         }
     }

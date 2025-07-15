@@ -171,14 +171,8 @@ public class ImportFromGc {
             miLog.setEstadistica(estadistica);
 
             // Persisto los objetos
-            service.persistirLog(miLog);
+            service.persistirEnBaseDeDatos(miLog, parseoFicherosGc);
             log.info(Mensajes.PERSISTIDO_LOG);
-
-            String prefijo = propertiesManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_PREFIX);
-            log.info("Prefijo de las tablas: {}", prefijo);
-
-            service.persistirObjetoParseoFicherosGc(parseoFicherosGc, prefijo);
-            log.info(Mensajes.PERSISTIDO_PARSEO_FICHEROS_GC);
 
             //
             enviarEmail(estadistica, null, true);

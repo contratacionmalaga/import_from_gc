@@ -15,6 +15,10 @@ public final class PropertiesKeys {
     public static final String APP_PATH = "app.path";
     /** Prefijo */
     public static final String APP_PREFIX = "app.prefix";
+    /** Prefijo */
+    public static final String APP_CHARACTER_ENCODING = "app.characterEncoding";
+    /** Prefijo */
+    public static final String APP_CONNECTION_COLLATION = "app.connectionCollation";
 
     /* Nombre de las propiedades del fichero hibernate.properties */
     /** Batch_size */

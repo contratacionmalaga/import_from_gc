@@ -29,20 +29,7 @@ public interface Service {
      * </p>
      *
      * @param miLog Objeto {@link Log} a persistir.
+     * @param parseo Objeto que contiene un Map con el nombre del FicheroGc y los Registros asociados
      */
-    void persistirLog(Log miLog);
-
-    /**
-     * Persiste los registros contenidos en un objeto {@link ParseoFicherosGc}.
-     *
-     * <p>
-     * Este método crea dinámicamente tablas (una por cada tipo de fichero representado)
-     * con el nombre basado en el prefijo proporcionado, y almacena en ellas los registros
-     * asociados a cada fichero.
-     * </p>
-     *
-     * @param parseoFicherosGc Objeto que agrupa los registros por tipo de fichero.
-     * @param prefijo          Prefijo que se antepone al nombre de las tablas dinámicas.
-     */
-    void persistirObjetoParseoFicherosGc(ParseoFicherosGc parseoFicherosGc, String prefijo);
+    void persistirEnBaseDeDatos(Log miLog, ParseoFicherosGc parseo);
 }

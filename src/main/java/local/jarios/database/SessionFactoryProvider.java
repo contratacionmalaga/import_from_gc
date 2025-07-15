@@ -50,22 +50,25 @@ public class SessionFactoryProvider {
      */
     public SessionFactory getSessionFactory() throws MiSessionFactoryProvider {
 
-        final var hibernateProperties = configurePrincipalProperties(propertyManager.getProperties(PropertiesFiles.HIBERNATE));
-        log.debug("[getSessionFactory] - Propiedades de conexión a la BD: {}", hibernateProperties);
-
-        var hibernateConfigurer = new HibernateConfigurer();
-        log.debug("[getSessionFactory] - Objeto HibernateConfigurer creado correctamente.");
-
-        var configuration = hibernateConfigurer.buildConfiguration(hibernateProperties);
-        log.debug("[getSessionFactory] - Configuración Hibernate creada correctamente.");
-
-        var entityScanner = new EntityScanner();
-        log.debug("[getSessionFactory] - Objeto EntityScanner creado correctamente.");
-
-        entityScanner.scanAndAddEntities(configuration, CONFIG_PACKAGE_NAME);
-        log.debug("[getSessionFactory] - Entidades escaneadas y añadidas desde el paquete '{}'.", CONFIG_PACKAGE_NAME);
-
         try {
+
+            Properties props = propertyManager.getProperties(PropertiesFiles.HIBERNATE);
+            log.debug("[getSessionFactory] - Propiedades leídas desde el fichero: {}", PropertiesFiles.HIBERNATE);
+
+            final var hibernateProperties = configurePrincipalProperties(props);
+            log.debug("[getSessionFactory] - Propiedades de conexión a la BD: {}", hibernateProperties);
+
+            var hibernateConfigurer = new HibernateConfigurer();
+            log.debug("[getSessionFactory] - Objeto HibernateConfigurer creado correctamente.");
+
+            var configuration = hibernateConfigurer.buildConfiguration(hibernateProperties);
+            log.debug("[getSessionFactory] - Configuración Hibernate creada correctamente.");
+
+            var entityScanner = new EntityScanner();
+            log.debug("[getSessionFactory] - Objeto EntityScanner creado correctamente.");
+
+            entityScanner.scanAndAddEntities(configuration, CONFIG_PACKAGE_NAME);
+            log.debug("[getSessionFactory] - Entidades añadidas desde el paquete '{}'.", CONFIG_PACKAGE_NAME);
 
             var sessionFactory = configuration.buildSessionFactory();
             log.debug("[getSessionFactory] - SessionFactory creada exitosamente.");
