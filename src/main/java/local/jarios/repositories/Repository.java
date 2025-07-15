@@ -1,10 +1,9 @@
-package local.jarios.repositorys;
+package local.jarios.repositories;
 
-import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
-import local.jarios.exceptions.MiRepositoryException;
 import local.jarios.entity.ParseoFicherosGc;
+import local.jarios.exceptions.MiRepositoryException;
 
 import java.util.List;
 
@@ -24,20 +23,6 @@ public interface Repository {
      * @param miLog Objeto Log a persistir
      */
     void persistirLog(Log miLog) throws MiRepositoryException;
-
-    /**
-     * Persiste una lista de objetos FicheroGc en la base de datos dentro de una transacción.
-     *
-     * @param listFicherosGc Lista de FicheroGc a persistir
-     */
-    void persistirListaFicherosGc(List<FicheroGc> listFicherosGc) throws MiRepositoryException;
-
-    /**
-     * Persiste un objeto Estadistica en la base de datos dentro de una transacción.
-     *
-     * @param estadistica Objeto Estadistica a persistir
-     */
-    void persistirEstadistica(Estadistica estadistica) throws MiRepositoryException;
 
     /**
      * Persiste un objeto ParseoFicherosGc en la base de datos dentro de una transacción.

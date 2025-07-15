@@ -1,17 +1,15 @@
 package local.jarios.entity;
 
-import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
+import local.jarios.common.util.TamanoCampos;
 import local.jarios.exceptions.MiUnknownHostException;
 import local.jarios.helpers.ComunHelper;
-import local.jarios.common.util.TamanoCampos;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -39,6 +37,7 @@ public class Estadistica extends AuditableCreatedAt {
      * </p>
      */
     @Id
+    @GeneratedValue(generator = "UUID")
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -50,12 +49,15 @@ public class Estadistica extends AuditableCreatedAt {
      * Se aplica borrado en cascada.
      * </p>
      */
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
     @JoinColumn(
             name = "log_id",
             nullable = false,
             referencedColumnName = "id",
-            foreignKey = @ForeignKey(name = "fk_estadistica_log",
+            foreignKey = @ForeignKey(
+                    name = "fk_estadistica_log",
                     foreignKeyDefinition = "FOREIGN KEY (log_id) REFERENCES log(id) ON DELETE CASCADE")
     )
     private Log logEntity;
@@ -83,58 +85,22 @@ public class Estadistica extends AuditableCreatedAt {
     private int nRegistrosGc;
 
     /**
-     * Fecha y hora del inicio del proceso de parseo.
-     * <p>
-     * No puede ser nulo.
-     * </p>
+     * Fecha y hora de inicio del proceso de importación.
      */
-    @Column(name = "fechaHoraInicialParseo", nullable = false)
-    private Timestamp fechaHoraInicialParseo;
+    @Column(name = "fechaHoraInicial")
+    private LocalDateTime fechaHoraInicial;
 
     /**
-     * Fecha y hora de finalización del proceso de parseo.
-     * <p>
-     * No puede ser nulo.
-     * </p>
+     * Fecha y hora de finalización del proceso de importación.
      */
-    @Column(name = "fechaHoraFinalParseo", nullable = false)
-    private Timestamp fechaHoraFinalParseo;
+    @Column(name = "fechaHoraFinal")
+    private LocalDateTime fechaHoraFinal;
 
     /**
-     * Fecha y hora del inicio del proceso de persistencia en base de datos.
-     * <p>
-     * No puede ser nulo.
-     * </p>
+     * Duración total del proceso de importación en formato legible.
      */
-    @Column(name = "fechaHoraInicialBaseDatos", nullable = false)
-    private Timestamp fechaHoraInicialBaseDatos;
-
-    /**
-     * Fecha y hora de finalización del proceso de persistencia en base de datos.
-     * <p>
-     * No puede ser nulo.
-     * </p>
-     */
-    @Column(name = "fechaHoraFinalBaseDatos", nullable = false)
-    private Timestamp fechaHoraFinalBaseDatos;
-
-    /**
-     * Duración total del proceso de parseo, en formato legible.
-     * <p>
-     * No puede ser nulo y tiene longitud máxima definida.
-     * </p>
-     */
-    @Column(name = "duracionParseo", nullable = false, length = TamanoCampos.TAMANO_250)
-    private String duracionParseo;
-
-    /**
-     * Duración total del proceso de persistencia en base de datos, en formato legible.
-     * <p>
-     * No puede ser nulo y tiene longitud máxima definida.
-     * </p>
-     */
-    @Column(name = "duracionBaseDatos", nullable = false, length = TamanoCampos.TAMANO_250)
-    private String duracionBaseDatos;
+    @Column(name = "duracion", length = TamanoCampos.TAMANO_250)
+    private String duracion;
 
 
     /**
@@ -145,46 +111,26 @@ public class Estadistica extends AuditableCreatedAt {
      * @throws MiUnknownHostException Si no se puede obtener el nombre del host
      */
     public Estadistica(Log logEntity) throws MiUnknownHostException {
-        this.id = Generators.timeBasedEpochGenerator().generate();
+        this.markAsCreated();
         this.logEntity = logEntity;
-        this.fechaHoraInicialParseo = Timestamp.from(Instant.now());
         this.equipo = ComunHelper.getHostName();
     }
 
     /**
-     * Registra la fecha y hora de finalización del parseo y calcula la duración en formato hh:mm:ss.SSS.
-     * @param fechaHoraFinalParseo Fecha y hora cuando finalizó el parseo
+     * Representación en texto del objeto Estadistica con todos sus campos.
+     *
+     * @return String con la representación del objeto
      */
-    public void registrarFinParseo(Timestamp fechaHoraFinalParseo) {
-        this.fechaHoraFinalParseo = fechaHoraFinalParseo;
-        long duracionMs = fechaHoraFinalParseo.getTime() - this.fechaHoraInicialParseo.getTime();
-        this.duracionParseo = formatDuracion(duracionMs);
-        log.info("Parseo finalizado. Duración: {}", duracionParseo);
-    }
-
-    /**
-     * Registra las fechas y horas de inicio y fin de la persistencia en base de datos y calcula la duración.
-     * @param fechaHoraInicialBaseDatos Fecha y hora de inicio de persistencia
-     * @param fechaHoraFinalBaseDatos Fecha y hora de fin de persistencia
-     */
-    public void registrarDuracionBaseDatos(Timestamp fechaHoraInicialBaseDatos, Timestamp fechaHoraFinalBaseDatos) {
-        this.fechaHoraInicialBaseDatos = fechaHoraInicialBaseDatos;
-        this.fechaHoraFinalBaseDatos = fechaHoraFinalBaseDatos;
-        long duracionMs = fechaHoraFinalBaseDatos.getTime() - fechaHoraInicialBaseDatos.getTime();
-        this.duracionBaseDatos = formatDuracion(duracionMs);
-        log.info("Persistencia en BD finalizada. Duración: {}", duracionBaseDatos);
-    }
-
-    /**
-     * Formatea milisegundos a string legible hh:mm:ss.SSS
-     * @param duracionMs duración en milisegundos
-     * @return duración formateada
-     */
-    private String formatDuracion(long duracionMs) {
-        long horas = duracionMs / 3600000;
-        long minutos = (duracionMs % 3600000) / 60000;
-        long segundos = (duracionMs % 60000) / 1000;
-        long milisegundos = duracionMs % 1000;
-        return String.format("%02d:%02d:%02d.%03d", horas, minutos, segundos, milisegundos);
+    @Override
+    public String toString() {
+        return "Estadistica [" +
+                "equipo='" + equipo + "', " +
+                "nTotalFicherosLeidos=" + nTotalFicherosLeidos + ", " +
+                "nRegistrosGc=" + nRegistrosGc + ", " +
+                "fechaHoraInicial=" + ComunHelper.getFechaHoraFormateada(fechaHoraInicial) + ", " +
+                "fechaHoraFinal=" + ComunHelper.getFechaHoraFormateada(fechaHoraFinal) + ", " +
+                "duracion=" + duracion +
+                "createdAt=" + ComunHelper.getFechaHoraFormateada(getCreatedAt()) +
+                "]";
     }
 }

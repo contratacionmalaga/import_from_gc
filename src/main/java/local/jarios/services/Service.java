@@ -5,8 +5,6 @@ import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.entity.ParseoFicherosGc;
 
-import java.util.List;
-
 /**
  * Interfaz que define los servicios relacionados con la persistencia de entidades en la base de datos.
  * <p>
@@ -35,47 +33,16 @@ public interface Service {
     void persistirLog(Log miLog);
 
     /**
-     * Persiste una lista de objetos {@link FicheroGc} en la base de datos.
+     * Persiste los registros contenidos en un objeto {@link ParseoFicherosGc}.
+     *
      * <p>
-     * Este método se encarga de almacenar una lista de objetos {@link FicheroGc} en la base de datos,
-     * gestionando las operaciones necesarias para su persistencia.
+     * Este método crea dinámicamente tablas (una por cada tipo de fichero representado)
+     * con el nombre basado en el prefijo proporcionado, y almacena en ellas los registros
+     * asociados a cada fichero.
      * </p>
      *
-     * @param listFicherosGc Lista de objetos {@link FicheroGc} a persistir.
-     */
-    void persistirListaFicherosGc(List<FicheroGc> listFicherosGc);
-
-    /**
-     * Persiste un objeto {@link ParseoFicherosGc} en la base de datos.
-     * <p>
-     * Este método se encarga de almacenar un objeto {@link ParseoFicherosGc} en la base de datos,
-     * gestionando las operaciones necesarias para su persistencia.
-     * </p>
-     *
-     * @param parseoFicherosGc Objeto {@link ParseoFicherosGc} a persistir.
-     * @param prefijo Prefijo utilizado en la creación de las tablas.
+     * @param parseoFicherosGc Objeto que agrupa los registros por tipo de fichero.
+     * @param prefijo          Prefijo que se antepone al nombre de las tablas dinámicas.
      */
     void persistirObjetoParseoFicherosGc(ParseoFicherosGc parseoFicherosGc, String prefijo);
-
-    /**
-     * Persiste un objeto {@link Estadistica} en la base de datos.
-     * <p>
-     * Este método se encarga de almacenar un objeto {@link Estadistica} en la base de datos,
-     * gestionando las operaciones necesarias para su persistencia.
-     * </p>
-     *
-     * @param estadistica Objeto {@link Estadistica} a persistir.
-     */
-    void persistirEstadistica(Estadistica estadistica);
-
-    /**
-     * Recupera una lista de objetos {@link FicheroGc} existentes en la base de datos.
-     * <p>
-     * Este método se encarga de recuperar una lista de objetos {@link FicheroGc} desde la base de datos,
-     * proporcionando los datos almacenados.
-     * </p>
-     *
-     * @return Lista de objetos {@link FicheroGc}.
-     */
-    List<FicheroGc> getListFicherosGc();
 }

@@ -1,14 +1,12 @@
 package local.jarios.entity;
 
-import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
-import local.jarios.interfaces.EsActualizable;
 import local.jarios.common.util.TamanoCampos;
+import local.jarios.interfaces.EsActualizable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -32,12 +30,9 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(
-        name = "ficheros_gc",
-        indexes = {
-                @Index(name = "idx_ficheros_gc_shortname", columnList = "shortName", unique = true)
-        }
+        name = "ficheros_gc"
 )
-public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<FicheroGc> {
+public class FicheroGc extends AuditableCreatedAt {
 
     /**
      * Identificador único del registro.
@@ -47,6 +42,7 @@ public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<Fich
      * </p>
      */
     @Id
+    @GeneratedValue(generator = "UUID")
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -59,12 +55,14 @@ public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<Fich
      * </p>
      */
     @ManyToOne(
-            fetch = FetchType.LAZY)
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
     @JoinColumn(
             name = "log_id",
             nullable = false,
             referencedColumnName = "id",
-            foreignKey = @ForeignKey(name = "fk_ficherosgc_log",
+            foreignKey = @ForeignKey(
+                    name = "fk_ficherosgc_log",
                     foreignKeyDefinition = "FOREIGN KEY (log_id) REFERENCES log(id) ON DELETE CASCADE"))
     private Log logEntity;
 
@@ -75,7 +73,7 @@ public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<Fich
      * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
      * </p>
      */
-    @Column(name = "shortName", nullable = false, length = TamanoCampos.TAMANO_250)
+    @Column(name = "short_name", nullable = false, length = TamanoCampos.TAMANO_250)
     private String shortName;
 
     /**
@@ -85,7 +83,7 @@ public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<Fich
      * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
      * </p>
      */
-    @Column(name = "longName", nullable = false, length = TamanoCampos.TAMANO_250)
+    @Column(name = "long_name", nullable = false, length = TamanoCampos.TAMANO_250)
     private String longName;
 
     /**
@@ -105,7 +103,7 @@ public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<Fich
      * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
      * </p>
      */
-    @Column(name = "canonicalUri", nullable = false, length = TamanoCampos.TAMANO_250)
+    @Column(name = "canonical_uri", nullable = false, length = TamanoCampos.TAMANO_250)
     private String canonicalUri;
 
     /**
@@ -115,7 +113,7 @@ public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<Fich
      * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
      * </p>
      */
-    @Column(name = "canonicalVersionUri", nullable = false, length = TamanoCampos.TAMANO_250)
+    @Column(name = "canonical_version_uri", nullable = false, length = TamanoCampos.TAMANO_250)
     private String canonicalVersionUri;
 
     /**
@@ -125,85 +123,15 @@ public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<Fich
      * longitud máxima está limitada por {@link TamanoCampos#TAMANO_250}.
      * </p>
      */
-    @Column(name = "locationUri", nullable = false, length = TamanoCampos.TAMANO_250)
+    @Column(name = "location_uri", nullable = false, length = TamanoCampos.TAMANO_250)
     private String locationUri;
 
     /**
      * Constructor que genera un UUID basado en tiempo y registra la creación del objeto.
      */
     public FicheroGc() {
+        this.markAsCreated();
         // Constructor vacío
-    }
-
-    /**
-     * Genera un Id único para el objeto.
-     * <p>
-     * Cuando creo el objeto NO TIENE id y esto me permite determinar
-     * a la hora de grabarlo en la base de datos si tengo que hacer un PERSIST | MERGE
-     * </p>
-     */
-    public void setId(){
-        this.id = Generators.timeBasedEpochGenerator().generate();
-    }
-
-    /**
-     * Compara si otro objeto es igual a esta instancia.
-     * <p>
-     * La comparación se realiza ignorando mayúsculas en campos clave.
-     * </p>
-     *
-     * @param obj Objeto a comparar.
-     * @return {@code true} si ambos objetos son iguales según los campos relevantes.
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            log.debug("Comparando objeto con sí mismo: retorna true");
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            log.debug("Objeto a comparar es null o de clase diferente: retorna false");
-            return false;
-        }
-        FicheroGc that = (FicheroGc) obj;
-        boolean result = comparar(that);
-        log.debug("Resultado comparación con objeto ID {}: {}", that.id, result);
-        return result;
-    }
-
-    /**
-     * Compara campos relevantes para determinar igualdad.
-     *
-     * @param ficheroGcEntity Objeto {@code FicheroGc} con el que se compara.
-     * @return {@code true} si todos los campos comparados son iguales (ignorando mayúsculas).
-     */
-    private boolean comparar(FicheroGc ficheroGcEntity) {
-        return
-                this.shortName.equalsIgnoreCase(ficheroGcEntity.getShortName()) &&
-                        this.longName.equalsIgnoreCase(ficheroGcEntity.getLongName()) &&
-                        this.version.equalsIgnoreCase(ficheroGcEntity.getVersion()) &&
-                        this.canonicalUri.equalsIgnoreCase(ficheroGcEntity.getCanonicalUri()) &&
-                        this.canonicalVersionUri.equalsIgnoreCase(ficheroGcEntity.getCanonicalVersionUri()) &&
-                        this.locationUri.equalsIgnoreCase(ficheroGcEntity.getLocationUri());
-    }
-
-    /**
-     * Genera un código hash consistente con el método {@link #equals(Object)}.
-     *
-     * @return Código hash basado en campos clave en minúsculas.
-     */
-    @Override
-    public int hashCode() {
-        int hash = Objects.hash(
-                shortName == null ? 0 : shortName.toLowerCase(),
-                longName == null ? 0 : longName.toLowerCase(),
-                version == null ? 0 : version.toLowerCase(),
-                canonicalUri == null ? 0 : canonicalUri.toLowerCase(),
-                canonicalVersionUri == null ? 0 : canonicalVersionUri.toLowerCase(),
-                locationUri == null ? 0 : locationUri.toLowerCase()
-        );
-        log.debug("Hash code generado para FicheroGc con ID {}: {}", id, hash);
-        return hash;
     }
 
     /**
@@ -221,32 +149,5 @@ public class FicheroGc extends AuditableUpdatedAt implements EsActualizable<Fich
                 locationUri;
         log.debug("toString generado: {}", representation);
         return representation;
-    }
-
-    /**
-     * Devuelve la clave única que identifica a esta entidad.
-     *
-     * @return Valor del campo único {@code shortName}.
-     */
-    @Override
-    public String getUniqueKey() {
-        return this.shortName;
-    }
-
-    /**
-     * Actualiza esta instancia con los valores de otro objeto {@code FicheroGc}.
-     * Se registran los cambios mediante log informativo.
-     *
-     * @param otro Objeto con los datos que actualizarán esta instancia.
-     */
-    @Override
-    public void actualizarCon(FicheroGc otro) {
-        log.info("Actualizando FicheroGc con ID {} con nuevos valores del objeto ID {}", this.id, otro.getId());
-        this.longName = otro.getLongName();
-        this.version = otro.getVersion();
-        this.canonicalUri = otro.getCanonicalUri();
-        this.canonicalVersionUri = otro.getCanonicalVersionUri();
-        this.locationUri = otro.getLocationUri();
-        log.info("Actualización completada para FicheroGc con ID {}", this.id);
     }
 }

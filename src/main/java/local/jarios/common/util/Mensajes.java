@@ -139,7 +139,7 @@ public final class Mensajes {
      * Mensaje que indica la ruta desde la que se importarán los ficheros.
      * Contiene marcador para la ruta.
      */
-    public static final String N_FICHEROS_PERSISTIDOS =
+    public static final String N_FICHEROS_EN_BASE_DATOS =
             "Número de FicherosGc existentes en la base de datos: {}";
 
     /**

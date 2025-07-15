@@ -1,6 +1,5 @@
 package local.jarios.entity;
 
-import com.fasterxml.uuid.Generators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +31,7 @@ public class Log extends AuditableCreatedAt {
      * </p>
      */
     @Id
+    @GeneratedValue(generator = "UUID")
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -39,7 +39,7 @@ public class Log extends AuditableCreatedAt {
      * Lista de ficheros asociados a este log.
      * Cascada y eliminación en orfanato activados.
      */
-    @OneToMany(mappedBy = "logEntity", orphanRemoval = true)
+    @OneToMany(mappedBy = "logEntity", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<FicheroGc> ficherosGc = new ArrayList<>();
 
     /**
@@ -53,6 +53,6 @@ public class Log extends AuditableCreatedAt {
      * Constructor que genera un UUID basado en tiempo y registra la creación.
      */
     public Log() {
-        this.id = Generators.timeBasedEpochGenerator().generate();
+        this.markAsCreated();
     }
 }

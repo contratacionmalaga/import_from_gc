@@ -47,10 +47,6 @@ public record EstadisticaEntityAdapter() implements JsonSerializer<Estadistica> 
         JsonSerializationHelper.addProperty(
                 jsonObject, "nRegistrosGc", estadistica.getNRegistrosGc());
         JsonSerializationHelper.addProperty(
-                jsonObject, "duracionParseo", estadistica.getDuracionParseo());
-        JsonSerializationHelper.addProperty(
-                jsonObject, "duracionPersistenciaEnBaseDatos", estadistica.getDuracionBaseDatos());
-        JsonSerializationHelper.addProperty(
                 jsonObject, "created_at", estadistica.getCreatedAt());
 
         log.debug("Serialización completada para Estadistica con ID: {}", estadistica.getId());

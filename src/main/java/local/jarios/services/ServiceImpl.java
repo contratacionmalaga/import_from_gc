@@ -3,16 +3,14 @@ package local.jarios.services;
 import local.jarios.entity.Estadistica;
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
+import local.jarios.entity.ParseoFicherosGc;
 import local.jarios.exceptions.MiRepositoryException;
 import local.jarios.exceptions.MiServiceException;
-import local.jarios.entity.ParseoFicherosGc;
-import local.jarios.repositorys.Repository;
-import local.jarios.repositorys.RepositoryImpl;
+import local.jarios.repositories.Repository;
+import local.jarios.repositories.RepositoryImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
-
-import java.util.List;
 
 /**
  * Implementación del servicio encargado de la persistencia de entidades en la base de datos.
@@ -70,7 +68,7 @@ public class ServiceImpl implements Service {
      */
     public void persistirLog(Log miLog) throws MiServiceException{
 
-        // Inicio
+
         try {
 
             // El repositorio se encarga de la persistencia y manejo de la las transacciones
@@ -86,29 +84,6 @@ public class ServiceImpl implements Service {
         }
     }
 
-    /**
-     * Persiste una lista de objetos {@link FicheroGc} en la base de datos.
-     *
-     * @param listFicherosGc Lista de objetos {@link FicheroGc} a persistir.
-     */
-    @Override
-    public void persistirListaFicherosGc(List<FicheroGc> listFicherosGc) throws MiServiceException {
-
-        // Inicio
-        try {
-
-            // Delegamos la persistencia y la gestión de la transacción al repositorio
-            repository.persistirListaFicherosGc(listFicherosGc);
-            log.debug("[persistirListaFicherosGc] - {} FicheroGc persistidos correctamente.", listFicherosGc.size());
-
-        } catch (MiRepositoryException ex) {
-
-            String msg = String.format("[persistirListaFicherosGc] - Error persistiendo la List<FicherosGc>: %s, Error: %s", listFicherosGc, ex.getMessage());
-            log.error(msg, ex.getMessage(), ex);
-            throw new MiServiceException(msg, ex);
-
-        }
-    }
 
     /**
      * Persiste un objeto {@link ParseoFicherosGc} en la base de datos.
@@ -131,47 +106,6 @@ public class ServiceImpl implements Service {
             log.error(msg, ex.getMessage(), ex);
             throw new MiServiceException(msg, ex);
 
-        }
-    }
-
-    /**
-     * Persiste un objeto {@link Estadistica} en la base de datos.
-     *
-     * @param estadistica Objeto {@link Estadistica} a persistir.
-     */
-    @Override
-    public void persistirEstadistica(Estadistica estadistica) throws MiServiceException {
-        // Inicio
-        log.debug("[persistirEstadistica] - Iniciando persistencia de Estadistica.");
-        try {
-            // Delegamos la persistencia y la gestión de la transacción al repositorio
-            repository.persistirEstadistica(estadistica);
-            log.debug("[persistirEstadistica] - Estadistica persistido correcamente.");
-        } catch (MiRepositoryException ex) {
-            String msg = String.format("[persistirEstadistica] - Error persistiendo Estadistica. Error: %s", ex.getMessage());
-            log.error(msg, ex);
-            throw new MiServiceException(msg, ex);
-        }
-    }
-
-    /**
-     * Recupera una lista de objetos {@link FicheroGc} existentes en la base de datos.
-     *
-     * @return Lista de objetos {@link FicheroGc}.
-     */
-    @Override
-    public List<FicheroGc> getListFicherosGc() throws MiServiceException {
-
-        // Inicio
-        try {
-            // Delegamos la persistencia y la gestión de la transacción al repositorio
-            List<FicheroGc>  listFicherosGc = repository.getListFicherosGc();
-            log.debug("[getListFicherosGc] - List<FicheroGc> obtenida correctamente..");
-            return listFicherosGc;
-        } catch (MiRepositoryException ex) {
-            String msg = String.format("[getListFicherosGc] - Error obteniendo List<FicheroGc>. Error: %s", ex.getMessage());
-            log.error(msg, ex);
-            throw new MiServiceException(msg, ex);
         }
     }
 }

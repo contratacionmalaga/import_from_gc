@@ -1,14 +1,15 @@
 package local.jarios.mappers;
 
+import local.jarios.common.util.Constantes;
 import local.jarios.entity.RegistroGc;
 import local.jarios.genericode.CodeList;
 import local.jarios.genericode.Row;
 import local.jarios.genericode.Value;
-import local.jarios.common.util.Constantes;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Clase responsable de mapear un {@link CodeList} a una lista de objetos {@link RegistroGc}.
@@ -33,9 +34,10 @@ public final class MapperRegistroGcFromCodeList {
      * Convierte un {@link CodeList} en una lista de objetos {@link RegistroGc}.
      *
      * @param codeList Objeto {@link CodeList} desde el cual se extraen los datos.
+     * @param logId Identificador único asociado al Log de ejecución
      * @return Lista de objetos {@link RegistroGc} generados a partir del código fuente.
      */
-    public static List<RegistroGc> getListRegistroGcFromCodeList(CodeList codeList) {
+    public static List<RegistroGc> getListRegistroGcFromCodeList(CodeList codeList, UUID logId) {
         List<RegistroGc> listaRegistrosGc = new ArrayList<>();
 
         if (codeList == null || codeList.getSimpleCodeList() == null) {
@@ -46,7 +48,7 @@ public final class MapperRegistroGcFromCodeList {
         var filas = codeList.getSimpleCodeList().getRow();
 
         if (filas == null || filas.isEmpty()) {
-            log.info("No se encontraron filas en el CodeList para procesar.");
+            log.debug("No se encontraron filas en el CodeList para procesar.");
             return listaRegistrosGc;
         }
 
@@ -76,8 +78,10 @@ public final class MapperRegistroGcFromCodeList {
                 continue;
             }
 
-            listaRegistrosGc.add(new RegistroGc(code, nombre));
-            log.debug("RegistroGc añadido: code='{}', nombre='{}'", code, nombre);
+            RegistroGc registroGc = new RegistroGc(code, nombre, logId);
+            log.debug("[getListRegistroGcFromCodeList] - Creado {}", registroGc);
+            listaRegistrosGc.add(registroGc);
+            log.debug("[getListRegistroGcFromCodeList] - Añadido a la lista ({})", listaRegistrosGc.size());
         }
 
         log.debug("Se generaron {} registros desde el CodeList.", listaRegistrosGc.size());

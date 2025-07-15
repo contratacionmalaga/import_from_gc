@@ -46,9 +46,11 @@ public final class TransactionManager {
      * @param transaction Transacción a confirmar.
      */
     public static void commitTransaction(Transaction transaction) {
-        if ((transaction != null) && !transaction.getRollbackOnly()) {
+        if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
             transaction.commit();
             log.debug("[commitTransaction] - Commit de la transacción.");
+        } else {
+            log.warn("[commitTransaction] - No se puede hacer commit porque la transacción no está activa o está marcada para rollback.");
         }
     }
 
@@ -61,17 +63,20 @@ public final class TransactionManager {
     public static void rollbackTransaction(Transaction transaction) throws MiTransactionManagerException {
         if (transaction != null) {
             try {
-
-                transaction.rollback();
-                log.warn("[rollbackTransaction] - Rollback ejecutado correctamente.");
-
+                if (transaction.isActive() && !transaction.getRollbackOnly()) {
+                    transaction.rollback();
+                    log.warn("[rollbackTransaction] - Rollback ejecutado correctamente.");
+                } else {
+                    log.warn("[rollbackTransaction] - La transacción no está activa o ya está marcada para rollback. No se realiza rollback.");
+                }
             } catch (Exception ex) {
-
                 String msg = String.format("[rollbackTransaction] - Error haciendo rollback: %s", ex.getMessage());
                 log.error(msg, ex);
                 throw new MiTransactionManagerException(msg, ex);
-
             }
+        } else {
+            log.warn("[rollbackTransaction] - La transacción es null. No se realiza rollback.");
         }
     }
+
 }

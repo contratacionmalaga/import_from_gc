@@ -1,9 +1,11 @@
 package local.jarios.entity;
 
+import local.jarios.helpers.ComunHelper;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.UUID;
 
 /**
  * Representa un registro de importación de un fichero Excel desde Internet.
@@ -16,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Setter
 @Getter
-@NoArgsConstructor
 @Slf4j
 public class RegistroGc extends AuditableCreatedAt {
 
@@ -26,16 +27,21 @@ public class RegistroGc extends AuditableCreatedAt {
     /** Nombre o descripción del registro */
     private String nombre;
 
+    /** Nombre o descripción del registro */
+    private UUID logId;
+
     /**
      * Constructor con parámetros.
      *
      * @param code Código identificador
      * @param nombre Nombre o descripción
+     * @param logId Identificador único asociado al Log de ejecución
      */
-    public RegistroGc(String code, String nombre) {
+    public RegistroGc(String code, String nombre, UUID logId) {
         this.code = code;
         this.nombre = nombre;
-        log.debug("RegistroGc creado con code='{}' y nombre='{}'", code, nombre);
+        this.logId = logId;
+        this.markAsCreated();
     }
 
     /**
@@ -45,8 +51,17 @@ public class RegistroGc extends AuditableCreatedAt {
      */
     @Override
     public String toString() {
-        String result = "(" + code + "," + nombre + ")";
-        log.debug("toString() llamado: {}", result);
-        return result;
+        return "RegistroGc: [" +
+                "logId='" + logId + "', " +
+                "code='" + code + "', " +
+                "nombre='" + nombre + "', " +
+                "createdAt='" + ComunHelper.getFechaHoraFormateada(this.getCreatedAt()) +
+                "']";
+
+    }
+
+    /** Constructor privado */
+    private RegistroGc() {
+        //
     }
 }
