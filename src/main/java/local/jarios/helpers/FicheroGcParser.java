@@ -31,6 +31,7 @@ public class FicheroGcParser {
      *
      * @param miLog                   Log asociado a la ejecución actual.
      * @param arrayFicherosDirectorio Array con los ficheros en el directorio para su procesamiento.
+     * @param estadistica Objeto que almacena los datos de cada ejecución.
      * @return Objeto {@link ParseoFicherosGc} con la información procesada lista para persistencia.
      */
     public ParseoFicherosGc parsearFicheros(
