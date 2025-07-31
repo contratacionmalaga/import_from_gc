@@ -45,20 +45,26 @@
         <exec.mainClass>local.jarios.ImportFromGc</exec.mainClass>
 
         <!-- Centralización de versiones -->
-        <jackson.version>2.19.1</jackson.version>
+        <jackson.version>2.19.2</jackson.version>
         <gson.version>2.13.1</gson.version>
         <jsoup.version>1.21.1</jsoup.version>
-        <hibernate.version>7.0.6.Final</hibernate.version>
+        <hibernate.version>7.0.8.Final</hibernate.version>
         <poi.version>5.4.1</poi.version>
         <slf4j.version>2.0.17</slf4j.version>
         <log4j.version>2.24.3</log4j.version>
         <lombok.version>1.18.38</lombok.version>
-        <hikaricp.version>6.3.0</hikaricp.version>
+        <hikaricp.version>7.0.0</hikaricp.version>
         <mariadb.version>3.5.4</mariadb.version>
         <uuid.version>5.1.0</uuid.version>
         <junit.version>5.10.2</junit.version>
         <assertj.version>4.0.0-M1</assertj.version>
         <mockito.version>5.18.0</mockito.version>
+        <reflections.version>0.10.2</reflections.version>
+        <java-uuid-generator.version>5.1.0</java-uuid-generator.version>
+        <version-helper.version>2.1.0</version-helper.version>
+        <encrypt-helper.version>2.2.0</encrypt-helper.version>
+        <properties-helper.version>3.2.0</properties-helper.version>
+        <email-helper.version>3.2.0</email-helper.version>
     </properties>
 
     <dependencies>
@@ -106,7 +112,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -114,7 +120,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.17</version>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <!-- Framework para la gestión de los logs con Log4j -->
@@ -140,39 +146,39 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.13.1</version>
+            <version>${gson.version}</version>
         </dependency>
 
         <!-- Componentes personales -->
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>encrypt_helper</artifactId>
-            <version>2.1.0</version>
+            <artifactId>encrypt-helper</artifactId>
+            <version>${version-helper.version}</version>
         </dependency>
 
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>version_helper</artifactId>
-            <version>2.2.0</version>
+            <artifactId>version-helper</artifactId>
+            <version>${encrypt-helper.version}</version>
         </dependency>
 
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>email_helper</artifactId>
-            <version>3.1.0</version>
+            <artifactId>email-helper</artifactId>
+            <version>${email-helper.version}</version>
         </dependency>
 
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>properties_helper</artifactId>
-            <version>3.2.0</version>
+            <artifactId>properties-helper</artifactId>
+            <version>${properties-helper.version}</version>
         </dependency>
         <!-- Fin de componenetes personales -->
 
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.10.2</version>
+            <version>${reflections.version}</version>
         </dependency>
 
         <dependency>
@@ -185,28 +191,28 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.5.4</version>
+            <version>${mariadb.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>6.3.0</version>
+            <version>${hikaricp.version}</version>
         </dependency>
 
         <!-- Dependencias para JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>6.0.0-M1</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>6.0.0-M1</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -214,14 +220,14 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>4.0.0-M1</version>
+            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.18.0</version> <!-- o última estable -->
+            <version>${mockito.version}</version> <!-- o última estable -->
             <scope>test</scope>
         </dependency>
 
@@ -229,7 +235,7 @@
         <dependency>
             <groupId>com.fasterxml.uuid</groupId>
             <artifactId>java-uuid-generator</artifactId>
-            <version>5.1.0</version>
+            <version>${java-uuid-generator.version}</version>
         </dependency>
 
     </dependencies>
@@ -246,8 +252,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.0</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
 
@@ -356,7 +362,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -400,6 +406,17 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <mainClass>local.jarios.ImportFromGc</mainClass>
+                                </manifest>
+                                <manifestEntries>
+                                    <Implementation-Title>${project.name}</Implementation-Title>
+                                    <Implementation-Version>${project.version}</Implementation-Version>
+                                    <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                                </manifestEntries>
+                            </archive>
                             <appendAssemblyId>true</appendAssemblyId>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
