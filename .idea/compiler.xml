@@ -8,8 +8,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="ImportDir3FromExcel" />
+        <module name="import_from_gc" />
         <module name="ImportarToMySql" />
-        <module name="import-from-gc" />
         <module name="Importaciones" />
       </profile>
     </annotationProcessing>
