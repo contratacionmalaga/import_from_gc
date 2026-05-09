@@ -139,25 +139,25 @@
         <!-- Componentes personales -->
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>encrypt-helper</artifactId>
+            <artifactId>encrypt_helper</artifactId>
             <version>${encrypt-helper.version}</version>
         </dependency>
 
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>version-helper</artifactId>
+            <artifactId>version_helper</artifactId>
             <version>${version-helper.version}</version>
         </dependency>
 
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>email-helper</artifactId>
+            <artifactId>email_helper</artifactId>
             <version>${email-helper.version}</version>
         </dependency>
 
         <dependency>
             <groupId>local.jarios</groupId>
-            <artifactId>properties-helper</artifactId>
+            <artifactId>properties_helper</artifactId>
             <version>${property-helper.version}</version>
         </dependency>
         <!-- Fin de componenetes personales -->
