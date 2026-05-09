@@ -21,7 +21,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -81,13 +80,14 @@ public class RepositoryImpl implements Repository {
 
         try {
             ejecutarEnTransaccion(session -> {
+                DestructiveImportPolicy.requireAllowed(propertyManager);
                 borrarTodos(session, FicheroGc.class);
                 session.flush();
                 session.merge(miLog);
                 log.debug("[persistirLog] Log persistido: {}", miLog);
 
                 for (Map.Entry<String, List<RegistroGc>> entry : parseo.getMapRegistrosGcByFicheroGc().entrySet()) {
-                    final String nombreTabla = prefijo + normalizarIdentificadorTabla(entry.getKey());
+                    final String nombreTabla = prefijo + TableNameNormalizer.normalize(entry.getKey());
                     log.debug("[persistirObjetoParseoFicherosGc] Procesando tabla: {}", nombreTabla);
 
                     if (registroGcDao.existeTabla(session, nombreTabla)) {
@@ -124,26 +124,12 @@ public class RepositoryImpl implements Repository {
      */
     private String obtenerPrefijoAplicacion() throws MiRepositoryException {
         try {
-            return normalizarIdentificadorTabla(propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_PREFIX));
+            return TableNameNormalizer.normalize(propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_PREFIX));
         } catch (PropertiesManagerException e) {
             String msg = "[obtenerPrefijoAplicacion] Error al obtener prefijo de configuración: " + e.getMessage();
             log.error(msg, e);
             throw new MiRepositoryException(msg, e);
         }
-    }
-
-    /**
-     * Normaliza nombres derivados de configuracion o de ficheros GC para usarlos como identificadores SQL.
-     *
-     * @param valor valor original
-     * @return identificador en minusculas con caracteres no seguros sustituidos por guion bajo
-     */
-    private String normalizarIdentificadorTabla(String valor) {
-        if (valor == null || valor.isBlank()) {
-            throw new IllegalArgumentException("El identificador de tabla no puede estar vacio.");
-        }
-
-        return valor.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]", "_");
     }
 
     /**
@@ -193,6 +179,7 @@ public class RepositoryImpl implements Repository {
      * @param entidadClass Clase de la entidad a eliminar
      */
     private void borrarTodos(Session session, Class<?> entidadClass) {
+        DestructiveImportPolicy.requireAllowed(propertyManager);
         String hql = "delete from " + entidadClass.getSimpleName();
         int resultado = session.createMutationQuery(hql).executeUpdate();
         log.info("[borrarTodos] Borrados todos los registros ({}) de {}", resultado, entidadClass.getSimpleName());

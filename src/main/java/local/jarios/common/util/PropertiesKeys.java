@@ -19,6 +19,8 @@ public final class PropertiesKeys {
     public static final String APP_CHARACTER_ENCODING = "app.characterEncoding";
     /** Prefijo */
     public static final String APP_CONNECTION_COLLATION = "app.connectionCollation";
+    /** Permite borrados y recreacion de datos durante la importacion */
+    public static final String APP_ALLOW_DESTRUCTIVE_IMPORT = "app.allowDestructiveImport";
 
     /* Nombre de las propiedades del fichero hibernate.properties */
     /** Batch_size */
@@ -52,7 +54,6 @@ public final class PropertiesKeys {
     }
 
 }
-
 
 
 

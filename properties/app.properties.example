@@ -5,3 +5,4 @@ app.path=data/gc
 app.prefix=placsp_
 app.characterEncoding=utf8mb4
 app.connectionCollation=utf8mb4_unicode_ci
+app.allowDestructiveImport=false
