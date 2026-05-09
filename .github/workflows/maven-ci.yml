@@ -67,10 +67,10 @@ jobs:
 
       - name: Resolve private helper packages
         run: |
-          mvn -B dependency:get -Dartifact=local.jarios:encrypt-helper:5.2.0 -DremoteRepositories=github-encrypt-helper::default::https://maven.pkg.github.com/contratacionmalaga/encrypt_helper
-          mvn -B dependency:get -Dartifact=local.jarios:version-helper:5.2.0 -DremoteRepositories=github-version-helper::default::https://maven.pkg.github.com/contratacionmalaga/version_helper
-          mvn -B dependency:get -Dartifact=local.jarios:email-helper:5.2.0 -DremoteRepositories=github-email-helper::default::https://maven.pkg.github.com/contratacionmalaga/email_helper
-          mvn -B dependency:get -Dartifact=local.jarios:properties-helper:5.2.0 -DremoteRepositories=github-properties-helper::default::https://maven.pkg.github.com/contratacionmalaga/properties_helper
+          mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:encrypt-helper:5.2.0 -DremoteRepositories=github-encrypt-helper::default::https://maven.pkg.github.com/contratacionmalaga/encrypt_helper
+          mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:version-helper:5.2.0 -DremoteRepositories=github-version-helper::default::https://maven.pkg.github.com/contratacionmalaga/version_helper
+          mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:email-helper:5.2.0 -DremoteRepositories=github-email-helper::default::https://maven.pkg.github.com/contratacionmalaga/email_helper
+          mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:properties-helper:5.2.0 -DremoteRepositories=github-properties-helper::default::https://maven.pkg.github.com/contratacionmalaga/properties_helper
 
       - name: Build and test
         run: mvn -B clean verify
