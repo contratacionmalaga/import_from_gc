@@ -26,12 +26,43 @@ jobs:
           java-version: '21'
           distribution: temurin
           cache: maven
-          server-id: github-releases
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
 
       - name: Configure package credentials
-        run: echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_ENV"
+        env:
+          MAVEN_PACKAGE_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p "$HOME/.m2"
+          cat > "$HOME/.m2/settings.xml" <<'EOF'
+          <settings>
+            <servers>
+              <server>
+                <id>github-releases</id>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.MAVEN_PACKAGE_TOKEN}</password>
+              </server>
+              <server>
+                <id>github-email-helper</id>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.MAVEN_PACKAGE_TOKEN}</password>
+              </server>
+              <server>
+                <id>github-properties-helper</id>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.MAVEN_PACKAGE_TOKEN}</password>
+              </server>
+              <server>
+                <id>github-version-helper</id>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.MAVEN_PACKAGE_TOKEN}</password>
+              </server>
+              <server>
+                <id>github-encrypt-helper</id>
+                <username>${env.GITHUB_ACTOR}</username>
+                <password>${env.MAVEN_PACKAGE_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
 
       - name: Build and test
         run: mvn -B clean verify

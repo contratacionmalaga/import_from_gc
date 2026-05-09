@@ -15,6 +15,22 @@
             <id>github-releases</id>
             <url>https://maven.pkg.github.com/contratacionmalaga/import_from_gc</url>
         </repository>
+        <repository>
+            <id>github-email-helper</id>
+            <url>https://maven.pkg.github.com/contratacionmalaga/email_helper</url>
+        </repository>
+        <repository>
+            <id>github-properties-helper</id>
+            <url>https://maven.pkg.github.com/contratacionmalaga/properties_helper</url>
+        </repository>
+        <repository>
+            <id>github-version-helper</id>
+            <url>https://maven.pkg.github.com/contratacionmalaga/version_helper</url>
+        </repository>
+        <repository>
+            <id>github-encrypt-helper</id>
+            <url>https://maven.pkg.github.com/contratacionmalaga/encrypt_helper</url>
+        </repository>
     </repositories>
 
     <name>import-from-gc</name>
