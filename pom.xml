@@ -289,9 +289,6 @@
                 <version>3.5.4</version>
                 <configuration>
                     <useModulePath>false</useModulePath> <!-- importante si usas Java 9+ con módulos -->
-                    <argLine>
-                        --add-modules jdk.incubator.vector -javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.17.5/byte-buddy-agent-1.17.5.jar" -XX:+EnableDynamicAgentLoading
-                    </argLine>
                 </configuration>
             </plugin>
 
