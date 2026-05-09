@@ -12,10 +12,6 @@
             <url>https://repo.maven.apache.org/maven2</url>
         </repository>
         <repository>
-            <id>github-releases</id>
-            <url>https://maven.pkg.github.com/contratacionmalaga/import_from_gc</url>
-        </repository>
-        <repository>
             <id>github-email-helper</id>
             <url>https://maven.pkg.github.com/contratacionmalaga/email_helper</url>
         </repository>
