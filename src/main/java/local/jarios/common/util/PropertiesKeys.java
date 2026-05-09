@@ -36,9 +36,9 @@ public final class PropertiesKeys {
 
     /* Nombre de las propiedades del fichero mail.properties */
     /** User */
-    public static final String MAIL_USER = "mail.user";
+    public static final String MAIL_USER = "mail.smtp.user";
     /** Password */
-    public static final String MAIL_PASSWORD = "mail.password";
+    public static final String MAIL_PASSWORD = "mail.smtp.password";
     /** From */
     public static final String MAIL_FROM = "mail.from";
     /** To */
@@ -52,7 +52,6 @@ public final class PropertiesKeys {
     }
 
 }
-
 
 
 

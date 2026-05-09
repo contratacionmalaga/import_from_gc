@@ -21,6 +21,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -86,7 +87,7 @@ public class RepositoryImpl implements Repository {
                 log.debug("[persistirLog] Log persistido: {}", miLog);
 
                 for (Map.Entry<String, List<RegistroGc>> entry : parseo.getMapRegistrosGcByFicheroGc().entrySet()) {
-                    final String nombreTabla = prefijo + entry.getKey().toLowerCase();
+                    final String nombreTabla = prefijo + normalizarIdentificadorTabla(entry.getKey());
                     log.debug("[persistirObjetoParseoFicherosGc] Procesando tabla: {}", nombreTabla);
 
                     if (registroGcDao.existeTabla(session, nombreTabla)) {
@@ -123,12 +124,26 @@ public class RepositoryImpl implements Repository {
      */
     private String obtenerPrefijoAplicacion() throws MiRepositoryException {
         try {
-            return propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_PREFIX);
+            return normalizarIdentificadorTabla(propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_PREFIX));
         } catch (PropertiesManagerException e) {
             String msg = "[obtenerPrefijoAplicacion] Error al obtener prefijo de configuración: " + e.getMessage();
             log.error(msg, e);
             throw new MiRepositoryException(msg, e);
         }
+    }
+
+    /**
+     * Normaliza nombres derivados de configuracion o de ficheros GC para usarlos como identificadores SQL.
+     *
+     * @param valor valor original
+     * @return identificador en minusculas con caracteres no seguros sustituidos por guion bajo
+     */
+    private String normalizarIdentificadorTabla(String valor) {
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalArgumentException("El identificador de tabla no puede estar vacio.");
+        }
+
+        return valor.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]", "_");
     }
 
     /**

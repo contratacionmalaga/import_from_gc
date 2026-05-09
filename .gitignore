@@ -3,5 +3,8 @@
 /.idea/
 /logs/
 /config/
+properties/app.properties
+properties/jakarta_principal.properties
+properties/mail.properties
 pom.xml.releaseBackup
 release.properties

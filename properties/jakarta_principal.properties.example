@@ -1,0 +1,10 @@
+# Database configuration template.
+# Prefer environment variables in deployments:
+# IMPORT_FROM_GC_JDBC_URL
+# IMPORT_FROM_GC_JDBC_DRIVER
+# IMPORT_FROM_GC_JDBC_USER
+# IMPORT_FROM_GC_JDBC_PASSWORD
+jakarta.persistence.jdbc.url=jdbc:mariadb://localhost:3306/java_importacion_opendata_gc?useUnicode=true&characterEncoding=utf8mb4&connectionCollation=utf8mb4_unicode_ci&connectionCollationForce=true&serverTimezone=Europe/Madrid&rewriteBatchedStatements=true
+jakarta.persistence.jdbc.driver=org.mariadb.jdbc.Driver
+jakarta.persistence.jdbc.user=
+jakarta.persistence.jdbc.password=

@@ -13,6 +13,7 @@ import org.hibernate.Session;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  * DAO (Data Access Object) para la entidad {@link RegistroGc}.
@@ -22,6 +23,9 @@ import java.util.UUID;
  */
 @Slf4j
 public class RegistroGcDao {
+
+    /** Patron permitido para identificadores SQL generados por la aplicacion. */
+    private static final Pattern SAFE_SQL_IDENTIFIER = Pattern.compile("[A-Za-z0-9_]+");
 
     /** Objeto para gestionar los ficheros properties. */
     private final PropertiesManagerService propertyManager;
@@ -42,6 +46,7 @@ public class RegistroGcDao {
      * @return {@code true} si la tabla existe, {@code false} en caso contrario
      */
     public boolean existeTabla(Session session, String nombreTabla) {
+        validarIdentificadorSql(nombreTabla, "nombreTabla");
         String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :nombre";
         log.debug("[existeTabla] SQL: {}", sql);
         long count = ((Number) session.createNativeQuery(sql)
@@ -61,8 +66,11 @@ public class RegistroGcDao {
 
         try {
 
+            validarIdentificadorSql(nombreTabla, "nombreTabla");
             String encoding = propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_CHARACTER_ENCODING);
             String collate = propertyManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_CONNECTION_COLLATION);
+            validarIdentificadorSql(encoding, "encoding");
+            validarIdentificadorSql(collate, "collate");
 
             String sql = "CREATE TABLE IF NOT EXISTS " + nombreTabla + " (" +
                     "id UUID NOT NULL, " +
@@ -90,6 +98,8 @@ public class RegistroGcDao {
      * @param registros    lista de objetos {@link RegistroGc} a insertar
      */
     public void insertarRegistros(Session session, String nombreTabla, List<RegistroGc> registros) {
+        validarIdentificadorSql(nombreTabla, "nombreTabla");
+
         if (registros.isEmpty()) {
             log.warn("[insertarRegistros] Lista de registros vacía.");
             return;
@@ -98,32 +108,41 @@ public class RegistroGcDao {
         StringBuilder sql = new StringBuilder("INSERT INTO " + nombreTabla + " (id, code, nombre) VALUES ");
 
         for (int i = 0; i < registros.size(); i++) {
-            RegistroGc r = registros.get(i);
-            UUID id = Generators.timeBasedEpochGenerator().generate();
-
-            sql.append("('")
-                    .append(id).append("','")
-                    .append(sanitizar(r.getCode())).append("','")
-                    .append(sanitizar(r.getNombre())).append("')");
+            sql.append("(:id").append(i)
+                    .append(", :code").append(i)
+                    .append(", :nombre").append(i)
+                    .append(")");
 
             if (i < registros.size() - 1) {
                 sql.append(", ");
             }
         }
 
-        log.debug("[insertarRegistros] SQL: {}", sql);
-        session.createNativeQuery(sql.toString()).executeUpdate();
+        var query = session.createNativeQuery(sql.toString());
+        for (int i = 0; i < registros.size(); i++) {
+            RegistroGc registro = registros.get(i);
+            UUID id = Generators.timeBasedEpochGenerator().generate();
+
+            query.setParameter("id" + i, id.toString());
+            query.setParameter("code" + i, registro.getCode());
+            query.setParameter("nombre" + i, registro.getNombre());
+        }
+
+        log.debug("[insertarRegistros] SQL parametrizado preparado para {} registros.", registros.size());
+        query.executeUpdate();
         log.debug("[insertarRegistros] Insertados {} registros en {}", registros.size(), nombreTabla);
     }
 
     /**
-     * Escapa comillas simples en cadenas para evitar errores de SQL o inyecciones.
+     * Valida identificadores SQL generados por la aplicacion.
      *
-     * @param valor cadena a sanitizar
-     * @return cadena sanitizada (comillas simples duplicadas)
+     * @param valor valor a validar
+     * @param campo nombre logico del campo validado
      */
-    private String sanitizar(String valor) {
-        return (valor == null) ? "" : valor.replace("'", "''");
+    private void validarIdentificadorSql(String valor, String campo) {
+        if (valor == null || !SAFE_SQL_IDENTIFIER.matcher(valor).matches()) {
+            throw new IllegalArgumentException("Identificador SQL no permitido en " + campo + ": " + valor);
+        }
     }
 
     /**
@@ -133,6 +152,7 @@ public class RegistroGcDao {
      * @param nombreTabla nombre de la tabla a eliminar
      */
     public void eliminarTabla(Session session, String nombreTabla) {
+        validarIdentificadorSql(nombreTabla, "nombreTabla");
         String sql = "DROP TABLE IF EXISTS " + nombreTabla;
         log.info("[eliminarTabla] SQL: {}", sql);
         session.createNativeQuery(sql).executeUpdate();

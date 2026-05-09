@@ -1,0 +1,18 @@
+# Mail configuration template.
+# Prefer environment variables in deployments:
+# IMPORT_FROM_GC_MAIL_USER
+# IMPORT_FROM_GC_MAIL_PASSWORD
+# IMPORT_FROM_GC_MAIL_FROM
+# IMPORT_FROM_GC_MAIL_TO
+mail.smtp.host=correo.malaga.es
+mail.smtp.auth=true
+mail.smtp.port=587
+mail.smtp.socketFactory.port=587
+mail.smtp.ssl.checkserveridentity=true
+mail.smtp.ssl.protocols=TLSv1.2
+mail.smtp.ssl.trust=correo.malaga.es
+mail.smtp.starttls.enable=true
+mail.smtp.user=
+mail.smtp.password=
+mail.from=
+mail.to=

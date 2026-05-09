@@ -14,6 +14,9 @@ package local.jarios.common.util;
 public final class Constantes {
 
     /** Cadena vacía. */
+    public static final String JSON_VACIO = "{}";
+
+    /** Cadena vacía. */
     public static final String CADENA_VACIA = "";
 
     /** Clave "code" utilizada en mapas o JSON. */
@@ -28,8 +31,8 @@ public final class Constantes {
     /** Retorno de carro / salto de línea. */
     public static final String CR = "\n";
 
-    /** Ruta del directorio con los ficheros properties */
-    public static final String CONFIG_DIR = "config";
+    /** Ruta del directorio con los ficheros properties. */
+    public static final String PROPERTIES_DIR = "properties";
 
     /** Formato fecha hora. */
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";

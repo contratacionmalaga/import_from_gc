@@ -1,0 +1,7 @@
+# Application configuration template.
+app.name=import_from_ficherosgc
+app.description=Aplicacion para el parseo de ficheros GC obtenidos de los datos abiertos de PLACSP
+app.path=data/gc
+app.prefix=placsp_
+app.characterEncoding=utf8mb4
+app.connectionCollation=utf8mb4_unicode_ci

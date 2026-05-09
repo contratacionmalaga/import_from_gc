@@ -25,7 +25,6 @@ import local.jarios.properties.api.PropertiesManagerServiceImpl;
 import local.jarios.properties.exception.PropertiesManagerException;
 import local.jarios.services.Service;
 import local.jarios.services.ServiceImpl;
-import local.jarios.version.VersionDemo;
 import local.jarios.version.api.Version;
 import local.jarios.version.api.VersionImpl;
 import local.jarios.version.exception.VersionException;
@@ -102,8 +101,13 @@ public class ImportFromGc {
             Version versionService = new VersionImpl();
             log.info("[main] El servicio de consulta de la versión del JAR se ha creado correctamente.");
 
-            propertiesManager.setConfigDir(Constantes.CONFIG_DIR);
-            log.info("[main] Directorio configurado: {}", Constantes.CONFIG_DIR);
+            // Obtengo la versión de la aplicación
+            appVersion = versionService.getVersion(ImportFromGc.class);
+            log.info("AppVersion: {}", appVersion);
+
+            // Directorio de configuración
+            propertiesManager.setConfigDir(Constantes.PROPERTIES_DIR);
+            log.info("Directorio configurado: /{}", Constantes.PROPERTIES_DIR);
 
             // === Configuración inicial ===
             Set<String> clavesSensibles = Set.of("password");
@@ -112,14 +116,14 @@ public class ImportFromGc {
 
             // Cargar todas las propiedades desde el directorio de configuración
             propertiesManager.loadAllProperties();
-            log.info("[main] Ficheros .properties cargados desde /{} correctamente", Constantes.CONFIG_DIR);
+            log.info("[main] Ficheros .properties cargados desde /{} correctamente", Constantes.PROPERTIES_DIR);
 
             // Muestro el valor de APP_NAME
             appName = propertiesManager.getProperty(PropertiesFiles.APP, PropertiesKeys.APP_NAME);
             log.info("[main] AppName: {}", appName);
 
             // Obtengo y muestro el valor de APP_VERSION
-            appVersion = versionService.getVersion(VersionDemo.class);
+            appVersion = versionService.getVersion(ImportFromGc.class);
             log.info("[main] AppVersion: {}", appVersion);
 
             // Creo el objeto Log para esta ejecución
@@ -248,10 +252,10 @@ public class ImportFromGc {
         String equipo = ComunHelper.getHostName();
         log.info("[construirEmailData] Equipo desde el que se envía el email: {}", equipo);
 
-        String from = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_FROM);
+        String from = getPropertyOrEnv(PropertiesFiles.MAIL, PropertiesKeys.MAIL_FROM, "IMPORT_FROM_GC_MAIL_FROM");
         log.info("[construirEmailData] Remitente: {}", from);
 
-        String to = propertiesManager.getProperty(PropertiesFiles.MAIL, PropertiesKeys.MAIL_TO);
+        String to = getPropertyOrEnv(PropertiesFiles.MAIL, PropertiesKeys.MAIL_TO, "IMPORT_FROM_GC_MAIL_TO");
         log.info("[construirEmailData] Destinatarios: {}", to);
 
         // Defino el asunto y el cupero del Email
@@ -289,6 +293,10 @@ public class ImportFromGc {
 
         // Configuración del servidor SMTP
         Properties emailProps = propertiesManager.getProperties(PropertiesFiles.MAIL);
+        applyEnvOverride(emailProps, PropertiesKeys.MAIL_USER, "IMPORT_FROM_GC_MAIL_USER");
+        applyEnvOverride(emailProps, PropertiesKeys.MAIL_PASSWORD, "IMPORT_FROM_GC_MAIL_PASSWORD");
+        applyEnvOverride(emailProps, PropertiesKeys.MAIL_FROM, "IMPORT_FROM_GC_MAIL_FROM");
+        applyEnvOverride(emailProps, PropertiesKeys.MAIL_TO, "IMPORT_FROM_GC_MAIL_TO");
         log.info("[enviarEmail] Properties cargadas correctamente.");
 
         // Construcción de los datos del correo
@@ -309,6 +317,39 @@ public class ImportFromGc {
         emailService.sendEmail(emailProps, emailData);
         log.info("[enviarEmail] Correo enviado correctamente.");
 
+    }
+
+    /**
+     * Aplica una variable de entorno sobre una propiedad cuando esta definida.
+     *
+     * @param props propiedades base
+     * @param propertyKey clave a sobrescribir
+     * @param envName nombre de la variable de entorno
+     */
+    private static void applyEnvOverride(Properties props, String propertyKey, String envName) {
+        String envValue = System.getenv(envName);
+        if (envValue != null && !envValue.isBlank()) {
+            props.setProperty(propertyKey, envValue);
+        }
+    }
+
+    /**
+     * Obtiene una propiedad permitiendo que una variable de entorno tenga prioridad.
+     *
+     * @param file fichero de propiedades
+     * @param key clave de propiedades
+     * @param envName nombre de variable de entorno
+     * @return valor configurado
+     * @throws PropertiesManagerException si falla la lectura del fichero de propiedades
+     */
+    private static String getPropertyOrEnv(String file, String key, String envName)
+            throws PropertiesManagerException {
+        String envValue = System.getenv(envName);
+        if (envValue != null && !envValue.isBlank()) {
+            return envValue;
+        }
+
+        return propertiesManager.getProperty(file, key);
     }
 
     /**

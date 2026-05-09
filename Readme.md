@@ -21,9 +21,7 @@
 - __Base de datos__: MariaDB en su versión `11.6` haciendo uso de esquemas.
 - __Versión del framework Hibernate__: HikariCP en su versión `7.0.0` para core y `7.0.0` para HikariCP
 - __Biblioteca Lombok__: Biblioteca que facilita la programación mediante la inyección de código mediante etiquetas. Utilizamos la versión `1.18.38`.
-- __Gestión de Logs__: Utilizamos `slf4j` como fachada para los logs de los componentes y como elemento generador de logs utilizamos `log4j`. Las versiones de los productos utilizadas son las siguientes:
-    - __Fachada__: `slf4j` versión `2.0.16` junto con la implementación `log4j-slf4j2-impl` para `log4j` en su versión `2.24.3`.
-    - __Gestor de Logs__: `log4j` en su versión `2.24.3`.
+- __Gestión de Logs__: Utilizamos `slf4j` como fachada y `logback` como implementación de logging.
 - Parseo de los ficheros GC con
     - __jaxb-core__: `2.3.0.1`
     - __jaxb-imp__: `2.3.0.1`
@@ -35,15 +33,42 @@
 ## Requisitos
 
 - Java 21+ (o versión compatible)
+- Maven 3.6.3+ hasta que el proyecto incorpore Maven Wrapper.
 - Dependencias:
   - Lombok (para anotaciones como `@Slf4j`)
   - Framework de persistencia compatible (Hibernate, JPA, JDBC, etc. según implementación en `ServiceImpl`)
 - Base de datos configurada y accesible
 - Ficheros GC en formato Excel ubicados en la ruta configurada en el fichero properties
 
+## Configuración
+
+Los ficheros `properties/*.properties` locales pueden contener valores específicos de entorno y no deben incluir secretos reales en el repositorio. Se incluyen plantillas `*.properties.example` para crear la configuración local.
+
+Variables de entorno soportadas:
+
+- `IMPORT_FROM_GC_JDBC_URL`
+- `IMPORT_FROM_GC_JDBC_DRIVER`
+- `IMPORT_FROM_GC_JDBC_USER`
+- `IMPORT_FROM_GC_JDBC_PASSWORD`
+- `IMPORT_FROM_GC_MAIL_USER`
+- `IMPORT_FROM_GC_MAIL_PASSWORD`
+- `IMPORT_FROM_GC_MAIL_FROM`
+- `IMPORT_FROM_GC_MAIL_TO`
+
+Por seguridad, `hibernate.hbm2ddl.auto` debe mantenerse como `validate` o `none` fuera de entornos locales controlados. La aplicación puede borrar y recrear tablas dinámicas durante la importación, por lo que no debe ejecutarse contra una base compartida sin validar antes el modo de operación.
+
+## Verificación
+
+```powershell
+mvn clean verify
+mvn spotbugs:check
+mvn org.owasp:dependency-check-maven:check
+```
+
 ## Actuaciones realizadas
 
-* __TODO__
+* Auditoría técnica generada en `doc/auditoria/2026_05_09`.
+* Configuración endurecida para evitar secretos versionados y creación destructiva de esquema por defecto.
     
 
 ***

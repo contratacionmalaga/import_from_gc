@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <!-- ===================== -->
+    <!-- PROPIEDADES -->
+    <!-- ===================== -->
+    <property name="APP_NAME" value="email-helper"/>
+    <property name="LOG_PATH" value="logs"/>
+    <timestamp key="ts" datePattern="yyyy-MM-dd_HH-mm-ss"/>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%file:%line] - %msg%n"/>
+
+    <!-- ===================== -->
+    <!-- APPENDER CONSOLA -->
+    <!-- ===================== -->
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ===================== -->
+    <!-- APPENDER FICHERO -->
+    <!-- ===================== -->
+    <appender name="MainAppLogFile" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="PropertiesHelper" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/properties_helper.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="EmailHelper" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/email_helper.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="EncryptHelper" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/encrypt_helper.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="VersionHelper" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/version_helper.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FileHibernate" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/hibernate.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FilePersistence" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/hibernate_persistence.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FileHibernateSQL" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/hibernate_sql.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FileReflections" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/reflection.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FileHikariCP" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/hikaricp.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FileApachePoi" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_PATH}/apache_poi.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ===================== -->
+    <!-- LOGGERS DE LA APP -->
+    <!-- ===================== -->
+    <logger name="local.jarios.properties" level="INFO">
+        <appender-ref ref="PropertiesHelper"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="local.jarios.email" level="INFO">
+        <appender-ref ref="EmailHelper"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="local.jarios.encrypt" level="INFO">
+        <appender-ref ref="EncryptHelper"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="local.jarios.version" level="INFO">
+        <appender-ref ref="VersionHelper"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="org.reflections.Reflections" level="INFO">
+        <appender-ref ref="FileReflections"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="org.apache.poi" level="INFO">
+        <appender-ref ref="FileApachePoi"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="org.hibernate" level="INFO">
+        <appender-ref ref="FileHibernate"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="javax.persistence" level="INFO">
+        <appender-ref ref="FilePersistence"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="org.hibernate.SQL" level="INFO">
+        <appender-ref ref="FileHibernateSQL"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="com.zaxxer.hikari" level="INFO">
+        <appender-ref ref="FileHikariCP"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="INFO">
+        <appender-ref ref="FileHibernate"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="local.jarios" level="INFO">
+        <appender-ref ref="MainAppLogFile"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- ===================== -->
+    <!-- ROOT -->
+    <!-- ===================== -->
+<!--    <root level="warn">-->
+<!--        <appender-ref ref="CONSOLE"/>-->
+<!--        <appender-ref ref="FILE"/>-->
+<!--    </root>-->
+
+</configuration>

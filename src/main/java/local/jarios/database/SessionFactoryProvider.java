@@ -56,7 +56,9 @@ public class SessionFactoryProvider {
             log.debug("[getSessionFactory] Propiedades leídas desde el fichero: {}", PropertiesFiles.HIBERNATE);
 
             final var hibernateProperties = configurePrincipalProperties(props);
-            log.debug("[getSessionFactory] Propiedades de conexión a la BD: {}", hibernateProperties);
+            log.debug(
+                    "[getSessionFactory] Propiedades de Hibernate configuradas. Total: {}",
+                    hibernateProperties.size());
 
             var hibernateConfigurer = new HibernateConfigurer();
             log.debug("[getSessionFactory] Objeto HibernateConfigurer creado correctamente.");
@@ -101,14 +103,32 @@ public class SessionFactoryProvider {
 
         //
         props.setProperty(JdbcSettings.JAKARTA_JDBC_URL,
-                propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_URL));
+                getPropertyOrEnv(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_URL, "IMPORT_FROM_GC_JDBC_URL"));
         props.setProperty(JdbcSettings.JAKARTA_JDBC_DRIVER,
-                propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_DRIVER));
+                getPropertyOrEnv(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_DRIVER, "IMPORT_FROM_GC_JDBC_DRIVER"));
         props.setProperty(JdbcSettings.JAKARTA_JDBC_USER,
-                propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_USER));
+                getPropertyOrEnv(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_USER, "IMPORT_FROM_GC_JDBC_USER"));
         props.setProperty(JdbcSettings.JAKARTA_JDBC_PASSWORD,
-                propertyManager.getProperty(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_PASSWORD));
+                getPropertyOrEnv(file, PropertiesKeys.JAKARTA_PERSISTENCE_JDBC_PASSWORD, "IMPORT_FROM_GC_JDBC_PASSWORD"));
 
-        log.debug("Propiedades configuradas desde archivo '{}': {}", file, props);
+        log.debug("Propiedades JDBC configuradas desde archivo '{}' y variables de entorno.", file);
+    }
+
+    /**
+     * Obtiene una propiedad permitiendo que una variable de entorno tenga prioridad.
+     *
+     * @param file fichero de propiedades
+     * @param key clave de propiedades
+     * @param envName nombre de variable de entorno
+     * @return valor configurado
+     * @throws PropertiesManagerException si falla la lectura del fichero de propiedades
+     */
+    private String getPropertyOrEnv(String file, String key, String envName) throws PropertiesManagerException {
+        String envValue = System.getenv(envName);
+        if (envValue != null && !envValue.isBlank()) {
+            return envValue;
+        }
+
+        return propertyManager.getProperty(file, key);
     }
 }

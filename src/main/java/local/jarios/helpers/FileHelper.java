@@ -3,6 +3,8 @@ package local.jarios.helpers;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Clase de utilidad para el manejo y procesamiento de ficheros.
@@ -34,7 +36,15 @@ public final class FileHelper {
     public static File[] getListaFicherosFromPath(String path) {
         log.debug("[getListaFicherosFromPath] Intentando obtener ficheros desde la ruta: {}", path);
 
-        File directorio = new File(path);
+        Path basePath = Paths.get("").toAbsolutePath().normalize();
+        Path resolvedPath = basePath.resolve(path).normalize();
+
+        if (!resolvedPath.startsWith(basePath)) {
+            log.warn("[getListaFicherosFromPath] El path '{}' queda fuera del directorio de trabajo.", path);
+            return new File[0];
+        }
+
+        File directorio = resolvedPath.toFile();
 
         if (!directorio.exists() || !directorio.isDirectory()) {
             log.warn("[getListaFicherosFromPath] El path '{}' no existe o no es un directorio válido.", path);
