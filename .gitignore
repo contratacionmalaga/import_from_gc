@@ -2,7 +2,9 @@
 /target/
 /.idea/
 /logs/
-/config/
+/config/*
+!/config/checkstyle/
+!/config/checkstyle/google_checks.xml
 properties/app.properties
 properties/jakarta_principal.properties
 properties/mail.properties
