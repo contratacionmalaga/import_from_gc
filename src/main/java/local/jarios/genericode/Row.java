@@ -1,42 +1,24 @@
 package local.jarios.genericode;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
-
-/**
- * Representa una fila en una lista de códigos.
- * Utiliza JAXB para la serialización y deserialización XML.
- * Lombok se encarga de generar los métodos getter y setter automáticamente.
- *
- * @author Juan Antonio
- * @since 04/06/2024
- */
+/** Representa una fila en una lista de codigos genericode. */
 @Getter
 @Setter
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Row")
 public class Row {
 
-	/**
-	 * Valor simple asociado a este elemento.
-	 */
-	@XmlElement(name = "Value")
-	private List<Value> values;
+  /** Valores incluidos en la fila. */
+  @XmlElement(name = "Value")
+  private List<Value> values;
 
-	/**
-	 * Constructor sin argumentos requerido por JAXB.
-	 * <p>
-	 * Este constructor es necesario para la correcta creación de instancias
-	 * durante la deserialización XML.
-	 * </p>
-	 */
-	public Row() {
-		// Constructor vacío requerido por JAXB
-	}
+  /** Constructor sin argumentos requerido por JAXB. */
+  public Row() {}
 }

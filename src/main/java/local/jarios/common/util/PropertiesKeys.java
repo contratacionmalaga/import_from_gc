@@ -1,59 +1,58 @@
 package local.jarios.common.util;
 
-/**
- * Clase que mantiene las variables asociadas a las Keys de los ficheros properties
- * @author Home
- */
+/** Claves usadas en los ficheros de propiedades. */
 public final class PropertiesKeys {
 
-    /* Nombre de las propiedades del fichero app.properties */
-    /** Nombre */
-    public static final String APP_NAME = "app.name";
-    /** Descripción */
-    public static final String APP_DESCRIPTION = "app.description";
-    /** Path */
-    public static final String APP_PATH = "app.path";
-    /** Prefijo */
-    public static final String APP_PREFIX = "app.prefix";
-    /** Prefijo */
-    public static final String APP_CHARACTER_ENCODING = "app.characterEncoding";
-    /** Prefijo */
-    public static final String APP_CONNECTION_COLLATION = "app.connectionCollation";
-    /** Permite borrados y recreacion de datos durante la importacion */
-    public static final String APP_ALLOW_DESTRUCTIVE_IMPORT = "app.allowDestructiveImport";
+  /** Nombre de la aplicacion. */
+  public static final String APP_NAME = "app.name";
 
-    /* Nombre de las propiedades del fichero hibernate.properties */
-    /** Batch_size */
-    public static final String HIBERNATE_JDBC_BATCH_SIZE = "hibernate.jdbc.batch_size";
+  /** Descripcion de la aplicacion. */
+  public static final String APP_DESCRIPTION = "app.description";
 
-    /*  */
-    /** Url */
-    public static final String JAKARTA_PERSISTENCE_JDBC_URL = "jakarta.persistence.jdbc.url";
-    /** Driver */
-    public static final String JAKARTA_PERSISTENCE_JDBC_DRIVER = "jakarta.persistence.jdbc.driver";
-    /** Usuario */
-    public static final String JAKARTA_PERSISTENCE_JDBC_USER = "jakarta.persistence.jdbc.user";
-    /** Password */
-    public static final String JAKARTA_PERSISTENCE_JDBC_PASSWORD= "jakarta.persistence.jdbc.password";
+  /** Ruta de ficheros de entrada. */
+  public static final String APP_PATH = "app.path";
 
-    /* Nombre de las propiedades del fichero mail.properties */
-    /** User */
-    public static final String MAIL_USER = "mail.smtp.user";
-    /** Password */
-    public static final String MAIL_PASSWORD = "mail.smtp.password";
-    /** From */
-    public static final String MAIL_FROM = "mail.from";
-    /** To */
-    public static final String MAIL_TO = "mail.to";
+  /** Prefijo de aplicacion. */
+  public static final String APP_PREFIX = "app.prefix";
 
-    /**
-     * Constructor privado de la clase
-     */
-    private PropertiesKeys() {
-        /* CONSTRUCTOR PRIVADO PRA EVITAR LA INSTANCIACIÓN */
-    }
+  /** Codificacion de caracteres de la aplicacion. */
+  public static final String APP_CHARACTER_ENCODING = "app.characterEncoding";
 
+  /** Collation de conexion de la aplicacion. */
+  public static final String APP_CONNECTION_COLLATION = "app.connectionCollation";
+
+  /** Permite borrados y recreacion de datos durante la importacion. */
+  public static final String APP_ALLOW_DESTRUCTIVE_IMPORT = "app.allowDestructiveImport";
+
+  /** Tamano de lote JDBC de Hibernate. */
+  public static final String HIBERNATE_JDBC_BATCH_SIZE = "hibernate.jdbc.batch_size";
+
+  /** URL JDBC Jakarta Persistence. */
+  public static final String JAKARTA_PERSISTENCE_JDBC_URL = "jakarta.persistence.jdbc.url";
+
+  /** Driver JDBC Jakarta Persistence. */
+  public static final String JAKARTA_PERSISTENCE_JDBC_DRIVER =
+      "jakarta.persistence.jdbc.driver";
+
+  /** Usuario JDBC Jakarta Persistence. */
+  public static final String JAKARTA_PERSISTENCE_JDBC_USER = "jakarta.persistence.jdbc.user";
+
+  /** Password JDBC Jakarta Persistence. */
+  public static final String JAKARTA_PERSISTENCE_JDBC_PASSWORD =
+      "jakarta.persistence.jdbc.password";
+
+  /** Usuario SMTP. */
+  public static final String MAIL_USER = "mail.smtp.user";
+
+  /** Password SMTP. */
+  public static final String MAIL_PASSWORD = "mail.smtp.password";
+
+  /** Remitente de correo. */
+  public static final String MAIL_FROM = "mail.from";
+
+  /** Destinatario de correo. */
+  public static final String MAIL_TO = "mail.to";
+
+  /** Constructor privado de clase utilitaria. */
+  private PropertiesKeys() {}
 }
-
-
-

@@ -1,42 +1,24 @@
 package local.jarios.genericode;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
-
-/**
- * Representa una lista de códigos simple en una lista de códigos.
- * Utiliza JAXB para la serialización y deserialización XML.
- * Lombok se encarga de generar los métodos getter y setter automáticamente.
- *
- * @author Juan Antonio
- * @since 04/06/2024
- */
+/** Representa la lista simple de filas dentro de un documento genericode. */
 @Getter
 @Setter
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "SimpleCodeList")
 public class SimpleCodeList {
 
-	/**
-	 * Valor simple asociado a este elemento.
-	 */
-	@XmlElement(name = "Row")
-	private List<Row> row;
+  /** Filas incluidas en la lista simple. */
+  @XmlElement(name = "Row")
+  private List<Row> row;
 
-	/**
-	 * Constructor sin argumentos requerido por JAXB.
-	 * <p>
-	 * Este constructor es necesario para la correcta creación de instancias
-	 * durante la deserialización XML.
-	 * </p>
-	 */
-	public SimpleCodeList() {
-		// Constructor vacío requerido por JAXB
-	}
+  /** Constructor sin argumentos requerido por JAXB. */
+  public SimpleCodeList() {}
 }

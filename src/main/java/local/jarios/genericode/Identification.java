@@ -1,71 +1,43 @@
 package local.jarios.genericode;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-/**
- * Representa la identificación de un código en una lista de códigos.
- * Utiliza JAXB para la serialización y deserialización XML.
- * Lombok se encarga de generar los métodos getter y setter automáticamente.
- *
- * @author Juan Antonio
- * @since 04/06/2024
- */
+/** Representa la identificacion de una lista de codigos genericode. */
 @Getter
 @Setter
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Identification")
 public class Identification {
 
-	/**
-	 * Valor simple asociado a este elemento.
-	 */
-	@XmlElement(name = "ShortName")
-	private String shortName;
+  /** Nombre corto del catalogo. */
+  @XmlElement(name = "ShortName")
+  private String shortName;
 
-	/**
-	 * Valor simple asociado a este elemento.
-	 */
-	@XmlElement(name = "LongName")
-	private String longName;
+  /** Nombre largo del catalogo. */
+  @XmlElement(name = "LongName")
+  private String longName;
 
-	/**
-	 * Valor simple asociado a este elemento.
-	 */
-	@XmlElement(name = "Version")
-	private String version;
+  /** Version del catalogo. */
+  @XmlElement(name = "Version")
+  private String version;
 
-	/**
-	 * Valor simple asociado a este elemento.
-	 */
-	@XmlElement(name = "CanonicalUri")
-	private String canonicalUri;
+  /** URI canonica del catalogo. */
+  @XmlElement(name = "CanonicalUri")
+  private String canonicalUri;
 
-	/**
-	 * Valor simple asociado a este elemento.
-	 */
-	@XmlElement(name = "CanonicalVersionUri")
-	private String canonicalVersionUri;
+  /** URI canonica de la version del catalogo. */
+  @XmlElement(name = "CanonicalVersionUri")
+  private String canonicalVersionUri;
 
-	/**
-	 * Valor simple asociado a este elemento.
-	 */
-	@XmlElement(name = "LocationUri")
-	private String locationUri;
+  /** URI de localizacion del catalogo. */
+  @XmlElement(name = "LocationUri")
+  private String locationUri;
 
-	/**
-	 * Constructor sin argumentos requerido por JAXB.
-	 * <p>
-	 * Este constructor es necesario para la correcta creación de instancias
-	 * durante la deserialización XML.
-	 * </p>
-	 */
-	public Identification() {
-		// Constructor vacío requerido por JAXB
-	}
+  /** Constructor sin argumentos requerido por JAXB. */
+  public Identification() {}
 }

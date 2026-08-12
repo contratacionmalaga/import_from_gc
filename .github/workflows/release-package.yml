@@ -25,50 +25,10 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Configure package credentials
-        env:
-          MAVEN_PACKAGE_TOKEN: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p "$HOME/.m2"
-          cat > "$HOME/.m2/settings.xml" <<EOF
-          <settings>
-            <servers>
-              <server>
-                <id>github-releases</id>
-                <username>${GITHUB_ACTOR}</username>
-                <password>${MAVEN_PACKAGE_TOKEN}</password>
-              </server>
-              <server>
-                <id>github-email-helper</id>
-                <username>${GITHUB_ACTOR}</username>
-                <password>${MAVEN_PACKAGE_TOKEN}</password>
-              </server>
-              <server>
-                <id>github-properties-helper</id>
-                <username>${GITHUB_ACTOR}</username>
-                <password>${MAVEN_PACKAGE_TOKEN}</password>
-              </server>
-              <server>
-                <id>github-version-helper</id>
-                <username>${GITHUB_ACTOR}</username>
-                <password>${MAVEN_PACKAGE_TOKEN}</password>
-              </server>
-              <server>
-                <id>github-encrypt-helper</id>
-                <username>${GITHUB_ACTOR}</username>
-                <password>${MAVEN_PACKAGE_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
-
-      - name: Resolve private helper packages
-        run: |
-          mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:encrypt_helper:5.2.0 -DremoteRepositories=github-encrypt-helper::default::https://maven.pkg.github.com/contratacionmalaga/encrypt_helper
-          mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:version_helper:5.2.0 -DremoteRepositories=github-version-helper::default::https://maven.pkg.github.com/contratacionmalaga/version_helper
-          mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:email_helper:5.2.0 -DremoteRepositories=github-email-helper::default::https://maven.pkg.github.com/contratacionmalaga/email_helper
-          mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:properties_helper:5.2.0 -DremoteRepositories=github-properties-helper::default::https://maven.pkg.github.com/contratacionmalaga/properties_helper
-          find "$HOME/.m2/repository/local/jarios" \( -name "_remote.repositories" -o -name "*.lastUpdated" \) -delete
+      - name: Set up private Maven packages
+        uses: ./.github/actions/setup-maven-private
+        with:
+          package-token: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Build and test
         run: mvn -B clean verify
@@ -79,10 +39,15 @@ jobs:
       - name: OWASP dependency check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: mvn -B org.owasp:dependency-check-maven:check
+        run: |
+          if [ -z "$NVD_API_KEY" ]; then
+            echo "::error::NVD_API_KEY secret is required for OWASP Dependency Check"
+            exit 1
+          fi
+          mvn -B org.owasp:dependency-check-maven:check -DnvdApiKey="$NVD_API_KEY"
 
       - name: Publish Maven package
-        run: mvn -B -DskipTests deploy
+        run: mvn -B deploy
 
       - name: Generate checksums
         run: |

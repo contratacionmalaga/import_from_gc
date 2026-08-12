@@ -1,7 +1,5 @@
 package local.jarios.services;
 
-import local.jarios.entity.Estadistica;
-import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.entity.ParseoFicherosGc;
 import local.jarios.exceptions.MiRepositoryException;
@@ -9,78 +7,50 @@ import local.jarios.exceptions.MiServiceException;
 import local.jarios.repositories.Repository;
 import local.jarios.repositories.RepositoryImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.HibernateException;
-import org.hibernate.SessionFactory;
 
-/**
- * Implementación del servicio encargado de la persistencia de entidades en la base de datos.
- * Utiliza Hibernate para gestionar las transacciones y operaciones CRUD.
- * <p>
- * Esta clase proporciona métodos para persistir objetos {@link Log}, {@link FicheroGc},
- * {@link ParseoFicherosGc} y {@link Estadistica} en la base de datos.
- * </p>
- * <p>
- * Además, gestiona la creación y cierre de sesiones de Hibernate y transacciones asociadas.
- * </p>
- *
- * @author Juan Antonio
- * @version 1.0
- * @since 2024-06-04
- */
+/** Servicio encargado de persistir el resultado del parseo GC. */
 @Slf4j
 public class ServiceImpl implements Service {
 
-    /**
-     * Instancia del repositorio para acceso y gestión de datos.
-     * <p>
-     * Se utiliza para realizar operaciones CRUD sobre las entidades persistentes.
-     * </p>
-     */
-    private final Repository repository;
+  /** Repositorio de persistencia. */
+  private final Repository repository;
 
-
-    /**
-     * Constructor que inicializa los componentes necesarios para la persistencia.
-     *
-     * @throws HibernateException Si ocurre un error al crear la {@link SessionFactory}.
-     */
-    public ServiceImpl() throws MiServiceException {
-
-        //
-        try {
-
-            this.repository = new RepositoryImpl();
-            log.debug("[ServiceImpl] Creado el objeto RepositoryImpl correctamente.");
-
-        } catch (MiRepositoryException ex) {
-
-            String msg = String.format("[ServiceImpl] Error creando el constructor: %s", ex.getMessage());
-            log.error(msg, ex);
-            throw new MiServiceException(msg, ex);
-
-        }
+  /**
+   * Constructor que inicializa los componentes de persistencia.
+   *
+   * @throws MiServiceException si ocurre un error creando el repositorio
+   */
+  public ServiceImpl() throws MiServiceException {
+    try {
+      this.repository = new RepositoryImpl();
+      log.debug("[ServiceImpl] Creado el objeto RepositoryImpl correctamente.");
+    } catch (MiRepositoryException ex) {
+      String msg = String.format("[ServiceImpl] Error creando el constructor: %s", ex.getMessage());
+      log.error(msg, ex);
+      throw new MiServiceException(msg, ex);
     }
+  }
 
-    /**
-     * Persiste un objeto {@link Log} en la base de datos.
-     *
-     * @param miLog Objeto {@link Log} a persistir.
-     */
-    public void persistirEnBaseDeDatos(Log miLog, ParseoFicherosGc parseoFicherosGc) throws MiServiceException{
-
-
-        try {
-
-            // El repositorio se encarga de la persistencia y manejo de la las transacciones
-            repository.persistirEnBaseDatos(miLog, parseoFicherosGc);
-            log.debug("[persistirLog] Grabación en base de datos correcta.");
-
-        } catch (MiRepositoryException ex) {
-
-            String msg = String.format("[persistirLog] Error persistiendo Log con ID %s: %s", miLog.getId(), ex.getMessage());
-            log.error(msg, ex.getMessage(), ex);
-            throw new MiServiceException (msg, ex);
-
-        }
+  /**
+   * Persiste un objeto {@link Log} y el parseo GC en base de datos.
+   *
+   * @param miLog log a persistir
+   * @param parseoFicherosGc parseo GC a persistir
+   * @throws MiServiceException si falla la persistencia
+   */
+  public void persistirEnBaseDeDatos(Log miLog, ParseoFicherosGc parseoFicherosGc)
+      throws MiServiceException {
+    try {
+      repository.persistirEnBaseDatos(miLog, parseoFicherosGc);
+      log.debug("[persistirLog] Grabacion en base de datos correcta.");
+    } catch (MiRepositoryException ex) {
+      String msg =
+          String.format(
+              "[persistirLog] Error persistiendo Log con ID %s: %s",
+              miLog.getId(),
+              ex.getMessage());
+      log.error(msg, ex);
+      throw new MiServiceException(msg, ex);
     }
+  }
 }

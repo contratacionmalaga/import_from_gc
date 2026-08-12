@@ -1,72 +1,52 @@
 package local.jarios.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
-/**
- * Clase para manejar las importaciones de ficheros Excel desde Internet,
- * agrupando los ficheros y sus registros asociados.
- * <p>
- * Esta clase extiende {@link AuditableCreatedAt} para heredar propiedades de auditoría.
- * </p>
- *
- * @author Juan Antonio
- * @since 04/06/2024
- * @author Juan Antonio
- */
+/** Agrupa ficheros GC parseados y sus registros asociados. */
 @Setter
 @Getter
 @Slf4j
 public class ParseoFicherosGc extends AuditableCreatedAt {
 
-    /**
-     * Lista de objetos {@link FicheroGc} importados.
-     */
-    private List<FicheroGc> listFicherosGc;
+  /** Lista de ficheros GC importados. */
+  private List<FicheroGc> listFicherosGc;
 
-    /**
-     * Mapa que relaciona la clave (por ejemplo nombre o id) de un fichero {@link FicheroGc}
-     * con la lista de registros asociados {@link RegistroGc}.
-     */
-    private Map<String, List<RegistroGc>> mapRegistrosGcByFicheroGc;
+  /** Mapa de registros por clave de fichero GC. */
+  private Map<String, List<RegistroGc>> mapRegistrosGcByFicheroGc;
 
-    /**
-     * Constructor por defecto.
-     * Inicializa las listas y mapas internos.
-     * También registra la creación de la instancia en el log.
-     */
-    public ParseoFicherosGc() {
-        this.listFicherosGc = new ArrayList<>();
-        this.mapRegistrosGcByFicheroGc = new HashMap<>();
-        log.debug("Instancia de ParseoFicherosGc creada. Listas y mapas inicializados.");
-    }
+  /** Constructor que inicializa las colecciones internas. */
+  public ParseoFicherosGc() {
+    this.listFicherosGc = new ArrayList<>();
+    this.mapRegistrosGcByFicheroGc = new HashMap<>();
+    log.debug("Instancia de ParseoFicherosGc creada. Listas y mapas inicializados.");
+  }
 
-    /**
-     * Añade un fichero {@link FicheroGc} a la lista interna.
-     *
-     * @param fichero el fichero a añadir
-     */
-    public void addFicheroGc(FicheroGc fichero) {
-        this.listFicherosGc.add(fichero);
-        log.debug("FicheroGc añadido: {}", fichero);
-    }
+  /**
+   * Anade un fichero GC a la lista interna.
+   *
+   * @param fichero fichero a anadir
+   */
+  public void addFicheroGc(FicheroGc fichero) {
+    this.listFicherosGc.add(fichero);
+    log.debug("FicheroGc anadido: {}", fichero);
+  }
 
-    /**
-     * Añade un registro {@link RegistroGc} a la lista asociada a un fichero identificado por clave.
-     *
-     * @param claveFichero clave identificadora del fichero
-     * @param registro registro a añadir
-     */
-    public void addRegistroGc(String claveFichero, RegistroGc registro) {
-        this.mapRegistrosGcByFicheroGc
-                .computeIfAbsent(claveFichero, k -> new ArrayList<>())
-                .add(registro);
-        log.debug("RegistroGc añadido para fichero '{}': {}", claveFichero, registro);
-    }
+  /**
+   * Anade un registro a la lista asociada a un fichero identificado por clave.
+   *
+   * @param claveFichero clave identificadora del fichero
+   * @param registro registro a anadir
+   */
+  public void addRegistroGc(String claveFichero, RegistroGc registro) {
+    this.mapRegistrosGcByFicheroGc
+        .computeIfAbsent(claveFichero, k -> new ArrayList<>())
+        .add(registro);
+    log.debug("RegistroGc anadido para fichero '{}': {}", claveFichero, registro);
+  }
 }

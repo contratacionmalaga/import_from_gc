@@ -1,21 +1,21 @@
 package local.jarios.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-/**
- * Entidad Log para auditorías y relaciones con FicheroGc y Estadistica.
- * Representa un log que agrupa ficheros y estadísticas.
- * Author: Juan Antonio
- * Date: 04/06/2024
- * Team: Juan Antonio
- */
+/** Entidad que agrupa ficheros GC y estadisticas de una ejecucion. */
 @Slf4j
 @Setter
 @Getter
@@ -23,36 +23,22 @@ import java.util.UUID;
 @Table(name = "log")
 public class Log extends AuditableCreatedAt {
 
-    /**
-     * Identificador único del registro.
-     * <p>
-     * Se mapea a la columna "id" de la tabla en la base de datos.
-     * No es actualizable ni nulo.
-     * </p>
-     */
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+  /** Identificador unico del registro. */
+  @Id
+  @GeneratedValue(generator = "UUID")
+  @Column(name = "id", updatable = false, nullable = false)
+  private UUID id;
 
-    /**
-     * Lista de ficheros asociados a este log.
-     * Cascada y eliminación en orfanato activados.
-     */
-    @OneToMany(mappedBy = "logEntity", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<FicheroGc> ficherosGc = new ArrayList<>();
+  /** Lista de ficheros asociados a este log. */
+  @OneToMany(mappedBy = "logEntity", orphanRemoval = true, cascade = CascadeType.ALL)
+  private List<FicheroGc> ficherosGc = new ArrayList<>();
 
-    /**
-     * Estadística asociada a este log.
-     * Cascada y eliminación en orfanato activados.
-     */
-    @OneToOne(mappedBy = "logEntity", orphanRemoval = true, cascade = CascadeType.ALL)
-    private Estadistica estadistica;
+  /** Estadistica asociada a este log. */
+  @OneToOne(mappedBy = "logEntity", orphanRemoval = true, cascade = CascadeType.ALL)
+  private Estadistica estadistica;
 
-    /**
-     * Constructor que genera un UUID basado en tiempo y registra la creación.
-     */
-    public Log() {
-        this.markAsCreated();
-    }
+  /** Constructor que registra la creacion. */
+  public Log() {
+    this.markAsCreated();
+  }
 }

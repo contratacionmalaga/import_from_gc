@@ -1,29 +1,20 @@
 package local.jarios.common.util;
 
-/**
- * Clase que mantiene las variables asociadas a los Ficheros de los ficheros properties
- * @author Home
- */
+/** Nombres base de los ficheros de propiedades. */
 public final class PropertiesFiles {
 
-    /** Nombre sin extensión del fichero app.properties */
-    public static final String APP = "app";
+  /** Fichero app.properties. */
+  public static final String APP = "app";
 
-    /** Nombre sin extensión del fichero app.properties */
-    public static final String HIBERNATE = "hibernate";
+  /** Fichero hibernate.properties. */
+  public static final String HIBERNATE = "hibernate";
 
-    /** Nombre sin extensión del fichero app.properties */
-    public static final String JAKARTA_PRINCIPAL = "jakarta_principal";
+  /** Fichero jakarta_principal.properties. */
+  public static final String JAKARTA_PRINCIPAL = "jakarta_principal";
 
-    /** Nombre sin extensión del fichero app.properties */
-    public static final String MAIL = "mail";
+  /** Fichero mail.properties. */
+  public static final String MAIL = "mail";
 
-    /** Nombre sin extensión del fichero app.properties */
-    private PropertiesFiles() {/* CONSTRUCTOR PRIVADO PRA EVITAR LA INSTANCIACIÓN */}
-
+  /** Constructor privado de clase utilitaria. */
+  private PropertiesFiles() {}
 }
-
-
-
-
-

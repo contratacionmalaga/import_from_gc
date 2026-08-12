@@ -34,28 +34,28 @@
     </appender>
 
     <appender name="PropertiesHelper" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_PATH}/properties_helper.log</file>
+        <file>${LOG_PATH}/properties-helper.log</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
     <appender name="EmailHelper" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_PATH}/email_helper.log</file>
+        <file>${LOG_PATH}/email-helper.log</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
     <appender name="EncryptHelper" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_PATH}/encrypt_helper.log</file>
+        <file>${LOG_PATH}/encrypt-helper.log</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
     <appender name="VersionHelper" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_PATH}/version_helper.log</file>
+        <file>${LOG_PATH}/version-helper.log</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
@@ -69,14 +69,14 @@
     </appender>
 
     <appender name="FilePersistence" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_PATH}/hibernate_persistence.log</file>
+        <file>${LOG_PATH}/hibernate-persistence.log</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
     <appender name="FileHibernateSQL" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_PATH}/hibernate_sql.log</file>
+        <file>${LOG_PATH}/hibernate-sql.log</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
@@ -97,7 +97,7 @@
     </appender>
 
     <appender name="FileApachePoi" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_PATH}/apache_poi.log</file>
+        <file>${LOG_PATH}/apache-poi.log</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>

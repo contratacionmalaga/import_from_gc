@@ -6,20 +6,15 @@ import local.jarios.exceptions.MiRepositoryException;
 import local.jarios.properties.api.PropertiesManagerService;
 import local.jarios.properties.exception.PropertiesManagerException;
 
-/**
- * Controla si la importacion puede borrar tablas o registros existentes.
- */
+/** Controla si la importacion puede borrar tablas o registros existentes. */
 final class DestructiveImportPolicy {
 
+  /** Variable de entorno que habilita operaciones destructivas. */
   private static final String ENV_ALLOW_DESTRUCTIVE_IMPORT =
       "IMPORT_FROM_GC_ALLOW_DESTRUCTIVE_IMPORT";
 
-  /**
-   * Constructor privado para evitar instanciacion.
-   */
-  private DestructiveImportPolicy() {
-    // Utility class.
-  }
+  /** Constructor privado para evitar instanciacion. */
+  private DestructiveImportPolicy() {}
 
   /**
    * Comprueba si las operaciones destructivas estan habilitadas.
@@ -37,11 +32,25 @@ final class DestructiveImportPolicy {
       return isAllowed(
           null,
           propertyManager.getProperty(
-              PropertiesFiles.APP,
-              PropertiesKeys.APP_ALLOW_DESTRUCTIVE_IMPORT));
+              PropertiesFiles.APP, PropertiesKeys.APP_ALLOW_DESTRUCTIVE_IMPORT));
     } catch (PropertiesManagerException ex) {
       return false;
     }
+  }
+
+  /**
+   * Resuelve la politica aplicando prioridad de variable de entorno sobre property.
+   *
+   * @param envValue valor de la variable de entorno
+   * @param propertyValue valor de properties
+   * @return {@code true} si la configuracion efectiva habilita borrados
+   */
+  static boolean isAllowed(String envValue, String propertyValue) {
+    if (envValue != null && !envValue.isBlank()) {
+      return parseBoolean(envValue);
+    }
+
+    return parseBoolean(propertyValue);
   }
 
   /**
@@ -66,20 +75,5 @@ final class DestructiveImportPolicy {
    */
   static boolean parseBoolean(String value) {
     return "true".equalsIgnoreCase(value == null ? "" : value.trim());
-  }
-
-  /**
-   * Resuelve la politica aplicando prioridad de variable de entorno sobre property.
-   *
-   * @param envValue valor de la variable de entorno
-   * @param propertyValue valor de properties
-   * @return {@code true} si la configuracion efectiva habilita borrados
-   */
-  static boolean isAllowed(String envValue, String propertyValue) {
-    if (envValue != null && !envValue.isBlank()) {
-      return parseBoolean(envValue);
-    }
-
-    return parseBoolean(propertyValue);
   }
 }

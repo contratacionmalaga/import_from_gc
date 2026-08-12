@@ -5,78 +5,68 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-/**
- * Clase utilitaria para la gestión de transacciones Hibernate.
- * <p>
- * Proporciona métodos estáticos para iniciar, confirmar y revertir transacciones
- * en una sesión de Hibernate, con logging de las acciones realizadas.
- * </p>
- * <p>
- * Esta clase es final y su constructor privado evita la instanciación.
- * </p>
- *
- * @author juan
- * @since 28/12/2024
- */
+/** Gestiona operaciones comunes sobre transacciones Hibernate. */
 @Slf4j
 public final class TransactionManager {
 
-    /**
-     * Constructor privado para evitar instanciación de la clase utilitaria.
-     */
-    private TransactionManager() {
-        // Evita instancias
+  /** Constructor privado de clase utilitaria. */
+  private TransactionManager() {}
+
+  /**
+   * Inicia una nueva transaccion en la sesion Hibernate proporcionada.
+   *
+   * @param session sesion Hibernate donde se inicia la transaccion
+   * @return transaccion iniciada
+   */
+  public static Transaction beginTransaction(Session session) {
+    Transaction transaction = session.beginTransaction();
+    log.debug("[beginTransaction] Inicio de transaccion.");
+    return transaction;
+  }
+
+  /**
+   * Realiza commit de la transaccion si esta no esta marcada para rollback.
+   *
+   * @param transaction transaccion a confirmar
+   */
+  public static void commitTransaction(Transaction transaction) {
+    if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
+      transaction.commit();
+      log.debug("[commitTransaction] Commit de la transaccion.");
+    } else {
+      log.warn(
+          "[commitTransaction] No se puede hacer commit porque la transaccion no esta activa "
+              + "o esta marcada para rollback.");
+    }
+  }
+
+  /**
+   * Realiza rollback de la transaccion indicada.
+   *
+   * @param transaction transaccion a revertir
+   * @throws MiTransactionManagerException si ocurre un error durante el rollback
+   */
+  public static void rollbackTransaction(Transaction transaction)
+      throws MiTransactionManagerException {
+    if (transaction == null) {
+      log.warn("[rollbackTransaction] La transaccion es null. No se realiza rollback.");
+      return;
     }
 
-    /**
-     * Inicia una nueva transacción en la sesión Hibernate proporcionada.
-     *
-     * @param session Sesión Hibernate donde se iniciará la transacción.
-     * @return La transacción iniciada.
-     */
-    public static Transaction beginTransaction(Session session) {
-        Transaction transaction = session.beginTransaction();
-        log.debug("[beginTransaction] Inicio de transacción.");
-        return transaction;
+    try {
+      if (transaction.isActive() && !transaction.getRollbackOnly()) {
+        transaction.rollback();
+        log.warn("[rollbackTransaction] Rollback ejecutado correctamente.");
+      } else {
+        log.warn(
+            "[rollbackTransaction] La transaccion no esta activa o ya esta marcada para "
+                + "rollback. No se realiza rollback.");
+      }
+    } catch (Exception ex) {
+      String msg =
+          String.format("[rollbackTransaction] Error haciendo rollback: %s", ex.getMessage());
+      log.error(msg, ex);
+      throw new MiTransactionManagerException(msg, ex);
     }
-
-    /**
-     * Realiza commit de la transacción si esta no está marcada para rollback.
-     *
-     * @param transaction Transacción a confirmar.
-     */
-    public static void commitTransaction(Transaction transaction) {
-        if (transaction != null && transaction.isActive() && !transaction.getRollbackOnly()) {
-            transaction.commit();
-            log.debug("[commitTransaction] Commit de la transacción.");
-        } else {
-            log.warn("[commitTransaction] No se puede hacer commit porque la transacción no está activa o está marcada para rollback.");
-        }
-    }
-
-    /**
-     * Realiza rollback de la transacción indicada.
-     *
-     * @param transaction Transacción a revertir.
-     * @throws MiTransactionManagerException Si ocurre un error durante el rollback.
-     */
-    public static void rollbackTransaction(Transaction transaction) throws MiTransactionManagerException {
-        if (transaction != null) {
-            try {
-                if (transaction.isActive() && !transaction.getRollbackOnly()) {
-                    transaction.rollback();
-                    log.warn("[rollbackTransaction] Rollback ejecutado correctamente.");
-                } else {
-                    log.warn("[rollbackTransaction] La transacción no está activa o ya está marcada para rollback. No se realiza rollback.");
-                }
-            } catch (Exception ex) {
-                String msg = String.format("[rollbackTransaction] Error haciendo rollback: %s", ex.getMessage());
-                log.error(msg, ex);
-                throw new MiTransactionManagerException(msg, ex);
-            }
-        } else {
-            log.warn("[rollbackTransaction] La transacción es null. No se realiza rollback.");
-        }
-    }
-
+  }
 }

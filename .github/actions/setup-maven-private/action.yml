@@ -1,0 +1,57 @@
+name: Setup Maven private packages
+description: Configure Maven credentials and resolve private helper packages.
+
+inputs:
+  package-token:
+    description: Token with read access to GitHub Packages.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Configure package credentials
+      shell: bash
+      env:
+        MAVEN_PACKAGE_TOKEN: ${{ inputs.package-token }}
+      run: |
+        mkdir -p "$HOME/.m2"
+        cat > "$HOME/.m2/settings.xml" <<EOF
+        <settings>
+          <servers>
+            <server>
+              <id>github-releases</id>
+              <username>${GITHUB_ACTOR}</username>
+              <password>${MAVEN_PACKAGE_TOKEN}</password>
+            </server>
+            <server>
+              <id>github-email-helper</id>
+              <username>${GITHUB_ACTOR}</username>
+              <password>${MAVEN_PACKAGE_TOKEN}</password>
+            </server>
+            <server>
+              <id>github-properties-helper</id>
+              <username>${GITHUB_ACTOR}</username>
+              <password>${MAVEN_PACKAGE_TOKEN}</password>
+            </server>
+            <server>
+              <id>github-version-helper</id>
+              <username>${GITHUB_ACTOR}</username>
+              <password>${MAVEN_PACKAGE_TOKEN}</password>
+            </server>
+            <server>
+              <id>github-encrypt-helper</id>
+              <username>${GITHUB_ACTOR}</username>
+              <password>${MAVEN_PACKAGE_TOKEN}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+
+    - name: Resolve private helper packages
+      shell: bash
+      run: |
+        mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:encrypt_helper:5.2.0 -DremoteRepositories=github-encrypt-helper::default::https://maven.pkg.github.com/contratacionmalaga/encrypt_helper
+        mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:version_helper:5.2.0 -DremoteRepositories=github-version-helper::default::https://maven.pkg.github.com/contratacionmalaga/version_helper
+        mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:email_helper:5.2.0 -DremoteRepositories=github-email-helper::default::https://maven.pkg.github.com/contratacionmalaga/email_helper
+        mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:properties_helper:5.2.0 -DremoteRepositories=github-properties-helper::default::https://maven.pkg.github.com/contratacionmalaga/properties_helper
+        find "$HOME/.m2/repository/local/jarios" \( -name "_remote.repositories" -o -name "*.lastUpdated" \) -delete

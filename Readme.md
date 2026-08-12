@@ -6,9 +6,11 @@ Hibernate.
 
 ## Estado del proyecto
 
-- Java 21 y Maven 3.6.3 o superior.
+- Java 21.
+- Maven Wrapper incluido con Maven 3.9.16 para builds reproducibles.
 - Hibernate con `hibernate.hbm2ddl.auto=validate` para evitar creacion o borrado
   automatico del esquema.
+- Parseo GC con Jakarta JAXB en Java 21.
 - Logback como backend de logging.
 - Dependencias privadas publicadas en GitHub Packages.
 - CI en GitHub Actions con build, tests, SpotBugs y OWASP Dependency Check.
@@ -31,8 +33,10 @@ Variables de entorno soportadas:
 - `IMPORT_FROM_GC_MAIL_TO`
 - `IMPORT_FROM_GC_ALLOW_DESTRUCTIVE_IMPORT`
 
-La importacion puede borrar registros de tablas gestionadas por la aplicacion y
-recrear tablas dinamicas de GC. Por defecto debe mantenerse deshabilitada:
+La importacion esta disenada como reemplazo destructivo del estado gestionado
+por la aplicacion y no conserva historico interno de ejecuciones anteriores.
+Puede borrar registros y recrear tablas dinamicas de GC, por lo que por
+defecto debe mantenerse deshabilitada:
 
 ```properties
 app.allowDestructiveImport=false
@@ -51,7 +55,7 @@ Configura estos secrets en el repositorio:
 
 - `PACKAGES_TOKEN`: token con acceso a GitHub Packages privados usados por los
   helpers internos.
-- `NVD_API_KEY`: API key de NVD para acelerar OWASP Dependency Check.
+- `NVD_API_KEY`: API key de NVD obligatoria para OWASP Dependency Check en CI y ejecuciones locales recurrentes.
 
 Los workflows leen esos secrets desde GitHub Actions. No deben aparecer en
 `pom.xml`, `properties`, scripts ni documentacion.
@@ -59,14 +63,12 @@ Los workflows leen esos secrets desde GitHub Actions. No deben aparecer en
 ## Verificacion
 
 ```powershell
-mvn -B clean verify
-mvn -B com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check
-mvn -B org.owasp:dependency-check-maven:check
+.\mvnw.cmd -B clean verify
+.\mvnw.cmd -B com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check
+.\scripts\owasp-dependency-check.ps1
 ```
 
-El proyecto conserva deuda historica de Checkstyle. El umbral esta configurado
-para permitir la migracion gradual, pero debe reducirse conforme se limpien las
-violaciones.
+Checkstyle esta cerrado en 0 avisos y el umbral Maven tambien esta en 0. OWASP Dependency Check debe ejecutarse con `NVD_API_KEY`; el script local falla antes de invocar Maven si la variable no existe.
 
 ## Releases
 
@@ -82,7 +84,7 @@ Al publicar una release en GitHub, el workflow `Release Package`:
 La auditoria tecnica esta en:
 
 ```text
-doc/auditoria/2026_05_09/auditoria-proyecto.md
+docs/auditorias/auditoria-viva-2026-08-12.md
 ```
 
 Puntos ya abordados:
@@ -91,7 +93,7 @@ Puntos ya abordados:
 - secretos versionables;
 - SQL nativo construido por concatenacion;
 - CI y release package;
-- Dependency Check con `NVD_API_KEY`;
+- Dependency Check con `NVD_API_KEY` obligatorio en CI y script local;
 - configuracion Checkstyle versionada.
 
 Pendiente principal:
@@ -99,4 +101,4 @@ Pendiente principal:
 - ampliar tests automatizados;
 - reducir deuda Checkstyle;
 - seguir retirando estado global mutable;
-- incorporar Maven Wrapper.
+- mantener actualizada la auditoria viva en `docs/auditorias`.

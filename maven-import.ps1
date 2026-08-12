@@ -6,10 +6,10 @@ $outputFile = Join-Path $basePath "comandos_mvn.txt"
 
 # Lista de JARs a instalar
 $libs = @(
-    @{ file = "email_helper-3.1.0.jar"; groupId = "local.jarios"; artifactId = "email-helper"; version = "3.1.0" },
-    @{ file = "properties_helper-3.2.0.jar"; groupId = "local.jarios"; artifactId = "properties-helper"; version = "3.2.0" },
-    @{ file = "version_helper-2.2.0.jar"; groupId = "local.jarios"; artifactId = "version-helper"; version = "2.2.0" },
-    @{ file = "encrypt_helper-2.1.0.jar"; groupId = "local.jarios"; artifactId = "encrypt-helper"; version = "2.1.0" }
+    @{ file = "email-helper-3.1.0.jar"; groupId = "local.jarios"; artifactId = "email-helper"; version = "3.1.0" },
+    @{ file = "properties-helper-3.2.0.jar"; groupId = "local.jarios"; artifactId = "properties-helper"; version = "3.2.0" },
+    @{ file = "version-helper-2.2.0.jar"; groupId = "local.jarios"; artifactId = "version-helper"; version = "2.2.0" },
+    @{ file = "encrypt-helper-2.1.0.jar"; groupId = "local.jarios"; artifactId = "encrypt-helper"; version = "2.1.0" }
 )
 
 # Expresión regular permitida: letras, números, guiones y puntos
