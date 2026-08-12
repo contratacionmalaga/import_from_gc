@@ -2,7 +2,7 @@
 
 Fecha de auditoria: 2026-08-12
 Ruta auditada: `C:\java\desarrollo\import-from-gc`
-Version declarada en `pom.xml`: `6.0.0`
+Version declarada en `pom.xml`: `6.0.1`
 Stack principal: Java 21, Maven, Hibernate ORM 7, MariaDB, JAXB, Jackson/Gson, SLF4J/Logback.
 
 ## Como mantener viva esta auditoria
