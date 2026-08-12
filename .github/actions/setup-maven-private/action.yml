@@ -1,5 +1,5 @@
 name: Setup Maven private packages
-description: Configure Maven credentials and resolve private helper packages.
+description: Configure Maven credentials and resolve private packages.
 
 inputs:
   package-token:
@@ -20,6 +20,11 @@ runs:
           <servers>
             <server>
               <id>github-releases</id>
+              <username>${GITHUB_ACTOR}</username>
+              <password>${MAVEN_PACKAGE_TOKEN}</password>
+            </server>
+            <server>
+              <id>github-jarios-parent</id>
               <username>${GITHUB_ACTOR}</username>
               <password>${MAVEN_PACKAGE_TOKEN}</password>
             </server>
@@ -47,11 +52,23 @@ runs:
         </settings>
         EOF
 
-    - name: Resolve private helper packages
+    - name: Resolve private packages
       shell: bash
       run: |
-        mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:encrypt_helper:5.2.0 -DremoteRepositories=github-encrypt-helper::default::https://maven.pkg.github.com/contratacionmalaga/encrypt_helper
-        mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:version_helper:5.2.0 -DremoteRepositories=github-version-helper::default::https://maven.pkg.github.com/contratacionmalaga/version_helper
-        mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:email_helper:5.2.0 -DremoteRepositories=github-email-helper::default::https://maven.pkg.github.com/contratacionmalaga/email_helper
-        mvn -B dependency:get -Dtransitive=false -Dartifact=local.jarios:properties_helper:5.2.0 -DremoteRepositories=github-properties-helper::default::https://maven.pkg.github.com/contratacionmalaga/properties_helper
+        cat > "$RUNNER_TEMP/private-packages-pom.xml" <<'EOF'
+        <project xmlns="http://maven.apache.org/POM/4.0.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>local.jarios</groupId>
+          <artifactId>private-package-resolver</artifactId>
+          <version>1.0.0</version>
+        </project>
+        EOF
+
+        mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:jarios-parent:pom:1.0.4 -DremoteRepositories=github-jarios-parent::default::https://maven.pkg.github.com/contratacionmalaga/jarios-parent
+        mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:encrypt-helper:7.0.2 -DremoteRepositories=github-encrypt-helper::default::https://maven.pkg.github.com/contratacionmalaga/encrypt_helper
+        mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:version-helper:6.1.1 -DremoteRepositories=github-version-helper::default::https://maven.pkg.github.com/contratacionmalaga/version_helper
+        mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:email-helper:6.1.1 -DremoteRepositories=github-email-helper::default::https://maven.pkg.github.com/contratacionmalaga/email_helper
+        mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:properties-helper:6.0.2 -DremoteRepositories=github-properties-helper::default::https://maven.pkg.github.com/contratacionmalaga/properties_helper
         find "$HOME/.m2/repository/local/jarios" \( -name "_remote.repositories" -o -name "*.lastUpdated" \) -delete
