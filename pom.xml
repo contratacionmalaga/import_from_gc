@@ -33,12 +33,12 @@
         <repository>
             <id>github-releases</id>
             <!-- Cambié la URL a la correcta para GitHub Packages -->
-            <url>https://maven.pkg.github.com/contratacionmalaga/import-from-gc</url>
+            <url>https://maven.pkg.github.com/contratacionmalaga/import_from_gc</url>
         </repository>
         <snapshotRepository>
             <id>github-snapshots</id>
             <!-- Cambié la URL a la correcta para GitHub Packages -->
-            <url>https://maven.pkg.github.com/contratacionmalaga/import-from-gc</url>
+            <url>https://maven.pkg.github.com/contratacionmalaga/import_from_gc</url>
         </snapshotRepository>
     </distributionManagement>
 
