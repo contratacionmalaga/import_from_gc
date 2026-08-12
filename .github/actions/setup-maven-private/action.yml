@@ -66,7 +66,7 @@ runs:
         </project>
         EOF
 
-        mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:jarios-parent:pom:1.0.4 -DremoteRepositories=github-jarios-parent::default::https://maven.pkg.github.com/contratacionmalaga/jarios-parent
+        mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:jarios-parent:1.0.4:pom -DremoteRepositories=github-jarios-parent::default::https://maven.pkg.github.com/contratacionmalaga/jarios-parent
         mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:encrypt-helper:7.0.2 -DremoteRepositories=github-encrypt-helper::default::https://maven.pkg.github.com/contratacionmalaga/encrypt_helper
         mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:version-helper:6.1.1 -DremoteRepositories=github-version-helper::default::https://maven.pkg.github.com/contratacionmalaga/version_helper
         mvn -B -f "$RUNNER_TEMP/private-packages-pom.xml" dependency:get -Dtransitive=false -Dartifact=local.jarios:email-helper:6.1.1 -DremoteRepositories=github-email-helper::default::https://maven.pkg.github.com/contratacionmalaga/email_helper
