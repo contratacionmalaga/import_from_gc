@@ -47,8 +47,7 @@ public class ServiceImpl implements Service {
       String msg =
           String.format(
               "[persistirLog] Error persistiendo Log con ID %s: %s",
-              miLog.getId(),
-              ex.getMessage());
+              miLog.getId(), ex.getMessage());
       log.error(msg, ex);
       throw new MiServiceException(msg, ex);
     }

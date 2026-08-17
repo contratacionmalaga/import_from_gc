@@ -54,12 +54,8 @@ public class ImportFromGc {
   /** Version de la aplicacion en ejecucion. */
   public static String appVersion = null;
 
-  /**
-   * Constructor sin argumentos.
-   */
-  public ImportFromGc() {
-
-  }
+  /** Constructor sin argumentos. */
+  public ImportFromGc() {}
 
   /**
    * Método principal que ejecuta el proceso completo de importación.
@@ -122,8 +118,8 @@ public class ImportFromGc {
       File[] arrayFicherosDirectorio = runtime.listFiles(path);
       estadistica.setNTotalFicherosLeidos(arrayFicherosDirectorio.length);
       log.info(Mensajes.N_FICHEROS_RUTA, arrayFicherosDirectorio.length);
-      ParseoFicherosGc parseoFicherosGc = runtime.parseFiles(
-          miLog, arrayFicherosDirectorio, estadistica);
+      ParseoFicherosGc parseoFicherosGc =
+          runtime.parseFiles(miLog, arrayFicherosDirectorio, estadistica);
       miLog.setFicherosGc(parseoFicherosGc.getListFicherosGc());
       log.info(Mensajes.AGIGN_LISTA_FICHEROS_LEIDOS_TO_LOG);
       localDateTime = TimeHelper.getLocalDateTimeNow();
@@ -131,9 +127,9 @@ public class ImportFromGc {
       log.info(
           Mensajes.ASIGN_FECHA_HORA_FINAL_PARSEO_TO_ESTADISTICA,
           ComunHelper.getFechaHoraFormateada(localDateTime));
-      String duracion = ComunHelper.getDiferenciaLocalDateTime(
-          estadistica.getFechaHoraInicial(),
-          estadistica.getFechaHoraFinal());
+      String duracion =
+          ComunHelper.getDiferenciaLocalDateTime(
+              estadistica.getFechaHoraInicial(), estadistica.getFechaHoraFinal());
       estadistica.setDuracion(duracion);
       log.info("[main] Asignada la duracion de la ejecución ({})", duracion);
       miLog.setEstadistica(estadistica);
@@ -330,7 +326,6 @@ public class ImportFromGc {
     log.info("[construirEmailData] Cuerpo del email creado correctamente");
 
     return new EmailData(from, to, asunto, cuerpo);
-
   }
 
   /**
@@ -368,7 +363,6 @@ public class ImportFromGc {
     log.info("[enviarEmail] Creado el objeto EmailService correctamente.");
     emailService.sendEmail(emailProps, emailData);
     log.info("[enviarEmail] Correo enviado correctamente.");
-
   }
 
   /**
@@ -396,10 +390,7 @@ public class ImportFromGc {
    * @throws PropertiesManagerException si falla la lectura del fichero de propiedades
    */
   private static String getPropertyOrEnv(
-      PropertiesManagerService runtimePropertiesManager,
-      String file,
-      String key,
-      String envName)
+      PropertiesManagerService runtimePropertiesManager, String file, String key, String envName)
       throws PropertiesManagerException {
     String envValue = System.getenv(envName);
     if (envValue != null && !envValue.isBlank()) {
@@ -410,10 +401,10 @@ public class ImportFromGc {
   }
 
   /**
-   * Finaliza la ejecución del programa mostrando un mensaje de log
-   * y llamando a System.exit con el código proporcionado.
+   * Finaliza la ejecución del programa mostrando un mensaje de log y llamando a System.exit con el
+   * código proporcionado.
    *
-   * @param mensaje  Mensaje que se mostrará en el log.
+   * @param mensaje Mensaje que se mostrará en el log.
    * @param exitCode codigo de salida del sistema
    * @return codigo de salida calculado
    */
@@ -462,14 +453,13 @@ public class ImportFromGc {
           valorCampo = String.valueOf(value);
         }
 
-        datos.add(new String[]{nombreCampo, valorCampo});
+        datos.add(new String[] {nombreCampo, valorCampo});
         log.debug("[toStringMatrix] {} - {}", nombreCampo, valorCampo);
 
       } catch (IllegalAccessException e) {
 
         log.debug("[toStringMatrix] Error de acceso ilegal. Error: {}", e.getMessage());
-        datos.add(new String[]{field.getName(), "Error al acceder"});
-
+        datos.add(new String[] {field.getName(), "Error al acceder"});
       }
     }
 
@@ -486,8 +476,7 @@ public class ImportFromGc {
 
     StackTraceElement[] elementos = ex.getStackTrace();
     log.debug(
-        "[obtenerStackTraceComoArray] Obtenidos elementos del stack trace: {}",
-        elementos.length);
+        "[obtenerStackTraceComoArray] Obtenidos elementos del stack trace: {}", elementos.length);
     String[] resultado = new String[elementos.length];
     log.debug("[obtenerStackTraceComoArray] Defino un String[] para el stack trace.");
     for (int i = 0; i < elementos.length; i++) {

@@ -46,7 +46,8 @@ public class RegistroGcDao {
     log.debug("[existeTabla] SQL: {}", sql);
     long count =
         ((Number)
-                session.createNativeQuery(sql)
+                session
+                    .createNativeQuery(sql)
                     .setParameter("nombre", nombreTabla)
                     .getSingleResult())
             .longValue();

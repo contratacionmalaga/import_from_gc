@@ -55,12 +55,14 @@ public class Estadistica extends AuditableCreatedAt {
   @Column(name = "nTotalFicherosLeidos")
   // CHECKSTYLE.OFF: MemberName
   private int nTotalFicherosLeidos;
+
   // CHECKSTYLE.ON: MemberName
 
   /** Numero total de registros GC procesados. */
   @Column(name = "nRegistrosGc")
   // CHECKSTYLE.OFF: MemberName
   private int nRegistrosGc;
+
   // CHECKSTYLE.ON: MemberName
 
   /** Fecha y hora de inicio del proceso de importacion. */
@@ -96,6 +98,7 @@ public class Estadistica extends AuditableCreatedAt {
   public void aumentarNRegistrosGc(int incremento) {
     this.nRegistrosGc += incremento;
   }
+
   // CHECKSTYLE.ON: AbbreviationAsWordInName
 
   /**

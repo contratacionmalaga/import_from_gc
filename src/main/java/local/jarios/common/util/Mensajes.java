@@ -71,8 +71,7 @@ public final class Mensajes {
   public static final String FINAL = "**** Final del log";
 
   /** Mensaje de ruta de importacion de ficheros. */
-  public static final String RUTA_FICHEROS =
-      "Ruta desde la que se importarán los ficheros: {}";
+  public static final String RUTA_FICHEROS = "Ruta desde la que se importarán los ficheros: {}";
 
   /** Mensaje de numero de ficheros en ruta. */
   public static final String N_FICHEROS_RUTA = "Número de ficheros en la ruta: {}";
@@ -86,8 +85,7 @@ public final class Mensajes {
       "Convertida la lista de ficheros persistidos en un Map correctamente.";
 
   /** Mensaje de entidades encontradas en un paquete. */
-  public static final String ENTIDADES =
-      "Se han encontrado {} entidades dentro del paquete {}.";
+  public static final String ENTIDADES = "Se han encontrado {} entidades dentro del paquete {}.";
 
   /** Mensaje de excepcion en clase y metodo. */
   public static final String EXCEPTION_ERROR =

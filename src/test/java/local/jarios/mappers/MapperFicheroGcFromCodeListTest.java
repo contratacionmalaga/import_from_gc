@@ -1,28 +1,28 @@
 package local.jarios.mappers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import local.jarios.entity.FicheroGc;
 import local.jarios.entity.Log;
 import local.jarios.genericode.CodeList;
 import local.jarios.genericode.Identification;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class MapperFicheroGcFromCodeListTest {
 
   @Test
   void mapsIdentificationFieldsToFicheroGc() {
     Log logEntity = new Log();
-    CodeList codeList = codeListWithIdentification(
-        "ContractCode",
-        "Contract code list",
-        "2.08",
-        "urn:canonical",
-        "urn:canonical:2.08",
-        "https://example.test/ContractCode.gc");
+    CodeList codeList =
+        codeListWithIdentification(
+            "ContractCode",
+            "Contract code list",
+            "2.08",
+            "urn:canonical",
+            "urn:canonical:2.08",
+            "https://example.test/ContractCode.gc");
 
-    FicheroGc ficheroGc = MapperFicheroGcFromCodeList
-        .getFicheroGcFromCodeList(logEntity, codeList);
+    FicheroGc ficheroGc = MapperFicheroGcFromCodeList.getFicheroGcFromCodeList(logEntity, codeList);
 
     assertThat(ficheroGc.getLogEntity()).isSameAs(logEntity);
     assertThat(ficheroGc.getShortName()).isEqualTo("ContractCode");
@@ -37,8 +37,7 @@ class MapperFicheroGcFromCodeListTest {
   void returnsNullWhenIdentificationIsMissing() {
     CodeList codeList = new CodeList();
 
-    FicheroGc ficheroGc = MapperFicheroGcFromCodeList
-        .getFicheroGcFromCodeList(new Log(), codeList);
+    FicheroGc ficheroGc = MapperFicheroGcFromCodeList.getFicheroGcFromCodeList(new Log(), codeList);
 
     assertThat(ficheroGc).isNull();
   }
@@ -47,8 +46,7 @@ class MapperFicheroGcFromCodeListTest {
   void replacesNullIdentificationFieldsWithEmptyStrings() {
     CodeList codeList = codeListWithIdentification(null, null, null, null, null, null);
 
-    FicheroGc ficheroGc = MapperFicheroGcFromCodeList
-        .getFicheroGcFromCodeList(new Log(), codeList);
+    FicheroGc ficheroGc = MapperFicheroGcFromCodeList.getFicheroGcFromCodeList(new Log(), codeList);
 
     assertThat(ficheroGc.getShortName()).isEmpty();
     assertThat(ficheroGc.getLongName()).isEmpty();

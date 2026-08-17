@@ -1,5 +1,12 @@
 package local.jarios;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import local.jarios.common.util.PropertiesFiles;
 import local.jarios.common.util.PropertiesKeys;
 import local.jarios.email.exception.EmailException;
@@ -13,14 +20,6 @@ import local.jarios.properties.exception.PropertiesManagerException;
 import local.jarios.services.Service;
 import local.jarios.version.api.Version;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class ImportFromGcRunnerTest {
 
@@ -114,15 +113,13 @@ class ImportFromGcRunnerTest {
 
   private static final class TestPropertiesManager implements PropertiesManagerService {
 
-
     @Override
     public Set<String> getSensitiveKeys() {
       return Set.of();
     }
 
     @Override
-    public void setSensitiveKeys(Set<String> sensitiveKeys) {
-    }
+    public void setSensitiveKeys(Set<String> sensitiveKeys) {}
 
     @Override
     public List<String> getListFiles() {
@@ -130,16 +127,13 @@ class ImportFromGcRunnerTest {
     }
 
     @Override
-    public void loadAllProperties() {
-    }
+    public void loadAllProperties() {}
 
     @Override
-    public void printProperties(String file) {
-    }
+    public void printProperties(String file) {}
 
     @Override
-    public void printAllProperties() {
-    }
+    public void printAllProperties() {}
 
     @Override
     public Properties getProperties(String file) {
@@ -147,8 +141,7 @@ class ImportFromGcRunnerTest {
     }
 
     @Override
-    public void setProperty(String file, String key, String value) {
-    }
+    public void setProperty(String file, String key, String value) {}
 
     @Override
     public boolean hasLoaded(String file) {
@@ -187,8 +180,7 @@ class ImportFromGcRunnerTest {
     }
 
     @Override
-    public void reload() {
-    }
+    public void reload() {}
 
     @Override
     public String getConfigDir() throws PropertiesManagerException {
@@ -196,11 +188,9 @@ class ImportFromGcRunnerTest {
     }
 
     @Override
-    public void setConfigDir(String configDir) {
-    }
+    public void setConfigDir(String configDir) {}
 
     @Override
-    public void addProperties(String file, Properties properties) {
-    }
+    public void addProperties(String file, Properties properties) {}
   }
 }

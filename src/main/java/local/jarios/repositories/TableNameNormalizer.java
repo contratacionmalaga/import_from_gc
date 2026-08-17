@@ -2,14 +2,10 @@ package local.jarios.repositories;
 
 import java.util.Locale;
 
-/**
- * Normaliza valores externos antes de usarlos como identificadores de tabla.
- */
+/** Normaliza valores externos antes de usarlos como identificadores de tabla. */
 final class TableNameNormalizer {
 
-  /**
-   * Constructor privado para evitar instanciacion.
-   */
+  /** Constructor privado para evitar instanciacion. */
   private TableNameNormalizer() {
     // Utility class.
   }

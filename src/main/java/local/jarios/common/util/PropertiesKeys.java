@@ -31,8 +31,7 @@ public final class PropertiesKeys {
   public static final String JAKARTA_PERSISTENCE_JDBC_URL = "jakarta.persistence.jdbc.url";
 
   /** Driver JDBC Jakarta Persistence. */
-  public static final String JAKARTA_PERSISTENCE_JDBC_DRIVER =
-      "jakarta.persistence.jdbc.driver";
+  public static final String JAKARTA_PERSISTENCE_JDBC_DRIVER = "jakarta.persistence.jdbc.driver";
 
   /** Usuario JDBC Jakarta Persistence. */
   public static final String JAKARTA_PERSISTENCE_JDBC_USER = "jakarta.persistence.jdbc.user";

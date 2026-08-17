@@ -37,8 +37,7 @@ public class SessionFactoryProvider {
     try {
       Properties props = propertyManager.getProperties(PropertiesFiles.HIBERNATE);
       log.debug(
-          "[getSessionFactory] Propiedades leidas desde el fichero: {}",
-          PropertiesFiles.HIBERNATE);
+          "[getSessionFactory] Propiedades leidas desde el fichero: {}", PropertiesFiles.HIBERNATE);
 
       final var hibernateProperties = configurePrincipalProperties(props);
       log.debug(

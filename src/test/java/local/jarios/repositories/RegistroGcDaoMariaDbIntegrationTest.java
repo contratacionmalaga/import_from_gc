@@ -1,5 +1,12 @@
 package local.jarios.repositories;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import local.jarios.common.util.PropertiesFiles;
 import local.jarios.common.util.PropertiesKeys;
 import local.jarios.dao.RegistroGcDao;
@@ -12,23 +19,13 @@ import local.jarios.properties.exception.PropertiesManagerException;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.MariaDBContainer;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-
 class RegistroGcDaoMariaDbIntegrationTest {
 
-  private static final MariaDBContainer<?> MARIA_DB =
-      new MariaDBContainer<>("mariadb:11.4");
+  private static final MariaDBContainer<?> MARIA_DB = new MariaDBContainer<>("mariadb:11.4");
 
   private static SessionFactory sessionFactory;
 
@@ -63,10 +60,10 @@ class RegistroGcDaoMariaDbIntegrationTest {
               new RegistroGc("A", "Activo", java.util.UUID.randomUUID()),
               new RegistroGc("B", "Borrador", java.util.UUID.randomUUID())));
 
-      long count = ((Number) session
-          .createNativeQuery("SELECT COUNT(*) FROM " + tableName)
-          .getSingleResult())
-          .longValue();
+      long count =
+          ((Number)
+                  session.createNativeQuery("SELECT COUNT(*) FROM " + tableName).getSingleResult())
+              .longValue();
 
       assertThat(count).isEqualTo(2);
 
@@ -107,12 +104,10 @@ class RegistroGcDaoMariaDbIntegrationTest {
 
     @Override
     public String getProperty(String file, String key) {
-      if (PropertiesFiles.APP.equals(file)
-          && PropertiesKeys.APP_CHARACTER_ENCODING.equals(key)) {
+      if (PropertiesFiles.APP.equals(file) && PropertiesKeys.APP_CHARACTER_ENCODING.equals(key)) {
         return "utf8mb4";
       }
-      if (PropertiesFiles.APP.equals(file)
-          && PropertiesKeys.APP_CONNECTION_COLLATION.equals(key)) {
+      if (PropertiesFiles.APP.equals(file) && PropertiesKeys.APP_CONNECTION_COLLATION.equals(key)) {
         return "utf8mb4_unicode_ci";
       }
       throw new IllegalArgumentException("Propiedad no soportada en test: " + file + "." + key);
@@ -124,8 +119,7 @@ class RegistroGcDaoMariaDbIntegrationTest {
     }
 
     @Override
-    public void setSensitiveKeys(Set<String> sensitiveKeys) {
-    }
+    public void setSensitiveKeys(Set<String> sensitiveKeys) {}
 
     @Override
     public List<String> getListFiles() {
@@ -133,16 +127,13 @@ class RegistroGcDaoMariaDbIntegrationTest {
     }
 
     @Override
-    public void loadAllProperties() {
-    }
+    public void loadAllProperties() {}
 
     @Override
-    public void printProperties(String file) {
-    }
+    public void printProperties(String file) {}
 
     @Override
-    public void printAllProperties() {
-    }
+    public void printAllProperties() {}
 
     @Override
     public Properties getProperties(String file) {
@@ -150,8 +141,7 @@ class RegistroGcDaoMariaDbIntegrationTest {
     }
 
     @Override
-    public void setProperty(String file, String key, String value) {
-    }
+    public void setProperty(String file, String key, String value) {}
 
     @Override
     public boolean hasLoaded(String file) {
@@ -179,8 +169,7 @@ class RegistroGcDaoMariaDbIntegrationTest {
     }
 
     @Override
-    public void reload() {
-    }
+    public void reload() {}
 
     @Override
     public String getConfigDir() throws PropertiesManagerException {
@@ -188,11 +177,9 @@ class RegistroGcDaoMariaDbIntegrationTest {
     }
 
     @Override
-    public void setConfigDir(String configDir) {
-    }
+    public void setConfigDir(String configDir) {}
 
     @Override
-    public void addProperties(String file, Properties properties) {
-    }
+    public void addProperties(String file, Properties properties) {}
   }
 }

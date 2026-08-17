@@ -1,27 +1,26 @@
 package local.jarios.mappers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.UUID;
 import local.jarios.genericode.CodeList;
 import local.jarios.genericode.Row;
 import local.jarios.genericode.SimpleCodeList;
 import local.jarios.genericode.Value;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 class MapperRegistroGcFromCodeListTest {
 
   @Test
   void mapsRowsWithCodeAndNombreValues() {
     UUID logId = UUID.randomUUID();
-    CodeList codeList = codeListWithRows(
-        row(value("code", "A"), value("nombre", "Activo")),
-        row(value("code", "B"), value("nombre", "Borrador")));
+    CodeList codeList =
+        codeListWithRows(
+            row(value("code", "A"), value("nombre", "Activo")),
+            row(value("code", "B"), value("nombre", "Borrador")));
 
-    var registros = MapperRegistroGcFromCodeList
-        .getListRegistroGcFromCodeList(codeList, logId);
+    var registros = MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(codeList, logId);
 
     assertThat(registros)
         .hasSize(2)
@@ -34,49 +33,53 @@ class MapperRegistroGcFromCodeListTest {
   @Test
   void ignoresNameColumnAndUnknownColumns() {
     UUID logId = UUID.randomUUID();
-    CodeList codeList = codeListWithRows(
-        row(
-            value("code", "A"),
-            value("name", "Ignored name"),
-            value("unknown", "Ignored value"),
-            value("nombre", "Activo")));
+    CodeList codeList =
+        codeListWithRows(
+            row(
+                value("code", "A"),
+                value("name", "Ignored name"),
+                value("unknown", "Ignored value"),
+                value("nombre", "Activo")));
 
-    var registros = MapperRegistroGcFromCodeList
-        .getListRegistroGcFromCodeList(codeList, logId);
+    var registros = MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(codeList, logId);
 
     assertThat(registros)
         .singleElement()
-        .satisfies(registro -> {
-          assertThat(registro.getCode()).isEqualTo("A");
-          assertThat(registro.getNombre()).isEqualTo("Activo");
-          assertThat(registro.getLogId()).isEqualTo(logId);
-        });
+        .satisfies(
+            registro -> {
+              assertThat(registro.getCode()).isEqualTo("A");
+              assertThat(registro.getNombre()).isEqualTo("Activo");
+              assertThat(registro.getLogId()).isEqualTo(logId);
+            });
   }
 
   @Test
   void skipsRowsWithoutRequiredValues() {
-    CodeList codeList = codeListWithRows(
-        row(value("code", "A")),
-        row(value("nombre", "Activo")),
-        row(value("code", "B"), value("nombre", "Borrador")));
+    CodeList codeList =
+        codeListWithRows(
+            row(value("code", "A")),
+            row(value("nombre", "Activo")),
+            row(value("code", "B"), value("nombre", "Borrador")));
 
-    var registros = MapperRegistroGcFromCodeList
-        .getListRegistroGcFromCodeList(codeList, UUID.randomUUID());
+    var registros =
+        MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(codeList, UUID.randomUUID());
 
     assertThat(registros)
         .singleElement()
-        .satisfies(registro -> {
-          assertThat(registro.getCode()).isEqualTo("B");
-          assertThat(registro.getNombre()).isEqualTo("Borrador");
-        });
+        .satisfies(
+            registro -> {
+              assertThat(registro.getCode()).isEqualTo("B");
+              assertThat(registro.getNombre()).isEqualTo("Borrador");
+            });
   }
 
   @Test
   void returnsEmptyListWhenCodeListHasNoRows() {
     assertThat(MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(null, UUID.randomUUID()))
         .isEmpty();
-    assertThat(MapperRegistroGcFromCodeList
-        .getListRegistroGcFromCodeList(new CodeList(), UUID.randomUUID()))
+    assertThat(
+            MapperRegistroGcFromCodeList.getListRegistroGcFromCodeList(
+                new CodeList(), UUID.randomUUID()))
         .isEmpty();
   }
 
