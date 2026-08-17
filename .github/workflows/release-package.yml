@@ -29,6 +29,7 @@ jobs:
         uses: ./.github/actions/setup-maven-private
         with:
           package-token: ${{ secrets.PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+          publish-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and test
         run: mvn -B clean verify

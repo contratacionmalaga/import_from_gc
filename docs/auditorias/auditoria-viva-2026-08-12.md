@@ -352,6 +352,8 @@ Trabajo que requiere decision previa:
 | 2026-08-12 | OWASP con NVD_API_KEY | Cerrado | `.github/workflows/maven-ci.yml`, `.github/workflows/release-package.yml`, `scripts/owasp-dependency-check.ps1`, GitHub secrets | `NVD_API_KEY` existe como secret en `contratacionmalaga/import_from_gc` y `contratacionmalaga/import-from-gc`; CI/release fallan si falta; el script local falla sin variable de entorno. |
 | 2026-08-12 | Actualizaciones estables en parent | Cerrado | `C:\java\desarrollo\jarios-parent\pom.xml`, `pom.xml` | Parent subido a `1.0.4`; gestiona Jackson 2.22.1, `jackson-annotations` 2.22, JAXB runtime 4.0.9 y OWASP Dependency Check 13.0.0. `jarios-parent:1.0.4` publicado en GitHub Packages; `import-from-gc` hereda esas versiones y `clean verify` pasa con 20 tests, Checkstyle 0 y Javadoc sin warnings. |
 
+| 2026-08-17 | Release v6.0.1 | Cerrado | GitHub Release `v6.0.1`, GitHub Packages, `.github/actions/setup-maven-private/action.yml`, `.github/workflows/release-package.yml` | Release creada; paquete Maven `local.jarios:import-from-gc:6.0.1` publicado desde local por 401 del `PACKAGES_TOKEN` en Actions; assets `jar-with-dependencies`, sources, javadoc y checksums adjuntos; workflow corregido para usar `PACKAGES_TOKEN` en lectura y `GITHUB_TOKEN` en publicacion. |
+
 ## Comandos de verificacion recomendados
 
 Con Maven Wrapper ya incorporado:
@@ -369,4 +371,4 @@ Con Maven Wrapper ya incorporado:
 ```
 ## Riesgo residual
 
-El proyecto queda en riesgo bajo-medio operativo: H1, H2, H3, H4, H5, H6, H7, H8, H9, H10, Javadoc Maven y OWASP con `NVD_API_KEY` estan cerrados o aceptados. Ya no queda deuda Checkstyle ni riesgo de ejecuciones OWASP recurrentes sin clave. Los riesgos residuales son de evolucion: mantener permisos/backups externos como control operativo permanente, tratar actualizaciones mayores o no GA de Hibernate/SLF4J/JUnit/Jakarta/Maven como hitos separados.
+El proyecto queda en riesgo bajo-medio operativo: H1, H2, H3, H4, H5, H6, H7, H8, H9, H10, Javadoc Maven y OWASP con `NVD_API_KEY` estan cerrados o aceptados. Ya no queda deuda Checkstyle ni riesgo de ejecuciones OWASP recurrentes sin clave. Los riesgos residuales son de evolucion: mantener permisos/backups externos como control operativo permanente, tratar actualizaciones mayores o no GA de Hibernate/SLF4J/JUnit/Jakarta/Maven como hitos separados y validar en la siguiente release que Actions publica con `GITHUB_TOKEN` tras separar el token de lectura.
