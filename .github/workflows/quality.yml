@@ -47,4 +47,4 @@ jobs:
         uses: ./.github/actions/setup-project-artifacts
 
       - name: Quality checks
-        run: ./mvnw -B -ntp -Pquality verify
+        run: ./mvnw -B -ntp -DimportFromGc.requireDocker=true -Pquality verify

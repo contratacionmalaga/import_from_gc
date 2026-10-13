@@ -46,4 +46,4 @@ jobs:
         uses: ./.github/actions/setup-project-artifacts
 
       - name: Build
-        run: ./mvnw -B -ntp clean verify
+        run: ./mvnw -B -ntp -DimportFromGc.requireDocker=true clean verify

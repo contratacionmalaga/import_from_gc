@@ -6,6 +6,7 @@ Hibernate.
 
 ## Estado del proyecto
 
+- Version actual: **6.0.5**.
 - Java 21.
 - Maven Wrapper incluido con Maven 3.9.16 para builds reproducibles.
 - Hibernate con `hibernate.hbm2ddl.auto=validate` para evitar creacion o borrado
@@ -14,7 +15,25 @@ Hibernate.
 - Logback como backend de logging.
 - Dependencias privadas publicadas en GitHub Packages.
 - CI en GitHub Actions con build, tests, SpotBugs y OWASP Dependency Check.
-- Paquete de release automatico al publicar una release en GitHub.
+- Paquete de release automatico al publicar una etiqueta `v*` en GitHub.
+
+## Novedades de 6.0.5
+
+- Las altas de `log.id`, `estadistica.id` y `ficheros_gc.id` generan UUID v7
+  mediante `@UuidGenerator(style = UuidGenerator.Style.VERSION_7)` de Hibernate.
+- Los catalogos conservan `Generators.timeBasedEpochGenerator()`, que genera v7.
+- `estadistica.log_id` y `ficheros_gc.log_id` guardan el mismo UUID de `log.id`;
+  son referencias y no tienen generadores propios.
+- Las pruebas en MariaDB 11.4 aislada comprueban `UUID.version() == 7`, el tipo
+  nativo `UUID` de los identificadores y referencias, y la conservacion de IDs
+  al actualizar con `merge`, incluidos registros existentes con UUID v4.
+- CI, Quality y Release Package exigen Docker para estas pruebas: una base no
+  disponible provoca un fallo en lugar de omitir la verificacion.
+
+El cambio afecta a altas futuras. Los UUID v4 almacenados no se convierten ni
+se regeneran al actualizar la misma fila. La importacion completa conserva su
+comportamiento destructivo documentado abajo: las filas borradas y recreadas
+reciben identificadores nuevos.
 
 ## Configuracion local
 
@@ -64,20 +83,35 @@ Los workflows leen esos secrets desde GitHub Actions. No deben aparecer en
 
 ```powershell
 .\mvnw.cmd -B clean verify
+.\mvnw.cmd -B -DimportFromGc.requireDocker=true clean verify
 .\mvnw.cmd -B com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check
 .\scripts\owasp-dependency-check.ps1
 ```
 
 Checkstyle esta cerrado en 0 avisos y el umbral Maven tambien esta en 0. OWASP Dependency Check debe ejecutarse con `NVD_API_KEY`; el script local falla antes de invocar Maven si la variable no existe.
 
+La segunda orden requiere Docker en ejecucion y verifica las entidades y los
+catalogos en un contenedor `mariadb:11.4` temporal con `create-drop`. No utiliza
+las credenciales ni la base de produccion. Sin Docker, la orden local por defecto
+omite las pruebas de integracion; los workflows siempre las exigen.
+
 ## Releases
 
-Al publicar una release en GitHub, el workflow `Release Package`:
+Al publicar una etiqueta `v*` en GitHub, el workflow `Release Package`:
 
 - compila y verifica el proyecto;
-- ejecuta SpotBugs y OWASP Dependency Check;
 - publica el paquete Maven en GitHub Packages;
-- adjunta a la release el JAR con dependencias, sources, javadocs y checksums.
+- crea la release y adjunta los JAR principal, con dependencias, sources y javadocs.
+
+El workflow `Quality` ejecuta Spotless, Checkstyle y SpotBugs antes de integrar
+los cambios. OWASP Dependency Check dispone de su propio workflow semanal y
+de ejecucion manual.
+
+Para desplegar 6.0.5, utiliza `import-from-gc-6.0.5-jar-with-dependencies.jar`
+publicado en la release `v6.0.5`. Sustituye el JAR configurado en el servicio o
+tarea de importacion, manteniendo sus ficheros de configuracion externos, y
+comprueba que el proceso utiliza ese archivo y muestra la version 6.0.5.
+No se necesita migrar ni reescribir los identificadores existentes.
 
 ## Auditoria
 
