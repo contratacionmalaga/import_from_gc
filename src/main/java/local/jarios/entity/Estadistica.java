@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.UuidGenerator;
 
 /** Entidad con las estadisticas de una ejecucion de importacion GC. */
 @Slf4j
@@ -31,7 +32,8 @@ public class Estadistica extends AuditableCreatedAt {
 
   /** Identificador unico del registro. */
   @Id
-  @GeneratedValue(generator = "UUID")
+  @GeneratedValue
+  @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
   @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
 

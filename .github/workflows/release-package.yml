@@ -89,12 +89,12 @@ jobs:
           fi
 
       - name: Build
-        run: ./mvnw -B -ntp clean verify
+        run: ./mvnw -B -ntp -DimportFromGc.requireDocker=true clean verify
 
       - name: Publish package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./mvnw -B -ntp deploy
+        run: ./mvnw -B -ntp -DimportFromGc.requireDocker=true deploy
 
       - name: Create GitHub Release
         env:

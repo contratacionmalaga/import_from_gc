@@ -15,6 +15,7 @@ import local.jarios.common.util.TamanoCampos;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.UuidGenerator;
 
 /** Entidad con los metadatos de un fichero GC importado. */
 @Slf4j
@@ -26,7 +27,8 @@ public class FicheroGc extends AuditableCreatedAt {
 
   /** Identificador unico del registro. */
   @Id
-  @GeneratedValue(generator = "UUID")
+  @GeneratedValue
+  @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
   @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
 

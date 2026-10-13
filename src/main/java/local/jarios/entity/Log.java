@@ -14,6 +14,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.UuidGenerator;
 
 /** Entidad que agrupa ficheros GC y estadisticas de una ejecucion. */
 @Slf4j
@@ -25,7 +26,8 @@ public class Log extends AuditableCreatedAt {
 
   /** Identificador unico del registro. */
   @Id
-  @GeneratedValue(generator = "UUID")
+  @GeneratedValue
+  @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
   @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
 

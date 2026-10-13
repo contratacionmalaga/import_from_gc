@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import local.jarios.common.util.PropertiesFiles;
 import local.jarios.common.util.PropertiesKeys;
 import local.jarios.dao.RegistroGcDao;
@@ -16,9 +17,11 @@ import local.jarios.entity.Log;
 import local.jarios.entity.RegistroGc;
 import local.jarios.properties.api.PropertiesManagerService;
 import local.jarios.properties.exception.PropertiesManagerException;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.MariaDBContainer;
@@ -28,6 +31,17 @@ class RegistroGcDaoMariaDbIntegrationTest {
   private static final MariaDBContainer<?> MARIA_DB = new MariaDBContainer<>("mariadb:11.4");
 
   private static SessionFactory sessionFactory;
+
+  @BeforeAll
+  static void startDatabase() {
+    boolean dockerAvailable = isDockerAvailable();
+    if (Boolean.getBoolean("importFromGc.requireDocker")) {
+      assertThat(dockerAvailable).as("Docker obligatorio para verificar UUID en MariaDB").isTrue();
+    }
+    assumeTrue(dockerAvailable, "Docker no disponible");
+    MARIA_DB.start();
+    sessionFactory = buildSessionFactory();
+  }
 
   @AfterAll
   static void stopDatabase() {
@@ -41,9 +55,6 @@ class RegistroGcDaoMariaDbIntegrationTest {
 
   @Test
   void createsInsertsAndDropsDynamicRegistroTableInMariaDb() {
-    assumeTrue(isDockerAvailable(), "Docker no disponible");
-    MARIA_DB.start();
-    sessionFactory = buildSessionFactory();
     RegistroGcDao dao = new RegistroGcDao(new TestPropertiesManager());
 
     try (var session = sessionFactory.openSession()) {
@@ -67,11 +78,170 @@ class RegistroGcDaoMariaDbIntegrationTest {
 
       assertThat(count).isEqualTo(2);
 
+      List<String> ids =
+          session
+              .createNativeQuery("SELECT CAST(id AS CHAR) FROM " + tableName, String.class)
+              .getResultList();
+      assertThat(ids).hasSize(2).doesNotHaveDuplicates();
+      ids.forEach(id -> assertThat(UUID.fromString(id).version()).isEqualTo(7));
+      assertNativeUuidColumn(session, tableName, "id");
+
       dao.eliminarTabla(session, tableName);
       assertThat(dao.existeTabla(session, tableName)).isFalse();
 
       transaction.commit();
     }
+  }
+
+  @Test
+  void generatesVersionSevenIdsAndPreservesThemOnMerge() {
+    Log source = new Log();
+    Estadistica estadistica = new Estadistica();
+    estadistica.setCreatedAt(source.getCreatedAt());
+    estadistica.setEquipo("uuid-v7-test");
+    estadistica.setLogEntity(source);
+    source.setEstadistica(estadistica);
+    FicheroGc fichero = new FicheroGc();
+    fichero.setLogEntity(source);
+    fichero.setShortName("uuid-v7-test");
+    fichero.setLongName("Catalogo de prueba UUID v7");
+    fichero.setVersion("1.0");
+    fichero.setCanonicalUri("urn:test:uuid-v7");
+    fichero.setCanonicalVersionUri("urn:test:uuid-v7:1.0");
+    fichero.setLocationUri("urn:test:uuid-v7:location");
+    source.getFicherosGc().add(fichero);
+
+    Log detached;
+    try (var session = sessionFactory.openSession()) {
+      var transaction = session.beginTransaction();
+      // El repositorio real persiste el grafo mediante merge.
+      detached = session.merge(source);
+      session.flush();
+      assertThat(detached.getId().version()).isEqualTo(7);
+      assertThat(detached.getEstadistica().getId().version()).isEqualTo(7);
+      assertThat(detached.getFicherosGc().getFirst().getId().version()).isEqualTo(7);
+      assertThat(
+              List.of(
+                  detached.getId(),
+                  detached.getEstadistica().getId(),
+                  detached.getFicherosGc().getFirst().getId()))
+          .doesNotHaveDuplicates();
+      assertStoredGraph(session, detached);
+      assertNativeUuidColumn(session, "log", "id");
+      assertNativeUuidColumn(session, "estadistica", "id");
+      assertNativeUuidColumn(session, "estadistica", "log_id");
+      assertNativeUuidColumn(session, "ficheros_gc", "id");
+      assertNativeUuidColumn(session, "ficheros_gc", "log_id");
+      transaction.commit();
+    }
+
+    UUID logId = detached.getId();
+    UUID estadisticaId = detached.getEstadistica().getId();
+    UUID ficheroId = detached.getFicherosGc().getFirst().getId();
+    detached.getEstadistica().setEquipo("updated-v7");
+    detached.getFicherosGc().getFirst().setLongName("updated-v7");
+    assertMergePreservesIds(detached, logId, estadisticaId, ficheroId, "updated-v7");
+  }
+
+  @Test
+  void preservesExistingVersionFourIdsAndReferencesOnMerge() {
+    UUID logId = UUID.randomUUID();
+    UUID estadisticaId = UUID.randomUUID();
+    UUID ficheroId = UUID.randomUUID();
+    try (var session = sessionFactory.openSession()) {
+      var transaction = session.beginTransaction();
+      // Simula registros anteriores a la actualizacion sin invocar los nuevos generadores.
+      session
+          .createNativeMutationQuery(
+              "INSERT INTO log (id, created_at) VALUES (:id, CURRENT_TIMESTAMP)")
+          .setParameter("id", logId.toString())
+          .executeUpdate();
+      session
+          .createNativeMutationQuery(
+              "INSERT INTO estadistica "
+                  + "(id, log_id, equipo, nTotalFicherosLeidos, nRegistrosGc, created_at) "
+                  + "VALUES (:id, :logId, 'legacy-v4', 0, 0, CURRENT_TIMESTAMP)")
+          .setParameter("id", estadisticaId.toString())
+          .setParameter("logId", logId.toString())
+          .executeUpdate();
+      session
+          .createNativeMutationQuery(
+              "INSERT INTO ficheros_gc (id, log_id, short_name, long_name, version, "
+                  + "canonical_uri, canonical_version_uri, location_uri, created_at) "
+                  + "VALUES (:id, :logId, 'legacy', 'legacy-v4', '1.0', "
+                  + "'urn:test:legacy', 'urn:test:legacy:1.0', 'urn:test:legacy', CURRENT_TIMESTAMP)")
+          .setParameter("id", ficheroId.toString())
+          .setParameter("logId", logId.toString())
+          .executeUpdate();
+      transaction.commit();
+    }
+
+    Log detached;
+    try (var session = sessionFactory.openSession()) {
+      detached = session.find(Log.class, logId);
+      detached.getEstadistica().setEquipo("updated-v4");
+      detached.getFicherosGc().getFirst().setLongName("updated-v4");
+    }
+    assertMergePreservesIds(detached, logId, estadisticaId, ficheroId, "updated-v4");
+  }
+
+  private static void assertMergePreservesIds(
+      Log detached, UUID logId, UUID estadisticaId, UUID ficheroId, String updatedValue) {
+    try (var session = sessionFactory.openSession()) {
+      var transaction = session.beginTransaction();
+      Log merged = session.merge(detached);
+      assertThat(merged.getId()).isEqualTo(logId);
+      assertThat(merged.getEstadistica().getId()).isEqualTo(estadisticaId);
+      assertThat(merged.getFicherosGc().getFirst().getId()).isEqualTo(ficheroId);
+      transaction.commit();
+    }
+    // Lee de nuevo desde MariaDB, sin reutilizar el estado en memoria.
+    try (var session = sessionFactory.openSession()) {
+      Log reloaded = session.find(Log.class, logId);
+      assertThat(reloaded.getEstadistica().getId()).isEqualTo(estadisticaId);
+      assertThat(reloaded.getFicherosGc().getFirst().getId()).isEqualTo(ficheroId);
+      assertThat(reloaded.getEstadistica().getEquipo()).isEqualTo(updatedValue);
+      assertThat(reloaded.getFicherosGc().getFirst().getLongName()).isEqualTo(updatedValue);
+      assertStoredGraph(session, reloaded);
+    }
+  }
+
+  private static void assertStoredGraph(Session session, Log stored) {
+    assertThat(
+            session
+                .createNativeQuery("SELECT CAST(id AS CHAR) FROM log WHERE id = :id", String.class)
+                .setParameter("id", stored.getId().toString())
+                .getSingleResult())
+        .isEqualTo(stored.getId().toString());
+    assertStoredReference(session, "estadistica", stored.getEstadistica().getId(), stored.getId());
+    assertStoredReference(
+        session, "ficheros_gc", stored.getFicherosGc().getFirst().getId(), stored.getId());
+  }
+
+  private static void assertStoredReference(
+      Session session, String tableName, UUID id, UUID logId) {
+    assertThat(
+            session
+                .createNativeQuery(
+                    "SELECT CAST(log_id AS CHAR) FROM " + tableName + " WHERE id = :id",
+                    String.class)
+                .setParameter("id", id.toString())
+                .getSingleResult())
+        .isEqualTo(logId.toString());
+  }
+
+  private static void assertNativeUuidColumn(Session session, String tableName, String columnName) {
+    assertThat(
+            session
+                .createNativeQuery(
+                    "SELECT DATA_TYPE FROM information_schema.columns "
+                        + "WHERE table_schema = DATABASE() "
+                        + "AND table_name = :tableName AND column_name = :columnName",
+                    String.class)
+                .setParameter("tableName", tableName)
+                .setParameter("columnName", columnName)
+                .getSingleResult())
+        .isEqualToIgnoringCase("uuid");
   }
 
   private static boolean isDockerAvailable() {
