@@ -6,7 +6,7 @@ Hibernate.
 
 ## Estado del proyecto
 
-- Version actual: **6.0.5**.
+- Version actual: **6.0.6**.
 - Java 21.
 - Maven Wrapper incluido con Maven 3.9.16 para builds reproducibles.
 - Hibernate con `hibernate.hbm2ddl.auto=validate` para evitar creacion o borrado
@@ -16,6 +16,20 @@ Hibernate.
 - Dependencias privadas publicadas en GitHub Packages.
 - CI en GitHub Actions con build, tests, SpotBugs y OWASP Dependency Check.
 - Paquete de release automatico al publicar una etiqueta `v*` en GitHub.
+
+## Novedades de 6.0.6
+
+- Se incorpora `app.email.enabled` en `properties/app.properties`, la misma clave
+  usada por `import-from-opendata` para controlar las notificaciones.
+- El envio de correos de exito y error esta desactivado por defecto. Solo se
+  habilita con `app.email.enabled=true`; una clave ausente, vacia o con otro
+  valor mantiene el correo desactivado.
+- Con el correo desactivado, una importacion correcta termina con codigo `0`
+  sin acceder al servidor SMTP. Un error de importacion sigue devolviendo `1`.
+
+Los cambios y las instrucciones de despliegue estan en
+[`docs/releases/v6.0.6/readme.md`](docs/releases/v6.0.6/readme.md), incluido tambien
+como `readme.md` en los archivos de la release.
 
 ## Novedades de 6.0.5
 
@@ -51,6 +65,18 @@ Variables de entorno soportadas:
 - `IMPORT_FROM_GC_MAIL_FROM`
 - `IMPORT_FROM_GC_MAIL_TO`
 - `IMPORT_FROM_GC_ALLOW_DESTRUCTIVE_IMPORT`
+
+Para activar o desactivar los correos de exito y error, configura
+`properties/app.properties`:
+
+```properties
+app.email.enabled=false
+```
+
+El valor por defecto es `false`, tambien si la clave falta en una configuracion
+anterior. Para enviar correo, establece `app.email.enabled=true` y configura
+`properties/mail.properties`. Si esta desactivado, `mail.properties` no es
+necesario y no se validan sus opciones ni se intenta una conexion SMTP.
 
 La importacion esta disenada como reemplazo destructivo del estado gestionado
 por la aplicacion y no conserva historico interno de ejecuciones anteriores.
@@ -107,10 +133,10 @@ El workflow `Quality` ejecuta Spotless, Checkstyle y SpotBugs antes de integrar
 los cambios. OWASP Dependency Check dispone de su propio workflow semanal y
 de ejecucion manual.
 
-Para desplegar 6.0.5, utiliza `import-from-gc-6.0.5-jar-with-dependencies.jar`
-publicado en la release `v6.0.5`. Sustituye el JAR configurado en el servicio o
+Para desplegar 6.0.6, utiliza `import-from-gc-6.0.6-jar-with-dependencies.jar`
+publicado en la release `v6.0.6`. Sustituye el JAR configurado en el servicio o
 tarea de importacion, manteniendo sus ficheros de configuracion externos, y
-comprueba que el proceso utiliza ese archivo y muestra la version 6.0.5.
+comprueba que el proceso utiliza ese archivo y muestra la version 6.0.6.
 No se necesita migrar ni reescribir los identificadores existentes.
 
 ## Auditoria

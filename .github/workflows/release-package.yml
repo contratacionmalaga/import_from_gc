@@ -100,10 +100,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release view "${{ steps.release.outputs.tag }}" >/dev/null 2>&1 || \
-          gh release create "${{ steps.release.outputs.tag }}" \
-            --title "${{ github.event.repository.name }} ${{ steps.release.outputs.version }}" \
-            --notes "Release ${{ github.event.repository.name }} ${{ steps.release.outputs.version }}."
+          RELEASE_README="docs/releases/${{ steps.release.outputs.tag }}/readme.md"
+          if ! gh release view "${{ steps.release.outputs.tag }}" >/dev/null 2>&1; then
+            if [[ -f "$RELEASE_README" ]]; then
+              gh release create "${{ steps.release.outputs.tag }}" \
+                --title "${{ github.event.repository.name }} ${{ steps.release.outputs.version }}" \
+                --notes-file "$RELEASE_README"
+            else
+              gh release create "${{ steps.release.outputs.tag }}" \
+                --title "${{ github.event.repository.name }} ${{ steps.release.outputs.version }}" \
+                --notes "Release ${{ github.event.repository.name }} ${{ steps.release.outputs.version }}."
+            fi
+          fi
 
       - name: Upload release artifacts
         env:
@@ -114,4 +122,9 @@ jobs:
             gh release upload "${{ steps.release.outputs.tag }}" target/*.jar --clobber
           else
             echo "No JAR artifacts found to upload."
+          fi
+
+          RELEASE_README="docs/releases/${{ steps.release.outputs.tag }}/readme.md"
+          if [[ -f "$RELEASE_README" ]]; then
+            gh release upload "${{ steps.release.outputs.tag }}" "$RELEASE_README" --clobber
           fi

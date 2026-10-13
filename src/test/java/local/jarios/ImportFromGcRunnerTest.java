@@ -20,12 +20,16 @@ import local.jarios.properties.exception.PropertiesManagerException;
 import local.jarios.services.Service;
 import local.jarios.version.api.Version;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ImportFromGcRunnerTest {
 
   @Test
   void returnsZeroAndRunsMainFlowWithoutTerminatingJvm() {
     TestRuntime runtime = new TestRuntime();
+    runtime.propertiesManager.emailEnabled = "true";
 
     int exitCode = ImportFromGc.run(runtime);
 
@@ -40,6 +44,7 @@ class ImportFromGcRunnerTest {
   @Test
   void returnsOneAndSendsFailureEmailWhenPersistenceFails() {
     TestRuntime runtime = new TestRuntime();
+    runtime.propertiesManager.emailEnabled = "true";
     runtime.service.failOnPersist = true;
 
     int exitCode = ImportFromGc.run(runtime);
@@ -47,6 +52,61 @@ class ImportFromGcRunnerTest {
     assertThat(exitCode).isEqualTo(1);
     assertThat(runtime.service.persistCalls).isEqualTo(1);
     assertThat(runtime.successEmails).isZero();
+    assertThat(runtime.errorEmails).isEqualTo(1);
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = {"false", " FALSE ", " ", "unexpected"})
+  void completesImportWithoutEmailWhenDisabledOrNotConfigured(String value) {
+    TestRuntime runtime = new TestRuntime();
+    runtime.propertiesManager.emailEnabled = value;
+    runtime.failOnSend = true;
+
+    int exitCode = ImportFromGc.run(runtime);
+
+    assertThat(exitCode).isZero();
+    assertThat(runtime.parseCalls).isEqualTo(1);
+    assertThat(runtime.service.persistCalls).isEqualTo(1);
+    assertThat(runtime.successEmails).isZero();
+    assertThat(runtime.errorEmails).isZero();
+  }
+
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = {"false", " FALSE ", " ", "unexpected"})
+  void preservesImportFailureWithoutSendingEmailWhenDisabledOrNotConfigured(String value) {
+    TestRuntime runtime = new TestRuntime();
+    runtime.propertiesManager.emailEnabled = value;
+    runtime.service.failOnPersist = true;
+    runtime.failOnSend = true;
+
+    int exitCode = ImportFromGc.run(runtime);
+
+    assertThat(exitCode).isEqualTo(1);
+    assertThat(runtime.service.persistCalls).isEqualTo(1);
+    assertThat(runtime.successEmails).isZero();
+    assertThat(runtime.errorEmails).isZero();
+  }
+
+  @Test
+  void enablesEmailWithTrimmedCaseInsensitiveTrue() {
+    TestRuntime runtime = new TestRuntime();
+    runtime.propertiesManager.emailEnabled = " TRUE ";
+
+    assertThat(ImportFromGc.run(runtime)).isZero();
+    assertThat(runtime.successEmails).isEqualTo(1);
+  }
+
+  @Test
+  void preservesEmailFailureWhenExplicitlyEnabled() {
+    TestRuntime runtime = new TestRuntime();
+    runtime.propertiesManager.emailEnabled = "true";
+    runtime.failOnSend = true;
+
+    assertThat(ImportFromGc.run(runtime)).isEqualTo(1);
+    assertThat(runtime.service.persistCalls).isEqualTo(1);
+    assertThat(runtime.successEmails).isEqualTo(1);
     assertThat(runtime.errorEmails).isEqualTo(1);
   }
 
@@ -58,6 +118,7 @@ class ImportFromGcRunnerTest {
     private int parseCalls;
     private int successEmails;
     private int errorEmails;
+    private boolean failOnSend;
 
     @Override
     public PropertiesManagerService getPropertiesManager() {
@@ -94,6 +155,9 @@ class ImportFromGcRunnerTest {
       } else {
         errorEmails++;
       }
+      if (failOnSend) {
+        throw new EmailException("SMTP no disponible");
+      }
     }
   }
 
@@ -112,6 +176,8 @@ class ImportFromGcRunnerTest {
   }
 
   private static final class TestPropertiesManager implements PropertiesManagerService {
+
+    private String emailEnabled;
 
     @Override
     public Set<String> getSensitiveKeys() {
@@ -149,12 +215,18 @@ class ImportFromGcRunnerTest {
     }
 
     @Override
-    public String getProperty(String file, String key) {
+    public String getProperty(String file, String key) throws PropertiesManagerException {
       if (PropertiesFiles.APP.equals(file) && PropertiesKeys.APP_NAME.equals(key)) {
         return "import-from-gc-test";
       }
       if (PropertiesFiles.APP.equals(file) && PropertiesKeys.APP_PATH.equals(key)) {
         return "data/gc";
+      }
+      if (PropertiesFiles.APP.equals(file) && PropertiesKeys.APP_EMAIL_ENABLED.equals(key)) {
+        if (emailEnabled == null) {
+          throw new PropertiesManagerException("Clave inexistente app.email.enabled");
+        }
+        return emailEnabled;
       }
       throw new IllegalArgumentException("Propiedad no soportada en test: " + file + "." + key);
     }
