@@ -118,11 +118,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          if compgen -G "target/*.jar" > /dev/null; then
-            gh release upload "${{ steps.release.outputs.tag }}" target/*.jar --clobber
-          else
-            echo "No JAR artifacts found to upload."
-          fi
+          VERSION="${{ steps.release.outputs.version }}"
+          JARS=(
+            "target/import-from-gc-${VERSION}.jar"
+            "target/import-from-gc-${VERSION}-sources.jar"
+            "target/import-from-gc-${VERSION}-javadoc.jar"
+          )
+          for JAR in "${JARS[@]}"; do
+            if [[ ! -f "$JAR" ]]; then
+              echo "Missing release artifact: $JAR" >&2
+              exit 1
+            fi
+          done
+          gh release upload "${{ steps.release.outputs.tag }}" "${JARS[@]}" --clobber
 
           RELEASE_README="docs/releases/${{ steps.release.outputs.tag }}/readme.md"
           if [[ -f "$RELEASE_README" ]]; then
