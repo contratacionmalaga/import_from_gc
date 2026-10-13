@@ -6,7 +6,7 @@ Hibernate.
 
 ## Estado del proyecto
 
-- Version actual: **6.0.6**.
+- Version actual: **6.1.0**.
 - Java 21.
 - Maven Wrapper incluido con Maven 3.9.16 para builds reproducibles.
 - Hibernate con `hibernate.hbm2ddl.auto=validate` para evitar creacion o borrado
@@ -16,6 +16,21 @@ Hibernate.
 - Dependencias privadas publicadas en GitHub Packages.
 - CI en GitHub Actions con build, tests, SpotBugs y OWASP Dependency Check.
 - Paquete de release automatico al publicar una etiqueta `v*` en GitHub.
+
+## Novedades de 6.1.0
+
+- El ejecutable con todas sus dependencias se genera como
+  `import-from-gc-6.1.0.jar`, sin el sufijo `-jar-with-dependencies`.
+- El POM utiliza Maven Shade, igual que `import-from-opendata`, para generar
+  el ejecutable como artefacto principal y combinar los servicios de las
+  dependencias.
+- La release adjunta el ejecutable, sources, javadocs y su `readme.md`.
+- El correo de exito y error sigue desactivado por defecto con
+  `app.email.enabled=false`.
+
+Los cambios y las instrucciones de despliegue estan en
+[`docs/releases/v6.1.0/readme.md`](docs/releases/v6.1.0/readme.md), incluido tambien
+como `readme.md` en los archivos de la release.
 
 ## Novedades de 6.0.6
 
@@ -127,16 +142,25 @@ Al publicar una etiqueta `v*` en GitHub, el workflow `Release Package`:
 
 - compila y verifica el proyecto;
 - publica el paquete Maven en GitHub Packages;
-- crea la release y adjunta los JAR principal, con dependencias, sources y javadocs.
+- crea la release y adjunta el JAR ejecutable con dependencias, sources, javadocs
+  y el `readme.md` de la version.
+
+El ejecutable se denomina `import-from-gc-<version>.jar` y contiene todas las
+dependencias. Puede iniciarse desde la carpeta que contiene `properties/` y
+`data/gc/`:
+
+```powershell
+java -jar import-from-gc-6.1.0.jar
+```
 
 El workflow `Quality` ejecuta Spotless, Checkstyle y SpotBugs antes de integrar
 los cambios. OWASP Dependency Check dispone de su propio workflow semanal y
 de ejecucion manual.
 
-Para desplegar 6.0.6, utiliza `import-from-gc-6.0.6-jar-with-dependencies.jar`
-publicado en la release `v6.0.6`. Sustituye el JAR configurado en el servicio o
+Para desplegar 6.1.0, utiliza `import-from-gc-6.1.0.jar`
+publicado en la release `v6.1.0`. Sustituye el JAR configurado en el servicio o
 tarea de importacion, manteniendo sus ficheros de configuracion externos, y
-comprueba que el proceso utiliza ese archivo y muestra la version 6.0.6.
+comprueba que el proceso utiliza ese archivo y muestra la version 6.1.0.
 No se necesita migrar ni reescribir los identificadores existentes.
 
 ## Auditoria
