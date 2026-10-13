@@ -24,6 +24,9 @@ public final class PropertiesKeys {
   /** Permite borrados y recreacion de datos durante la importacion. */
   public static final String APP_ALLOW_DESTRUCTIVE_IMPORT = "app.allowDestructiveImport";
 
+  /** Habilita los correos de exito y error de la importacion. */
+  public static final String APP_EMAIL_ENABLED = "app.email.enabled";
+
   /** Tamano de lote JDBC de Hibernate. */
   public static final String HIBERNATE_JDBC_BATCH_SIZE = "hibernate.jdbc.batch_size";
 

@@ -136,8 +136,12 @@ public class ImportFromGc {
       service.persistirEnBaseDeDatos(miLog, parseoFicherosGc);
       log.info(Mensajes.PERSISTIDO_LOG);
 
-      runtime.sendEmail(estadistica, null, true);
-      log.info("[main] Email enviado correctamente.");
+      if (isEmailNotificationEnabled(runtimePropertiesManager)) {
+        runtime.sendEmail(estadistica, null, true);
+        log.info("[main] Email enviado correctamente.");
+      } else {
+        log.info("[main] Envio de email desactivado por configuracion.");
+      }
       return finalizar(Mensajes.FINAL_CORRECTO, 0);
 
     } catch (MiServiceException ex) {
@@ -173,14 +177,37 @@ public class ImportFromGc {
     log.error("{}. Error: {}", mensajeError, originalException);
 
     try {
-      runtime.sendEmail(null, originalException, false);
-      log.info("[manejarExcepcion] Correo de error enviado correctamente.");
+      if (isEmailNotificationEnabled(runtime.getPropertiesManager())) {
+        runtime.sendEmail(null, originalException, false);
+        log.info("[manejarExcepcion] Correo de error enviado correctamente.");
+      } else {
+        log.info("[manejarExcepcion] Envio de email de error desactivado por configuracion.");
+      }
 
     } catch (EmailException | MiUnknownHostException | PropertiesManagerException emailEx) {
       log.error("[manejarExcepcion] Error al enviar el correo con los errores:", emailEx);
     }
 
     return finalizar(Mensajes.FINAL_ERRONEO, 1);
+  }
+
+  /**
+   * Consulta la opcion de correo; por defecto no se envian notificaciones.
+   *
+   * @param runtimePropertiesManager gestor de propiedades runtime
+   * @return {@code true} solo cuando app.email.enabled contiene true
+   */
+  private static boolean isEmailNotificationEnabled(
+      PropertiesManagerService runtimePropertiesManager) {
+    try {
+      String value =
+          runtimePropertiesManager.getProperty(
+              PropertiesFiles.APP, PropertiesKeys.APP_EMAIL_ENABLED);
+      return value != null && Boolean.parseBoolean(value.trim());
+    } catch (PropertiesManagerException ex) {
+      log.debug("No se pudo consultar app.email.enabled; envio de email desactivado.");
+      return false;
+    }
   }
 
   /** Puerta de enlace inyectable para aislar dependencias runtime en tests. */

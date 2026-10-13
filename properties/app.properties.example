@@ -6,3 +6,5 @@ app.prefix=placsp_
 app.characterEncoding=utf8mb4
 app.connectionCollation=utf8mb4_unicode_ci
 app.allowDestructiveImport=false
+# Send success and error emails only when explicitly enabled.
+app.email.enabled=false
