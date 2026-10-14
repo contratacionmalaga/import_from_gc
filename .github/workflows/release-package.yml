@@ -136,3 +136,14 @@ jobs:
           if [[ -f "$RELEASE_README" ]]; then
             gh release upload "${{ steps.release.outputs.tag }}" "$RELEASE_README" --clobber
           fi
+
+      - name: Upload deployment scripts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          VERSION="${{ steps.release.outputs.version }}"
+          ZIP="target/import-from-gc-${VERSION}-deployment-scripts.zip"
+          zip "$ZIP" generar_ejecutables.ps1 publicar_ejecutables.ps1 import_from_opendata_gc.bat \
+            scripts/use-java21-maven3916.ps1 scripts/test-publicar-ejecutables.ps1
+          gh release upload "${{ steps.release.outputs.tag }}" "$ZIP" --clobber
