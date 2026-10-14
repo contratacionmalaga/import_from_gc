@@ -6,7 +6,7 @@ Hibernate.
 
 ## Estado del proyecto
 
-- Version actual: **6.1.0**.
+- Version actual: **6.2.0**.
 - Java 21.
 - Maven Wrapper incluido con Maven 3.9.16 para builds reproducibles.
 - Hibernate con `hibernate.hbm2ddl.auto=validate` para evitar creacion o borrado
@@ -16,6 +16,25 @@ Hibernate.
 - Dependencias privadas publicadas en GitHub Packages.
 - CI en GitHub Actions con build, tests, SpotBugs y OWASP Dependency Check.
 - Paquete de release automatico al publicar una etiqueta `v*` en GitHub.
+
+## Novedades de 6.2.0
+
+- `generar_ejecutables.ps1` compila con Java 21 y Maven Wrapper y publica
+  automaticamente en `C:\java\ejecutables\import-from-opendata-gc-ejecutables`.
+- `publicar_ejecutables.ps1` archiva cada version con su ejecutable,
+  configuracion, catalogos GC, scripts y manifiesto SHA256 en `versions/`.
+- Las instalaciones antiguas, incluida la 6.0.5, se conservan antes de
+  sustituirlas. Republicar una version tambien conserva su copia anterior.
+- `-RollbackVersion` restaura ejecutable, properties y catalogos de una version
+  archivada. `-WhatIf` permite revisar la operacion sin modificar archivos.
+- El BAT mantiene el nombre estable `import_from_opendata_gc.jar` para las
+  tareas existentes. Publicar o restaurar no ejecuta la importacion.
+- La release incluye los scripts de despliegue en un ZIP, ademas de los JARs
+  y el README de actualizacion.
+
+Las instrucciones de actualizacion y restauracion estan en
+[`docs/releases/v6.2.0/readme.md`](docs/releases/v6.2.0/readme.md), adjunto tambien
+como `readme.md` a la release.
 
 ## Novedades de 6.1.0
 
@@ -150,18 +169,73 @@ dependencias. Puede iniciarse desde la carpeta que contiene `properties/` y
 `data/gc/`:
 
 ```powershell
-java -jar import-from-gc-6.1.0.jar
+java -jar import-from-gc-6.2.0.jar
 ```
 
 El workflow `Quality` ejecuta Spotless, Checkstyle y SpotBugs antes de integrar
 los cambios. OWASP Dependency Check dispone de su propio workflow semanal y
 de ejecucion manual.
 
-Para desplegar 6.1.0, utiliza `import-from-gc-6.1.0.jar`
-publicado en la release `v6.1.0`. Sustituye el JAR configurado en el servicio o
+Para desplegar 6.2.0, utiliza `import-from-gc-6.2.0.jar`
+publicado en la release `v6.2.0`. Sustituye el JAR configurado en el servicio o
 tarea de importacion, manteniendo sus ficheros de configuracion externos, y
-comprueba que el proceso utiliza ese archivo y muestra la version 6.1.0.
+comprueba que el proceso utiliza ese archivo y muestra la version 6.2.0.
 No se necesita migrar ni reescribir los identificadores existentes.
+
+## Publicacion local automatica y versiones anteriores
+
+Desde `C:\java\desarrollo\import-from-gc`, ejecuta:
+
+```powershell
+.\generar_ejecutables.ps1
+```
+
+Compila con Java 21 y Maven 3.9.16 y, si la compilacion termina correctamente,
+publica en `C:\java\ejecutables\import-from-opendata-gc-ejecutables`.
+Por defecto omite los tests, igual que el generador de OpenData. Usa
+`-SkipTests $false` para ejecutarlos, `-SkipClean` para omitir clean,
+`-NoDeploy` para compilar sin copiar o `-OutputDir D:\otra-instalacion` para
+cambiar el destino. `mvn package` por separado no publica en la carpeta operativa.
+
+Para publicar el JAR que ya existe en `target`, sin recompilar:
+
+```powershell
+.\publicar_ejecutables.ps1
+.\publicar_ejecutables.ps1 -WhatIf
+```
+
+Cada publicacion guarda el ejecutable, `properties/`, los catalogos `data/gc/`,
+los scripts y un manifiesto SHA256 en `versions/<version>/`. Copia tambien
+los archivos operativos a la raiz y registra `active-release.properties`.
+El BAT `import_from_opendata_gc.bat` mantiene el nombre estable y ejecuta
+`import_from_opendata_gc.jar`, una copia de la version activada. Publicar o
+restaurar archivos no ejecuta Java ni importa datos en la base de datos.
+
+Antes de sustituir archivos se conserva la instalacion anterior en
+`backups/installation/`. Si el JAR antiguo aun no tiene carpeta de version,
+se identifica su version interna y se archiva con sus properties y catalogos;
+esto incluye la instalacion anterior 6.0.5. Al republicar una version existente,
+su copia previa se conserva en `backups/releases/`. No se eliminan versiones
+anteriores automaticamente. Los directorios de properties y datos sustituidos
+se apartan en `backups/replaced/` para evitar mezclar catalogos obsoletos.
+
+La configuracion y los catalogos activos se sustituyen por los de desarrollo
+al publicar, o por los guardados en la version al restaurar. Los logs permanecen
+en la carpeta operativa. Para volver a una version archivada:
+
+```powershell
+.\publicar_ejecutables.ps1 -RollbackVersion 6.0.5 -WhatIf
+.\publicar_ejecutables.ps1 -RollbackVersion 6.0.5
+```
+
+El rollback restaura ejecutable, properties y catalogos GC. No revierte los
+cambios de una importacion ya ejecutada en la base de datos.
+
+Para verificar el flujo con JARs de prueba y carpetas temporales:
+
+```powershell
+.\scripts\test-publicar-ejecutables.ps1
+```
 
 ## Auditoria
 
