@@ -125,7 +125,7 @@ final class DestructiveImportContext {
     }
 
     try {
-      return propertyManager.getProperty(PropertiesFiles.JAKARTA_PRINCIPAL, key);
+      return propertyManager.getProperty(PropertiesFiles.BD, key);
     } catch (PropertiesManagerException ex) {
       return null;
     }

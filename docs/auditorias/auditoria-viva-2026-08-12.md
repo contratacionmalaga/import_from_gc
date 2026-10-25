@@ -53,7 +53,7 @@ Limitaciones:
 - Datos GC: 102 ficheros bajo `data/gc`.
 - Tests ya ejecutados en `target/surefire-reports`: 20 tests, 0 fallos, 0 errores, 0 omitidos con Docker Desktop activo.
 - Checkstyle: 0 avisos tras limpiar helpers, mappers, servicios, repositorios, DTOs JAXB, excepciones, enum y entidades JPA; el umbral queda en `checkstyle.max.violations=0`.
-- Properties reales ignorados: `properties/app.properties`, `properties/jakarta_principal.properties`, `properties/mail.properties`.
+- Properties reales ignorados: `properties/app.properties`, `properties/bd.properties`, `properties/mail.properties`.
 - Directorio solicitado para auditorias: creado en `docs/auditorias`.
 - Existe una auditoria historica en `doc/auditoria/2026_05_09/auditoria-proyecto.md`; conviene mantenerla solo como historico o migrarla a `docs/auditorias`.
 

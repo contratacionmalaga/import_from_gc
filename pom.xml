@@ -4,11 +4,11 @@
   <parent>
     <groupId>local.jarios</groupId>
     <artifactId>jarios-parent</artifactId>
-    <version>1.0.13</version>
+    <version>1.0.15</version>
     <relativePath>../jarios-parent/pom.xml</relativePath>
   </parent>
   <artifactId>import-from-gc</artifactId>
-  <version>6.2.0</version>
+  <version>6.3.0</version>
   <packaging>jar</packaging>
   <repositories>
     <repository>
@@ -19,9 +19,9 @@
   <name>import-from-gc</name>
   <description>Cliente que parsea los datos abiertos de la Plataforma de Contratación del Sector Público</description>
   <scm>
-    <connection>scm:git:https://github.com/contratacionmalaga/import-from-gc.git</connection>
-    <developerConnection>scm:git:git@github.com:contratacionmalaga/import-from-gc.git</developerConnection>
-    <url>https://github.com/contratacionmalaga/import-from-gc</url>
+    <connection>scm:git:https://github.com/contratacionmalaga/import_from_gc.git</connection>
+    <developerConnection>scm:git:git@github.com:contratacionmalaga/import_from_gc.git</developerConnection>
+    <url>https://github.com/contratacionmalaga/import_from_gc</url>
     <tag>HEAD</tag>
   </scm>
   <distributionManagement>
@@ -41,6 +41,11 @@
     <!-- Por defecto usa la versión completa -->
     <final.name>${project.artifactId}-${version.trimmed}</final.name>
     <exec.mainClass>local.jarios.ImportFromGc</exec.mainClass>
+    <!-- Mismas versiones de helpers que import_from_opendata. -->
+    <encrypt-helper.version>7.1.0</encrypt-helper.version>
+    <email-helper.version>6.2.0</email-helper.version>
+    <property-helper.version>6.1.0</property-helper.version>
+    <version-helper.version>6.2.0</version-helper.version>
     <!-- Centralización de versiones -->
     <!-- Thresholds -->
     <checkstyle.max.violations>0</checkstyle.max.violations>
@@ -79,6 +84,14 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-to-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
@@ -348,6 +361,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

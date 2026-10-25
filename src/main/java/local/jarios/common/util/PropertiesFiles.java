@@ -9,8 +9,8 @@ public final class PropertiesFiles {
   /** Fichero hibernate.properties. */
   public static final String HIBERNATE = "hibernate";
 
-  /** Fichero jakarta_principal.properties. */
-  public static final String JAKARTA_PRINCIPAL = "jakarta_principal";
+  /** Fichero bd.properties. */
+  public static final String BD = "bd";
 
   /** Fichero mail.properties. */
   public static final String MAIL = "mail";

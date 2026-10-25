@@ -174,7 +174,7 @@ public class ImportFromGc {
   private static int manejarExcepcion(
       RuntimeGateway runtime, Exception originalException, String mensajeError) {
 
-    log.error("{}. Error: {}", mensajeError, originalException);
+    log.error("{}Error: {}", mensajeError, originalException.getMessage(), originalException);
 
     try {
       if (isEmailNotificationEnabled(runtime.getPropertiesManager())) {
