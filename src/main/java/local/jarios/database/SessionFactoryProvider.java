@@ -76,7 +76,7 @@ public class SessionFactoryProvider {
    */
   private Properties configurePrincipalProperties(Properties props)
       throws PropertiesManagerException {
-    setCommonConnectionProperties(props, PropertiesFiles.JAKARTA_PRINCIPAL);
+    setCommonConnectionProperties(props, PropertiesFiles.BD);
     return props;
   }
 

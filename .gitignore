@@ -6,7 +6,7 @@
 !/config/checkstyle/
 !/config/checkstyle/google_checks.xml
 properties/app.properties
-properties/jakarta_principal.properties
+properties/bd.properties
 properties/mail.properties
 pom.xml.releaseBackup
 release.properties

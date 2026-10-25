@@ -6,7 +6,7 @@ Hibernate.
 
 ## Estado del proyecto
 
-- Version actual: **6.2.0**.
+- Version actual: **6.3.0**.
 - Java 21.
 - Maven Wrapper incluido con Maven 3.9.16 para builds reproducibles.
 - Hibernate con `hibernate.hbm2ddl.auto=validate` para evitar creacion o borrado
@@ -16,6 +16,22 @@ Hibernate.
 - Dependencias privadas publicadas en GitHub Packages.
 - CI en GitHub Actions con build, tests, SpotBugs y OWASP Dependency Check.
 - Paquete de release automatico al publicar una etiqueta `v*` en GitHub.
+
+## Novedades de 6.3.0
+
+- Logging alineado con `import_from_opendata`: progreso y errores resumidos
+  en consola, con trazas completas y detalle de Hibernate en ficheros separados.
+- El ejecutable incluye Logback y el puente Log4j a SLF4J, evitando el aviso
+  `No SLF4J providers were found` y los errores ocultos.
+- La configuracion JDBC pasa de `jakarta_principal.properties` a
+  `properties/bd.properties`, conservando las claves `jakarta.persistence.jdbc.*`.
+- Dependencias y plugins compartidos alineados mediante `jarios-parent:1.0.15`.
+- Corregidas las claves `hibernate.*` del fichero de configuracion versionado;
+  se incluye una plantilla de Hibernate con validacion del esquema.
+
+Los cambios y la migracion de configuracion estan en
+[`docs/releases/v6.3.0/readme.md`](docs/releases/v6.3.0/readme.md), adjunto tambien
+como `readme.md` a la release.
 
 ## Novedades de 6.2.0
 
@@ -87,6 +103,12 @@ reciben identificadores nuevos.
 
 Los ficheros `properties/*.properties` reales son locales y no deben versionarse
 con secretos. Usa las plantillas `properties/*.properties.example` como base.
+
+La conexion a MariaDB se configura en `properties/bd.properties`, tomando como
+base `properties/bd.properties.example`. Renombra la configuracion anterior
+`jakarta_principal.properties` a `bd.properties` antes de iniciar la 6.3.0.
+Las claves `jakarta.persistence.jdbc.*` se mantienen y las variables de entorno
+JDBC tienen prioridad sobre los valores del fichero.
 
 Variables de entorno soportadas:
 
@@ -169,17 +191,39 @@ dependencias. Puede iniciarse desde la carpeta que contiene `properties/` y
 `data/gc/`:
 
 ```powershell
-java -jar import-from-gc-6.2.0.jar
+java -jar import-from-gc-6.3.0.jar
 ```
+
+## Logging
+
+El logging sigue el formato de `import_from_opendata`: progreso en consola sin
+trazas, errores resumidos desde la clase principal y detalle tecnico en ficheros
+UTF-8 separados por ejecucion:
+
+- `logs/import-from-gc_<ejecucion>.log`: actividad y avisos.
+- `logs/import-from-gc_error_<ejecucion>.log`: errores con sus trazas completas.
+- `logs/import-from-gc_hibernate_<ejecucion>.log`: Hibernate, Hikari y JDBC.
+
+Los ficheros rotan a los 25 MB, se comprimen en `logs/archive/` y conservan la
+misma politica de retencion que `import_from_opendata`. Para fijar el identificador
+o el directorio de una ejecucion, utiliza `-Dgc.execution.id=...` o
+`-Dgc.log.path=...` antes de `-jar`.
+
+Ambos proyectos usan `jarios-parent:1.0.15` para alinear las versiones de las
+dependencias compartidas y los plugins Maven. GC incluye explicitamente
+`slf4j-api`, `logback-classic` y `log4j-to-slf4j` en el ejecutable. Los helpers
+tambien coinciden: encrypt 7.1.0, email 6.2.0, properties 6.1.0 y version 6.2.0.
+El parseo GC conserva Jakarta JAXB 4; las dependencias Atom/CODICE y JAXB 2 del
+otro importador corresponden a su propio formato de entrada.
 
 El workflow `Quality` ejecuta Spotless, Checkstyle y SpotBugs antes de integrar
 los cambios. OWASP Dependency Check dispone de su propio workflow semanal y
 de ejecucion manual.
 
-Para desplegar 6.2.0, utiliza `import-from-gc-6.2.0.jar`
-publicado en la release `v6.2.0`. Sustituye el JAR configurado en el servicio o
+Para desplegar 6.3.0, utiliza `import-from-gc-6.3.0.jar`
+publicado en la release `v6.3.0`. Sustituye el JAR configurado en el servicio o
 tarea de importacion, manteniendo sus ficheros de configuracion externos, y
-comprueba que el proceso utiliza ese archivo y muestra la version 6.2.0.
+comprueba que el proceso utiliza ese archivo y muestra la version 6.3.0.
 No se necesita migrar ni reescribir los identificadores existentes.
 
 ## Publicacion local automatica y versiones anteriores
